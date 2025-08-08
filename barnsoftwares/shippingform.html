@@ -1,0 +1,2413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <head>
+        <link rel="icon" type="image/png" href="/icon.png?v=2">
+        <link rel="apple-touch-icon" href="/icon.png?v=2">
+        <link rel="icon" type="image/png" sizes="192x192" href="/iconcropped.png">
+        <link rel="icon" type="image/png" sizes="512x512" href="/iconcropped.png">
+        <link rel="manifest" href="/manifest.json">
+        <meta name="theme-color" content="#1a365d">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Farm Management Hub</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Shipping Flock Log</title>
+
+        <!-- Barn Software Styles -->
+        <link rel="stylesheet" href="../barnsoftwares-css/barn-software-styles.css">
+        <link rel="stylesheet" href="../barnsoftwares-css/shippingform.css">
+        <script src="../barnsoftwares-css/barn-header.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    </head>
+
+<body>
+    <h1 id="main-title" style="text-align: center; margin-bottom: 20px;">Vassilakos - Barn 1</h1>
+    <div class="container" id="form-container">
+        <h2 id="log-title">Flock Log - Shipping Info</h2>
+        <table>
+            <tr>
+                <td>Date and Time of Catch</td>
+                <td><input type="datetime-local" name="catch_datetime"></td>
+            </tr>
+            <tr>
+                <td>Name of Farm Rep on Duty</td>
+                <td><input type="text" name="farm_rep" value="Chris Rose"></td>
+            </tr>
+            <tr>
+                <td>Feeders and Waters Raised prior to Catch</td>
+                <td><input type="text" name="feeders_waters" value="Yes"></td>
+            </tr>
+            <tr>
+                <td>Light Intensity Reduced prior to Catch</td>
+                <td><input type="text" name="light_intensity" value="Yes"></td>
+            </tr>
+            <tr>
+                <td>Flock Evaluated for Fitness prior to Transport</td>
+                <td><input type="text" name="flock_fitness" value="Yes"></td>
+            </tr>
+            <tr>
+                <td>Inside Barn Temp at Loading</td>
+                <td><input type="text" name="inside_barn_temp" value="68°F"></td>
+            </tr>
+            <tr>
+                <td>Outside Barn Temp at Loading</td>
+                <td><input type="text" name="outside_barn_temp"></td>
+            </tr>
+            <tr>
+                <td>Catching and Loading Comments</td>
+                <td><textarea name="additional_comments">OK, no issues.</textarea></td>
+            </tr>
+            <tr>
+                <td>Culls Left Over</td>
+                <td><input type="number" name="culls_left"></td>
+            </tr>
+            <tr>
+                <td>Date and Time of Euthanasia of Leftover Birds</td>
+                <td><input type="datetime-local" name="euthanasia_datetime"></td>
+            </tr>
+            <tr>
+                <td>Barn Temp was reduced prior to loading by 2 degrees 4hrs.</td>
+                <td><input type="text" name="barn_temp_reduction" value="Yes"></td>
+            </tr>
+        </table>
+
+        <h3>Trailer Information</h3>
+        <table id="shipping-info">
+            <tr>
+                <th>Trailer Number</th>
+                <th>Bird Count</th>
+                <th>Net KG</th>
+                <th>Action</th>
+            </tr>
+            <tr class="shipping-row">
+                <td><input type="text" name="trailers_loaded"></td>
+                <td><input type="number" class="bird-count" name="bird_count" oninput="calculateRowWeight(this)"></td>
+                <td><input type="number" class="net-kg" name="net_kg" oninput="calculateRowWeight(this)"></td>
+                <td><button type="button" class="move-to-density"
+                        style="padding: 0.25rem 0.5rem; font-size: 0.85rem;">Add to Density</button></td>
+            </tr>
+        </table>
+
+
+        <h3>Flock Density Calculation</h3>
+        <table id="density-table">
+            <thead>
+                <tr>
+                    <th>Trailer #</th>
+                    <th>Bird Count</th>
+                    <th>Net KG</th>
+                    <th>Average Weight</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Only keep the Total row so new rows can be inserted above it -->
+                <tr id="total-row">
+                    <td><b>Total</b></td>
+                    <td><input type="text" class="totalBirds" placeholder="0" readonly style="pointer-events: none;">
+                    </td>
+                    <td><input type="text" class="totalNetKg" placeholder="0" readonly style="pointer-events: none;">
+                    </td>
+                    <td><input type="text" class="avgWeight" placeholder="0" readonly style="pointer-events: none;">
+                    </td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+
+
+        <h3>Balance & Density Calculation</h3>
+        <table>
+            <tr>
+                <th>Floor</th>
+                <th>Total Placed</th>
+                <th>Mortality</th>
+                <th>Thin out</th>
+                <th>Balance</th>
+                <th>Average Weight</th>
+                <th>Barn SQF</th>
+                <th>Flock Density KG per SF</th>
+            </tr>
+
+            <tr>
+                <td><b>Bottom Floor</b></td>
+                <td><input type="text" id="bottom-total-placed" value="0" readonly></td>
+                <td><input type="text" id="bottom-floor-mortality" value="0" readonly></td>
+                <td><input type="number" id="bottom-thin-out" value="0"></td>
+                <td><input type="text" class="balanceBottom" value="0" readonly></td>
+                <td><input type="text" class="avgWeightBottom" value="0" readonly></td>
+                <td><input type="text" value="11,370" readonly></td>
+                <td><input type="text" class="densityBottom" value="0" readonly></td>
+            </tr>
+
+            <tr>
+                <td><b>Top Floor</b></td>
+                <td><input type="text" id="top-total-placed" value="0" readonly></td>
+                <td><input type="text" id="top-floor-mortality" value="0" readonly></td>
+                <td><input type="number" id="top-thin-out" value="0"></td>
+                <td><input type="text" class="balanceTop" value="0" readonly></td>
+                <td><input type="text" class="avgWeightTop" value="0" readonly></td>
+                <td><input type="text" value="11,450" readonly></td>
+                <td><input type="text" class="densityTop" value="0" readonly></td>
+            </tr>
+
+        </table>
+
+        <button id="duplicate-log">Add Shipping Info</button>
+        <button id="save-pdf">Print as PDF</button>
+        <button id="save-to-firestore">Save Changes</button>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import {
+            getFirestore,
+            doc,
+            setDoc,
+            getDoc,
+            getDocs,
+            collection,
+            updateDoc,
+            deleteField,
+            onSnapshot  // Add this missing import
+        } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB20OmcQemfIXm4712im9mqiBnpeVt8sJQ",
+            authDomain: "chicken-project-2.firebaseapp.com",
+            projectId: "chicken-project-2",
+            storageBucket: "chicken-project-2.firebasestorage.app",
+            messagingSenderId: "596273529964",
+            appId: "1:596273529964:web:bd51e2646d5ed48afa4449",
+            measurementId: "G-9YLPHR08DB"
+        };
+
+        // Initialize Firebase & Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function extractLogData(log) {
+            // grab thin-out values
+            const { bottomTO, topTO } = getThinOutValues(log);
+
+            // build shippingInfo
+            const shippingRows = log.querySelectorAll(".shipping-row");
+            const shippingInfo = {};
+            shippingRows.forEach((row, i) => {
+                shippingInfo[`shipping${i + 1}`] = {
+                    trailersLoaded: row.querySelector("input[name='trailers_loaded']")?.value || "",
+                    birdCount: Number(row.querySelector("input[name='bird_count']")?.value) || 0,
+                    netKG: Number(row.querySelector("input[name='net_kg']")?.value) || 0
+                };
+            });
+
+            return {
+                dateTimeOfCatch: log.querySelector("input[name='catch_datetime']")?.value || "",
+                farmRepOnDuty: log.querySelector("input[name='farm_rep']")?.value || "",
+                feedersAndWatersRaised: log.querySelector("input[name='feeders_waters']")?.value || "",
+                lightIntensityReduced: log.querySelector("input[name='light_intensity']")?.value || "",
+                flockEvaluated: log.querySelector("input[name='flock_fitness']")?.value || "",
+                insideBarnTemp: log.querySelector("input[name='inside_barn_temp']")?.value || "",
+                outsideBarnTemp: log.querySelector("input[name='outside_barn_temp']")?.value || "",
+                catchingAndLoadingComments: log.querySelector("textarea[name='loading_comments']")?.value || "",
+                cullsLeftOver: Number(log.querySelector("input[name='culls_left']")?.value) || 0,
+                euthanasiaDateTime: log.querySelector("input[name='euthanasia_datetime']")?.value || "",
+                barnTempReducedBeforeLoading: log.querySelector("input[name='barn_temp_reduction']")?.value || "",
+                additionalComments: log.querySelector("textarea[name='additional_comments']")?.value || "",
+                shippingInfo,
+                bottomTO,
+                topTO
+            };
+        }
+
+
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            // Wait for Firestore to load all values before running calculations.
+            await populateTotalPlacedFromCrop();
+            await populateMortalityTotals(); // Loads summed mortality for bottom (vas-b1-f1-MC) and top (vas-b1-f2-MC)
+            await populateThinOutValues();   // Loads thin out values from startnewcrop
+
+            window.calculateTotals = calculateTotals;
+
+            // NEW: Populate saved trailer data on load
+            await populateDensityTableFromFirestore();
+
+            // Now trigger recalculation once the values are in place.
+            calculateDensity(document);
+
+            // Add extra event listeners so that changes on the readonly fields trigger recalculation.
+            document.getElementById("bottom-total-placed").addEventListener("input", () => calculateDensity(document));
+            document.getElementById("top-total-placed").addEventListener("input", () => calculateDensity(document));
+            document.getElementById("bottom-floor-mortality").addEventListener("input", () => calculateDensity(document));
+            document.getElementById("top-floor-mortality").addEventListener("input", () => calculateDensity(document));
+
+            let logCounter = 1;
+            const shippingLogRef = doc(db, "shippingLogs", "fixedDocumentID");
+
+            function getCurrentDateTime() {
+                let now = new Date();
+                let isoString = new Intl.DateTimeFormat("en-CA", {
+                    timeZone: "America/Toronto",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false
+                }).format(now);
+                return isoString.replace(",", "").replace(/\//g, "-").replace(" ", "T");
+            }
+
+            const defaultValues = {
+                "catch_datetime": getCurrentDateTime(),
+                "farm_rep": "Chris Rose",
+                "feeders_waters": "Yes",
+                "light_intensity": "Yes",
+                "flock_fitness": "Yes",
+                "inside_barn_temp": "68°F",
+                "outside_barn_temp": "",
+                "loading_comments": "OK, no issues.",
+                "culls_left": "",
+                "euthanasia_datetime": getCurrentDateTime(),
+                "barn_temp_reduction": "Yes",
+                "additional_comments": "",
+                "trailers_loaded": "",
+                "bird_count": "",
+                "net_kg": ""
+            };
+
+            document.querySelectorAll("input[type='datetime-local']").forEach(input => {
+                input.value = getCurrentDateTime();
+            });
+
+            function addShippingRow(shippingTable) {
+                const container = shippingTable.closest(".container");
+                const newRow = document.createElement("tr");
+                newRow.classList.add("shipping-row");
+                newRow.innerHTML = `
+    <td>
+      <input type="text" name="trailers_loaded" value="">
+    </td>
+    <td>
+      <input type="number" class="bird-count" name="bird_count"
+             oninput="calculateRowWeight(this)">
+    </td>
+    <td>
+      <input type="number" class="net-kg" name="net_kg"
+             oninput="calculateRowWeight(this)">
+    </td>
+    <td>
+      <button type="button" class="move-to-density"
+              style="padding:0.25rem 0.5rem;font-size:0.85rem;">
+        Add to Density
+      </button>
+    </td>
+  `;
+                shippingTable.appendChild(newRow);
+            }
+
+            function addRemoveButton(logElement) {
+                let removeButton = document.createElement("button");
+                removeButton.textContent = "Remove Form";
+                removeButton.classList.add("remove-form");
+                removeButton.style.display = "block";
+                removeButton.style.margin = "10px auto";
+                removeButton.onclick = async function () {
+                    // find this log’s index before removal
+                    const all = Array.from(document.querySelectorAll(".container"));
+                    const idx = all.indexOf(logElement) + 1;    // 1-based
+                    // delete the corresponding field in Firestore (log2, log3, …)
+                    await updateDoc(shippingLogRef, { [`log${idx}`]: deleteField() });
+                    // then remove it locally
+                    logElement.remove();
+                    updateLogNumbers();
+                };
+                logElement.appendChild(removeButton);
+            }
+
+            function updateLogNumbers() {
+                document.querySelectorAll('.container').forEach((logEl, idx) => {
+                    const title = logEl.querySelector('#log-title');
+                    title.textContent = `Flock Log - Shipping Info ${idx + 1}`;
+                });
+
+                // Show main title only for first form
+                const mainTitle = document.getElementById('main-title');
+                if (mainTitle) {
+                    mainTitle.style.display = document.querySelectorAll('.container').length === 1 ? 'block' : 'block';
+                }
+            }
+            document.getElementById("duplicate-log").addEventListener("click", async () => {
+                const originalLog = document.querySelector(".container");
+                const newLog = originalLog.cloneNode(true);
+
+                // Assign a unique log number
+                logCounter++;
+                newLog.querySelector("#log-title").textContent = `Flock Log - Shipping Info ${logCounter}`;
+
+                // Clear input values in the new form
+                newLog.querySelectorAll("input[type='text'], input[type='number'], textarea").forEach(input => {
+                    // Preserve only default values that should be retained (like farm_rep, feeders_waters, etc.)
+                    const keepValue = ['farm_rep', 'feeders_waters', 'light_intensity', 'flock_fitness', 'barn_temp_reduction'].includes(input.name);
+
+                    if (!keepValue) {
+                        input.value = "";
+                    }
+                });
+
+                // Reset date/time fields to current time
+                newLog.querySelectorAll("input[type='datetime-local']").forEach(input => {
+                    input.value = getCurrentDateTime();
+                });
+
+                // Clear all trailer rows in the shipping info table
+                const shippingTable = newLog.querySelector("#shipping-info");
+                const firstRow = shippingTable.querySelector(".shipping-row");
+                if (firstRow) {
+                    // Keep only the first row but clear its values
+                    firstRow.querySelectorAll("input").forEach(input => {
+                        input.value = "";
+                    });
+
+                    // Remove any additional shipping rows
+                    const additionalRows = shippingTable.querySelectorAll(".shipping-row:not(:first-child)");
+                    additionalRows.forEach(row => row.remove());
+                }
+
+                // Clear the density table, keeping only the total row
+                const densityTable = newLog.querySelector("#density-table tbody");
+                const totalRow = densityTable.querySelector("#total-row");
+                if (totalRow) {
+                    // Clear all rows except total row
+                    Array.from(densityTable.children).forEach(row => {
+                        if (row.id !== "total-row") {
+                            row.remove();
+                        }
+                    });
+
+                    // Reset total values
+                    totalRow.querySelectorAll("input").forEach(input => {
+                        input.value = "0";
+                    });
+                }
+
+                // Add remove button
+                addRemoveButton(newLog);
+
+                // IMPORTANT CHANGE: Clone buttons lose their event listeners, so we need to set them up again
+                // Setup proper event listeners for the duplicated form buttons
+                setupFormEventListeners(newLog);
+
+                document.body.appendChild(newLog);
+                updateLogNumbers();
+
+                // Create a new empty log data object
+                const newLogData = {
+                    dateTimeOfCatch: getCurrentDateTime(),
+                    farmRepOnDuty: newLog.querySelector("input[name='farm_rep']")?.value || "",
+                    feedersAndWatersRaised: newLog.querySelector("input[name='feeders_waters']")?.value || "",
+                    lightIntensityReduced: newLog.querySelector("input[name='light_intensity']")?.value || "",
+                    flockEvaluated: newLog.querySelector("input[name='flock_fitness']")?.value || "",
+                    insideBarnTemp: "",
+                    outsideBarnTemp: "",
+                    catchingAndLoadingComments: "",
+                    cullsLeftOver: 0,
+                    euthanasiaDateTime: getCurrentDateTime(),
+                    barnTempReducedBeforeLoading: newLog.querySelector("input[name='barn_temp_reduction']")?.value || "",
+                    additionalComments: "",
+                    shippingInfo: {},
+                    trailers: {},
+                    bottomTO: newLog.querySelector("#bottom-thin-out")?.value || "",
+                    topTO: newLog.querySelector("#top-thin-out")?.value || ""
+                };
+
+                // Save to Firestore under the appropriate log key
+                await updateDoc(shippingLogRef, {
+                    [`log${logCounter}`]: newLogData
+                });
+
+                // Initialize the totals for this new form
+                calculateTotals(newLog);
+            });
+            // Define calculateRowWeight as a global function immediately
+            function calculateRowWeight(inputElement) {
+                const formContainer = inputElement.closest(".container");
+                const row = inputElement.closest("tr");
+                const birdCount = Number(row.querySelector(".bird-count")?.value) || 0;
+                const netKg = Number(row.querySelector(".net-kg")?.value) || 0;
+
+                // Get the specific form's density table
+                const densityTable = formContainer.querySelector("#density-table");
+                const totalBirdInput = densityTable.querySelector(".totalBirds");
+                const totalNetInput = densityTable.querySelector(".totalNetKg");
+                const avgWeightInput = densityTable.querySelector(".avgWeight");
+
+                // Calculate total values from all trailer rows in this specific form
+                let totalBirds = 0, totalNetKg = 0;
+                const trailerRows = formContainer.querySelectorAll("#density-table tbody tr:not(#total-row)");
+
+                trailerRows.forEach(row => {
+                    const inputs = row.querySelectorAll("input");
+                    if (inputs.length >= 3) {
+                        totalBirds += Number(inputs[1].value) || 0;
+                        totalNetKg += Number(inputs[2].value) || 0;
+                    }
+                });
+
+                // Update the total values in this form's density table
+                if (totalBirdInput) totalBirdInput.value = totalBirds;
+                if (totalNetInput) totalNetInput.value = totalNetKg;
+
+                if (avgWeightInput) {
+                    avgWeightInput.value = totalBirds > 0 ? (totalNetKg / totalBirds).toFixed(2) : "0";
+                }
+
+                // Update balance and density calculations for this form
+                if (typeof calculateDensity === 'function') {
+                    calculateDensity(formContainer);
+                }
+            }
+
+
+            function calculateTotals(formContainer) {
+                console.log("Calculating totals for form:", formContainer.querySelector("#log-title").textContent);
+
+                // Get all trailer rows from this form's density table (excluding the total row)
+                const trailerRows = formContainer.querySelectorAll("#density-table tbody tr:not(#total-row)");
+
+                // Sum up the bird count and net KG from each trailer row
+                let totalBirds = 0, totalNetKg = 0;
+
+                trailerRows.forEach(row => {
+                    const inputs = row.querySelectorAll("input");
+                    if (inputs.length >= 3) {
+                        const birdCount = Number(inputs[1].value) || 0;
+                        const netKg = Number(inputs[2].value) || 0;
+
+                        totalBirds += birdCount;
+                        totalNetKg += netKg;
+
+                        console.log(`Trailer: ${inputs[0].value}, Birds: ${birdCount}, NetKG: ${netKg}`);
+                    }
+                });
+
+                console.log(`Total Birds: ${totalBirds}, Total NetKG: ${totalNetKg}`);
+
+                // Find the total and average fields within THIS form container
+                const totalBirdInput = formContainer.querySelector(".totalBirds");
+                const totalNetInput = formContainer.querySelector(".totalNetKg");
+                const avgWeightInput = formContainer.querySelector(".avgWeight");
+
+                // Write into .value (not textContent)
+                if (totalBirdInput) {
+                    totalBirdInput.value = totalBirds;
+                    console.log("Updated totalBirds:", totalBirdInput.value);
+                }
+
+                if (totalNetInput) {
+                    totalNetInput.value = totalNetKg;
+                    console.log("Updated totalNetKg:", totalNetInput.value);
+                }
+
+                // Calculate average weight as Net KG / Bird Count (correct formula)
+                if (avgWeightInput) {
+                    const avg = totalBirds > 0 ? (totalNetKg / totalBirds).toFixed(2) : "0";
+                    avgWeightInput.value = avg;
+                    console.log("Updated avgWeight:", avgWeightInput.value);
+
+                    // Also update the average weights in Balance & Density section
+                    const avgWeightBottom = formContainer.querySelector(".avgWeightBottom");
+                    const avgWeightTop = formContainer.querySelector(".avgWeightTop");
+
+                    if (avgWeightBottom) avgWeightBottom.value = avg;
+                    if (avgWeightTop) avgWeightTop.value = avg;
+                }
+
+                // Now recalc your density
+                calculateDensity(formContainer);
+            }
+            function calculateBalance(formContainer) {
+                const bottomTotalPlacedEl = document.getElementById("bottom-total-placed");
+                const bottomMortalityEl = document.getElementById("bottom-floor-mortality");
+                const bottomThinOutEl = formContainer.querySelector("#bottom-thin-out");
+                const balanceBottomEl = formContainer.querySelector(".balanceBottom");
+
+                const topTotalPlacedEl = document.getElementById("top-total-placed");
+                const topMortalityEl = document.getElementById("top-floor-mortality");
+                const topThinOutEl = formContainer.querySelector("#top-thin-out");
+                const balanceTopEl = formContainer.querySelector(".balanceTop");
+
+                // Check if all required elements exist before proceeding
+                if (!bottomTotalPlacedEl || !bottomMortalityEl || !bottomThinOutEl || !balanceBottomEl ||
+                    !topTotalPlacedEl || !topMortalityEl || !topThinOutEl || !balanceTopEl) {
+                    console.warn("Some required elements for balance calculation are missing");
+                    return;
+                }
+
+                const bottomTotalPlaced = Number(bottomTotalPlacedEl.value) || 0;
+                const bottomMortality = Number(bottomMortalityEl.value) || 0;
+                const bottomThinOut = Number(bottomThinOutEl.value) || 0;
+                const balanceBottom = bottomTotalPlaced - bottomMortality - bottomThinOut;
+
+                balanceBottomEl.value = balanceBottom;
+                balanceBottomEl.setAttribute("value", balanceBottom);
+
+                const topTotalPlaced = Number(topTotalPlacedEl.value) || 0;
+                const topMortality = Number(topMortalityEl.value) || 0;
+                const topThinOut = Number(topThinOutEl.value) || 0;
+                const balanceTop = topTotalPlaced - topMortality - topThinOut;
+
+                balanceTopEl.value = balanceTop;
+                balanceTopEl.setAttribute("value", balanceTop);
+            }
+            // Enhanced calculateDensity function with reactive updates
+            function calculateDensity(formContainer) {
+                // First calculate the Balance values
+                calculateBalance(formContainer);
+
+                // Get balance values
+                let balanceBottom = Number(formContainer.querySelector(".balanceBottom").value) || 0;
+                let balanceTop = Number(formContainer.querySelector(".balanceTop").value) || 0;
+
+                // Get average weight values
+                let avgWeightBottom = Number(formContainer.querySelector(".avgWeightBottom").value) || 0;
+                let avgWeightTop = Number(formContainer.querySelector(".avgWeightTop").value) || 0;
+
+                // Fixed barn square footage values
+                let barnSQFBottom = 11370;
+                let barnSQFTop = 11450;
+
+                // Calculate density using the formula: (balance × average weight) / Barn SQF
+                let densityBottom = (balanceBottom * avgWeightBottom) / barnSQFBottom;
+                let densityTop = (balanceTop * avgWeightTop) / barnSQFTop;
+
+                // Update the density fields with the calculated values (formatted to 2 decimal places)
+                let densityBottomField = formContainer.querySelector(".densityBottom");
+                let densityTopField = formContainer.querySelector(".densityTop");
+
+                densityBottomField.value = densityBottom.toFixed(2);
+                densityTopField.value = densityTop.toFixed(2);
+
+                console.log("Density calculation updated - Bottom:", densityBottom.toFixed(2), "Top:", densityTop.toFixed(2));
+            }
+
+            // Add this to your DOMContentLoaded event handler to set up the real-time listeners
+            document.addEventListener("DOMContentLoaded", async function () {
+                // ... existing code ...
+
+                // Add event listeners to all inputs that affect the density calculation
+                setupReactiveListeners();
+
+                // ... existing code ...
+            });
+
+            // Function to set up all reactive listeners
+            function setupReactiveListeners() {
+                // Listen for changes on average weight inputs
+                document.querySelector(".avgWeightBottom").addEventListener("input", () => calculateDensity(document));
+                document.querySelector(".avgWeightTop").addEventListener("input", () => calculateDensity(document));
+
+                // Listen for changes on thin out inputs
+                document.getElementById("bottom-thin-out").addEventListener("input", () => calculateDensity(document));
+                document.getElementById("top-thin-out").addEventListener("input", () => calculateDensity(document));
+
+                // Listen for changes on mortality inputs
+                document.getElementById("bottom-floor-mortality").addEventListener("input", () => calculateDensity(document));
+                document.getElementById("top-floor-mortality").addEventListener("input", () => calculateDensity(document));
+
+                // Listen for changes on total placed inputs
+                document.getElementById("bottom-total-placed").addEventListener("input", () => calculateDensity(document));
+                document.getElementById("top-total-placed").addEventListener("input", () => calculateDensity(document));
+            }
+
+            onSnapshot(shippingLogRef, (docSnap) => {
+                if (!docSnap.exists()) return;
+
+                const data = docSnap.data();
+
+                // Process each log separately
+                document.querySelectorAll(".container").forEach((formContainer, index) => {
+                    const logKey = `log${index + 1}`;
+                    const logData = data[logKey];
+
+                    if (logData && logData.trailers) {
+                        // Calculate totals for this specific log/form
+                        let totalBirds = 0;
+                        let totalNetKg = 0;
+
+                        Object.values(logData.trailers).forEach(trailer => {
+                            totalBirds += parseInt(trailer.birdCount) || 0;
+                            totalNetKg += parseFloat(trailer.netKG) || 0;
+                        });
+
+                        // Update this form's totals
+                        const totalBirdInput = formContainer.querySelector(".totalBirds");
+                        const netKgInput = formContainer.querySelector(".totalNetKg");
+                        const avgWeightInput = formContainer.querySelector(".avgWeight");
+                        const avgWeightBottom = formContainer.querySelector(".avgWeightBottom");
+                        const avgWeightTop = formContainer.querySelector(".avgWeightTop");
+
+                        if (totalBirdInput) totalBirdInput.value = totalBirds;
+                        if (netKgInput) netKgInput.value = totalNetKg;
+
+                        // Calculate average as Net KG / Bird Count
+                        let avg = totalBirds > 0 ? (totalNetKg / totalBirds).toFixed(2) : "0";
+
+                        if (avgWeightInput) avgWeightInput.value = avg;
+                        if (avgWeightBottom) avgWeightBottom.value = avg;
+                        if (avgWeightTop) avgWeightTop.value = avg;
+
+                        // Trigger density calculation for this form
+                        calculateDensity(formContainer);
+                    }
+                });
+            });
+
+            // Add this function to update the thin out values in real-time
+            function setupThinOutRealTimeListener() {
+                const cropRef = doc(db, "startnewcrop", "vas-b1-snc");
+                onSnapshot(cropRef, (docSnap) => {
+                    if (!docSnap.exists()) return;
+
+                    const data = docSnap.data();
+                    const bottomThinOut = data["f1-thin-out"] || "0";
+                    const topThinOut = data["f2-thin-out"] || "0";
+
+                    const bottomThinOutInput = document.getElementById("bottom-thin-out");
+                    const topThinOutInput = document.getElementById("top-thin-out");
+
+                    if (bottomThinOutInput) bottomThinOutInput.value = bottomThinOut;
+                    if (topThinOutInput) topThinOutInput.value = topThinOut;
+
+                    // Trigger recalculation
+                    calculateDensity(document);
+                });
+            }
+
+            // Call this function during initialization
+            setupThinOutRealTimeListener();
+
+            // Make sure the fillFormWithData function correctly sets the thin out values
+            function fillFormWithData(logEl, data) {
+                if (!data) {
+                    console.warn("No data provided to fillFormWithData");
+                    return;
+                }
+
+                console.log("Filling form with data:", data);
+
+                // Helper to safely set an input/textarea value if it exists
+                const setVal = (sel, v) => {
+                    const el = logEl.querySelector(sel);
+                    if (el) el.value = v !== undefined && v !== null ? v : "";
+                };
+
+                // Main fields
+                setVal("input[name='catch_datetime']", data.dateTimeOfCatch);
+                setVal("input[name='farm_rep']", data.farmRepOnDuty);
+                setVal("input[name='feeders_waters']", data.feedersAndWatersRaised);
+                setVal("input[name='light_intensity']", data.lightIntensityReduced);
+                setVal("input[name='flock_fitness']", data.flockEvaluated);
+                setVal("input[name='inside_barn_temp']", data.insideBarnTemp);
+                setVal("input[name='outside_barn_temp']", data.outsideBarnTemp);
+                setVal("input[name='culls_left']", data.cullsLeftOver);
+                setVal("input[name='euthanasia_datetime']", data.euthanasiaDateTime);
+                setVal("input[name='barn_temp_reduction']", data.barnTempReducedBeforeLoading);
+
+                // Handle comments field - use additionalComments or catchingAndLoadingComments
+                const comments = data.additionalComments || data.catchingAndLoadingComments || "";
+                setVal("textarea[name='additional_comments']", comments);
+
+                // Set thin-out values - using the form's specific thin out fields
+                setVal("#bottom-thin-out", data.bottomTO);
+                setVal("#top-thin-out", data.topTO);
+
+                // Process shipping info rows
+                processShippingRows(logEl, data);
+
+                // Process trailer data in the density table
+                processTrailerData(logEl, data);
+
+                // Trigger calculations to update balance and density
+                calculateDensity(logEl);
+            }
+
+            // Handle shipping info rows separately
+            function processShippingRows(logEl, data) {
+                const tbl = logEl.querySelector("#shipping-info");
+                if (!tbl) return;
+
+                // Clear existing shipping rows
+                const rows = tbl.querySelectorAll(".shipping-row");
+                rows.forEach(row => row.remove());
+
+                // Add shipping info rows from data
+                if (data.shippingInfo && Object.keys(data.shippingInfo).length > 0) {
+                    Object.values(data.shippingInfo).forEach(info => {
+                        addShippingRow(tbl);
+                        const newRow = tbl.querySelector(".shipping-row:last-child");
+                        if (newRow) {
+                            const trailerInput = newRow.querySelector("input[name='trailers_loaded']");
+                            const birdCountInput = newRow.querySelector(".bird-count");
+                            const netKgInput = newRow.querySelector(".net-kg");
+
+                            if (trailerInput) trailerInput.value = info.trailersLoaded || "";
+                            if (birdCountInput) birdCountInput.value = info.birdCount || "";
+                            if (netKgInput) netKgInput.value = info.netKG || "";
+                        }
+                    });
+                } else {
+                    // Add a blank row if no shipping info
+                    addShippingRow(tbl);
+                }
+            }
+
+            // Handle trailer data in the density table separately
+            function processTrailerData(logEl, data) {
+                const densityTable = logEl.querySelector("#density-table tbody");
+                if (!densityTable) return;
+
+                // Clear existing rows except total row
+                const totalRow = densityTable.querySelector("#total-row");
+                Array.from(densityTable.children).forEach(row => {
+                    if (row.id !== "total-row") row.remove();
+                });
+
+                // Add trailer data from trailers object
+                if (data.trailers && Object.keys(data.trailers).length > 0) {
+                    Object.values(data.trailers).forEach(trailer => {
+                        // Create a new row
+                        const newRow = document.createElement("tr");
+                        newRow.innerHTML = `
+        <td><input type="text" value="${trailer.trailerNumber || ''}" readonly style="pointer-events: none;"></td>
+        <td><input type="text" value="${trailer.birdCount || ''}" readonly style="pointer-events: none;"></td>
+        <td><input type="text" value="${trailer.netKG || ''}" readonly style="pointer-events: none;"></td>
+        <td><input type="text" value="${trailer.avgWeight || ''}" readonly style="pointer-events: none;"></td>
+        <td><button type="button" class="remove-row-btn">X</button></td>
+      `;
+
+                        // Insert before total row
+                        if (totalRow) {
+                            densityTable.insertBefore(newRow, totalRow);
+                        } else {
+                            densityTable.appendChild(newRow);
+                        }
+                    });
+                }
+
+                // Make sure total row is always at the end
+                if (totalRow) {
+                    densityTable.appendChild(totalRow);
+                }
+
+                // 3. Run this code when the page loads to rename existing buttons
+                document.addEventListener("DOMContentLoaded", function () {
+                    // Rename all existing "Save as PDF" buttons to "Print as PDF"
+                    document.querySelectorAll("#save-pdf").forEach(button => {
+                        button.textContent = "Print as PDF";
+                    });
+                });
+
+                // Update totals
+                calculateTotals(logEl);
+            }
+
+
+            // Modify the populateLogsFromFirestore function to ensure the original form gets event listeners
+            async function populateLogsFromFirestore() {
+                const shippingLogRef = doc(db, "shippingLogs", "fixedDocumentID");
+                const fixedDocSnap = await getDoc(shippingLogRef);
+
+                if (fixedDocSnap.exists()) {
+                    const data = fixedDocSnap.data();
+
+                    // Find all log entries (log1, log2, log3, etc.)
+                    const logKeys = Object.keys(data).filter(key => /^log\d+$/.test(key));
+
+                    // Sort logKeys numerically (log1, log2, log3, etc.)
+                    logKeys.sort((a, b) => {
+                        const numA = parseInt(a.replace("log", ""));
+                        const numB = parseInt(b.replace("log", ""));
+                        return numA - numB;
+                    });
+
+                    // First, remove all existing forms except the first one
+                    const existingForms = document.querySelectorAll(".container");
+                    for (let i = 1; i < existingForms.length; i++) {
+                        existingForms[i].remove();
+                    }
+
+                    // Reset log counter to match the highest log number
+                    logCounter = logKeys.length > 0
+                        ? Math.max(...logKeys.map(key => parseInt(key.replace("log", ""))))
+                        : 1;
+
+                    // Fill the first form with log1 data if it exists
+                    const originalForm = document.querySelector(".container");
+                    if (data.log1 && originalForm) {
+                        fillFormWithData(originalForm, data.log1);
+                        // IMPORTANT: Make sure to set up event listeners for the original form
+                        setupFormEventListeners(originalForm);
+                    }
+
+                    // Create additional forms for log2, log3, etc.
+                    logKeys.forEach(logKey => {
+                        if (logKey === "log1") return; // Skip log1 as we've already handled it
+
+                        const logNum = parseInt(logKey.replace("log", ""));
+
+                        // Clone the first form
+                        const clone = document.querySelector(".container").cloneNode(true);
+                        clone.querySelector("#log-title").textContent = `Flock Log - Shipping Info ${logNum}`;
+
+                        // Fill the cloned form with corresponding log data
+                        fillFormWithData(clone, data[logKey]);
+
+                        // Rewire event listeners for the clone
+                        setupFormEventListeners(clone);
+
+                        // Add remove button
+                        addRemoveButton(clone);
+
+                        // Append to document
+                        document.body.appendChild(clone);
+                    });
+
+                    // Update all log numbers to ensure they're sequential
+                    updateLogNumbers();
+
+                    console.log(`✅ Populated ${logKeys.length} logs from Firestore`);
+                } else {
+                    console.warn("⚠️ No shipping logs document found in Firestore");
+                    // Even if no logs found, still set up listeners for the original form
+                    setupFormEventListeners(document.querySelector(".container"));
+                }
+            }
+            // 3) call it
+            await populateLogsFromFirestore();
+
+            function setupFormEventListeners(formElement) {
+                // Get references to all buttons inside this specific form
+                const addShippingInfoBtn = formElement.querySelector("#add-shipping-info");
+                const savePdfBtn = formElement.querySelector("#save-pdf");
+                const saveToFirestoreBtn = formElement.querySelector("#save-to-firestore");
+                const duplicateLogBtn = formElement.querySelector("#duplicate-log");
+
+                // RENAME: Change "Save as PDF" to "Print as PDF"
+                if (savePdfBtn) {
+                    savePdfBtn.textContent = "Print as PDF";
+                }
+
+                // Add shipping info row button
+                const shipTbl = formElement.querySelector("#shipping-info");
+                if (addShippingInfoBtn) {
+                    // Remove any existing listeners
+                    addShippingInfoBtn.replaceWith(addShippingInfoBtn.cloneNode(true));
+                    // Add new listener
+                    formElement.querySelector("#add-shipping-info").addEventListener("click", () => addShippingRow(shipTbl));
+                }
+
+                // Print as PDF button - generate PDF for this specific form only
+                if (savePdfBtn) {
+                    savePdfBtn.replaceWith(savePdfBtn.cloneNode(true));
+                    formElement.querySelector("#save-pdf").addEventListener("click", function () {
+                        generateSingleFormPDF(formElement);
+                    });
+                }
+
+                // Save to Firestore button
+                if (saveToFirestoreBtn) {
+                    saveToFirestoreBtn.replaceWith(saveToFirestoreBtn.cloneNode(true));
+                    formElement.querySelector("#save-to-firestore").addEventListener("click", async function () {
+                        // Get all logs and save them
+                        let allLogs = document.querySelectorAll(".container");
+                        let allData = {};
+
+                        allLogs.forEach((log, index) => {
+                            let logKey = `log${index + 1}`;
+                            const { bottomTO, topTO } = getThinOutValues(log);
+                            let logData = {
+                                dateTimeOfCatch: log.querySelector("input[name='catch_datetime']")?.value || "",
+                                farmRepOnDuty: log.querySelector("input[name='farm_rep']")?.value || "",
+                                feedersAndWatersRaised: log.querySelector("input[name='feeders_waters']")?.value || "",
+                                lightIntensityReduced: log.querySelector("input[name='light_intensity']")?.value || "",
+                                flockEvaluated: log.querySelector("input[name='flock_fitness']")?.value || "",
+                                insideBarnTemp: log.querySelector("input[name='inside_barn_temp']")?.value || "",
+                                outsideBarnTemp: log.querySelector("input[name='outside_barn_temp']")?.value || "",
+                                catchingAndLoadingComments: log.querySelector("textarea[name='additional_comments']")?.value || "",
+                                cullsLeftOver: Number(log.querySelector("input[name='culls_left']")?.value) || 0,
+                                euthanasiaDateTime: log.querySelector("input[name='euthanasia_datetime']")?.value || "",
+                                barnTempReducedBeforeLoading: log.querySelector("input[name='barn_temp_reduction']")?.value || "",
+                                additionalComments: log.querySelector("textarea[name='additional_comments']")?.value || "",
+                                shippingInfo: {},
+                                bottomTO,
+                                topTO
+                            };
+
+                            // Add shipping info
+                            let shippingRows = log.querySelectorAll(".shipping-row");
+                            shippingRows.forEach((row, shipIndex) => {
+                                let shippingKey = `shipping${shipIndex + 1}`;
+                                let inputs = row.querySelectorAll("input");
+                                logData.shippingInfo[shippingKey] = {
+                                    trailersLoaded: inputs[0].value,
+                                    birdCount: Number(inputs[1].value),
+                                    netKG: Number(inputs[2].value)
+                                };
+                            });
+
+                            // Add trailer data
+                            logData.trailers = {};
+                            const trailerRows = log.querySelectorAll("#density-table tbody tr:not(#total-row)");
+                            trailerRows.forEach(row => {
+                                const inputs = row.querySelectorAll("input");
+                                if (inputs.length >= 4) {
+                                    const trailerNum = inputs[0].value;
+                                    if (trailerNum) {
+                                        logData.trailers[trailerNum] = {
+                                            trailerNumber: trailerNum,
+                                            birdCount: Number(inputs[1].value) || 0,
+                                            netKG: Number(inputs[2].value) || 0,
+                                            avgWeight: inputs[3].value || "0"
+                                        };
+                                    }
+                                }
+                            });
+
+                            allData[logKey] = logData;
+                        });
+
+                        const { bottomTO, topTO } = getThinOutValues(document);
+                        allData["bottom-TO"] = bottomTO;
+                        allData["top-TO"] = topTO;
+
+                        // Save data to Firestore
+                        await setDoc(shippingLogRef, allData, { merge: true });
+
+                        // Update the "startnewcrop" document with the new thin out fields
+                        const cropDocRef = doc(db, "startnewcrop", "vas-b1-snc");
+                        await setDoc(cropDocRef, {
+                            "f1-thin-out": bottomTO,
+                            "f2-thin-out": topTO
+                        }, { merge: true });
+
+                        alert("All forms, shipping data, and thin out values saved to Firestore successfully!");
+                    });
+                }
+
+                // IMPORTANT - FIXED: Duplicate log button - set up for EACH form
+                if (duplicateLogBtn) {
+                    duplicateLogBtn.replaceWith(duplicateLogBtn.cloneNode(true));
+                    formElement.querySelector("#duplicate-log").addEventListener("click", async () => {
+                        // Get the form container this button belongs to
+                        const originalLog = formElement;
+                        const newLog = originalLog.cloneNode(true);
+
+                        // Assign a unique log number
+                        logCounter++;
+                        newLog.querySelector("#log-title").textContent = `Flock Log - Shipping Info ${logCounter}`;
+
+                        // Clear input values in the new form
+                        newLog.querySelectorAll("input[type='text'], input[type='number'], textarea").forEach(input => {
+                            // Preserve only default values that should be retained
+                            const keepValue = ['farm_rep', 'feeders_waters', 'light_intensity', 'flock_fitness', 'barn_temp_reduction'].includes(input.name);
+
+                            if (!keepValue) {
+                                input.value = "";
+                            }
+                        });
+
+                        // Reset date/time fields to current time
+                        newLog.querySelectorAll("input[type='datetime-local']").forEach(input => {
+                            input.value = getCurrentDateTime();
+                        });
+
+                        // Clear all trailer rows in the shipping info table
+                        const shippingTable = newLog.querySelector("#shipping-info");
+                        const firstRow = shippingTable.querySelector(".shipping-row");
+                        if (firstRow) {
+                            // Keep only the first row but clear its values
+                            firstRow.querySelectorAll("input").forEach(input => {
+                                input.value = "";
+                            });
+
+                            // Remove any additional shipping rows
+                            const additionalRows = shippingTable.querySelectorAll(".shipping-row:not(:first-child)");
+                            additionalRows.forEach(row => row.remove());
+                        }
+
+                        // Clear the density table, keeping only the total row
+                        const densityTable = newLog.querySelector("#density-table tbody");
+                        const totalRow = densityTable.querySelector("#total-row");
+                        if (totalRow) {
+                            // Clear all rows except total row
+                            Array.from(densityTable.children).forEach(row => {
+                                if (row.id !== "total-row") {
+                                    row.remove();
+                                }
+                            });
+
+                            // Reset total values
+                            totalRow.querySelectorAll("input").forEach(input => {
+                                input.value = "0";
+                            });
+                        }
+
+                        // Add remove button
+                        addRemoveButton(newLog);
+
+                        // Setup event listeners for the new form
+                        setupFormEventListeners(newLog);
+
+                        // Add the new form to the document
+                        document.body.appendChild(newLog);
+                        updateLogNumbers();
+
+                        // Create a new empty log data object
+                        const newLogData = {
+                            dateTimeOfCatch: getCurrentDateTime(),
+                            farmRepOnDuty: newLog.querySelector("input[name='farm_rep']")?.value || "",
+                            feedersAndWatersRaised: newLog.querySelector("input[name='feeders_waters']")?.value || "",
+                            lightIntensityReduced: newLog.querySelector("input[name='light_intensity']")?.value || "",
+                            flockEvaluated: newLog.querySelector("input[name='flock_fitness']")?.value || "",
+                            insideBarnTemp: "",
+                            outsideBarnTemp: "",
+                            catchingAndLoadingComments: "",
+                            cullsLeftOver: 0,
+                            euthanasiaDateTime: getCurrentDateTime(),
+                            barnTempReducedBeforeLoading: newLog.querySelector("input[name='barn_temp_reduction']")?.value || "",
+                            additionalComments: "",
+                            shippingInfo: {},
+                            trailers: {},
+                            bottomTO: newLog.querySelector("#bottom-thin-out")?.value || "",
+                            topTO: newLog.querySelector("#top-thin-out")?.value || ""
+                        };
+
+                        // Save to Firestore under the appropriate log key
+                        await updateDoc(shippingLogRef, {
+                            [`log${logCounter}`]: newLogData
+                        });
+
+                        // Initialize the totals for this new form
+                        calculateTotals(newLog);
+                    });
+                }
+
+                // Move to density buttons for this specific form
+                shipTbl.addEventListener("click", (e) => {
+                    if (e.target && e.target.classList.contains("move-to-density")) {
+                        moveTrailerData(e.target);
+                    }
+                });
+
+                // Set up thin-out event listeners
+                const bottomThinOut = formElement.querySelector("#bottom-thin-out");
+                const topThinOut = formElement.querySelector("#top-thin-out");
+
+                if (bottomThinOut) {
+                    bottomThinOut.addEventListener("input", () => calculateDensity(formElement));
+                }
+
+                if (topThinOut) {
+                    topThinOut.addEventListener("input", () => calculateDensity(formElement));
+                }
+
+                // Set up density table remove buttons for this specific form
+                const densityTable = formElement.querySelector("#density-table");
+                if (densityTable) {
+                    densityTable.addEventListener("click", async (e) => {
+                        if (!e.target.classList.contains("remove-row-btn")) return;
+
+                        // Get form index (1-based)
+                        const all = Array.from(document.querySelectorAll('.container'));
+                        const idx = all.indexOf(formElement) + 1;
+                        const logKey = `log${idx}`;
+
+                        // Get trailer number
+                        const row = e.target.closest("tr");
+                        const trailerNum = row.querySelector("input").value;
+
+                        // Remove from DOM
+                        row.remove();
+
+                        // Remove from Firestore for this specific log
+                        const shippingLogRef = doc(db, "shippingLogs", "fixedDocumentID");
+                        await updateDoc(shippingLogRef, {
+                            [`${logKey}.trailers.${trailerNum}`]: deleteField()
+                        });
+
+                        console.log(`✅ Removed trailer ${trailerNum} from ${logKey}`);
+
+                        // Recalculate totals for this form
+                        calculateTotals(formElement);
+                    });
+                }
+            }
+
+            // Add this function to generate multi-page PDF with all forms
+            // Add this function to your JavaScript code
+            // Updated PDF generation function to match the desired format
+            // Updated PDF generation function with smaller text for single page
+            // Optimized PDF generation function with better spacing
+            // Optimized PDF generation function with fixed spacing
+            // =============================================================================
+            // COMPLETE generateMultiPagePDF function:
+            // =============================================================================
+
+            async function generateMultiPagePDF() {
+                try {
+                    // Get all form containers
+                    const forms = document.querySelectorAll(".container");
+                    if (forms.length === 0) {
+                        alert("No forms found to print!");
+                        return;
+                    }
+
+                    console.log("Starting PDF generation...");
+
+                    // Initialize jsPDF - make sure we're getting it from the global scope correctly
+                    if (!window.jspdf || !window.jspdf.jsPDF) {
+                        console.error("jsPDF library not found!");
+                        alert("PDF generation failed: jsPDF library not found!");
+                        return;
+                    }
+
+                    const { jsPDF } = window.jspdf;
+                    console.log("Creating PDF document...");
+
+                    // Generate a separate PDF for each form
+                    for (let i = 0; i < forms.length; i++) {
+                        const form = forms[i];
+
+                        // Create a new document for each form
+                        const doc = new jsPDF({
+                            orientation: "landscape",  // Change to landscape to match your examples
+                            unit: "mm",
+                            format: "a4"
+                        });
+
+                        // Set default font
+                        doc.setFont("helvetica");
+
+                        // Extract form number from title
+                        const title = form.querySelector("#log-title").textContent;
+                        const formNumber = title.split(" ").pop(); // Get the last part (the number)
+
+                        // Add main title centered at the top
+                        doc.setFontSize(16);  // Slightly reduced from 18
+                        doc.text("Vassilakos - Barn 1", 150, 12, { align: "center" });
+                        doc.text(`Flock Log - Shipping Info ${formNumber}`, 150, 20, { align: "center" });
+
+                        // Set font for form content
+                        doc.setFontSize(10);  // Reduced from 12 to 10
+
+                        // Starting Y position for form fields
+                        let yPos = 30;
+
+                        // 1. Add the main form fields in a single column format
+                        const mainFields = [
+                            { label: "Quota Period", value: window.quotaPeriod || "" },
+                            { label: "Date and Time of Catch", value: form.querySelector("input[name='catch_datetime']")?.value || "" },
+                            { label: "Name of Farm Rep on Duty", value: form.querySelector("input[name='farm_rep']")?.value || "" },
+                            { label: "Feeders and Waters Raised prior to Catch", value: form.querySelector("input[name='feeders_waters']")?.value || "" },
+                            { label: "Light Intensity Reduced prior to Catch", value: form.querySelector("input[name='light_intensity']")?.value || "" },
+                            { label: "Flock Evaluated for Fitness prior to Transport", value: form.querySelector("input[name='flock_fitness']")?.value || "" },
+                            { label: "Inside Barn Temp at Loading", value: form.querySelector("input[name='inside_barn_temp']")?.value || "" },
+                            { label: "Outside Barn Temp at Loading", value: form.querySelector("input[name='outside_barn_temp']")?.value || "" },
+                            { label: "Catching and Loading Comments", value: form.querySelector("textarea[name='additional_comments']")?.value || "" },
+                            { label: "Culls Left Over", value: form.querySelector("input[name='culls_left']")?.value || "" },
+                            { label: "Date and Time of Euthanasia of Leftover Birds", value: form.querySelector("input[name='euthanasia_datetime']")?.value || "" },
+                            { label: "Barn Temp was reduced prior to loading by 2 degrees 4hrs.", value: form.querySelector("input[name='barn_temp_reduction']")?.value || "" }
+                        ];
+
+                        // Display main form fields with moderate spacing
+                        mainFields.forEach(field => {
+                            doc.text(`${field.label}: ${field.value}`, 20, yPos);
+                            yPos += 6;  // Reduced from 7 to 6
+                        });
+
+                        // 2. Add the Trailer Information section
+                        yPos += 8;  // Reduced from 10 to 8
+                        doc.setFontSize(14);  // Reduced from 16 to 14
+                        doc.text("Trailer Information", 20, yPos);
+                        doc.setFontSize(10);   // Back to content font
+                        yPos += 7;   // Reduced from 8 to 7
+
+                        // Draw table header for trailer information
+                        doc.setDrawColor(0);
+                        doc.setFillColor(240, 240, 240);
+                        doc.rect(20, yPos - 5, 180, 7, 'F');  // Reduced height from 8 to 7
+                        doc.setTextColor(0);
+                        doc.text("Trailer #", 25, yPos);
+                        doc.text("Bird Count", 75, yPos);
+                        doc.text("Net KG", 125, yPos);
+
+                        yPos += 5;  // Reduced from 6 to 5
+                        yPos += 3;  // ADD SPACING - moves trailer data 3 pixels lower
+
+                        // Get active trailer data from the density table (non-blank entries)
+                        const trailerRows = form.querySelectorAll("#density-table tbody tr:not(#total-row)");
+                        let totalBirds = 0;
+                        let totalNetKg = 0;
+
+                        trailerRows.forEach(row => {
+                            const inputs = row.querySelectorAll("input");
+                            if (inputs.length >= 3 && inputs[0].value) {
+                                const trailerNum = inputs[0].value;
+                                const birdCount = Number(inputs[1].value) || 0;
+                                const netKg = Number(inputs[2].value) || 0;
+
+                                totalBirds += birdCount;
+                                totalNetKg += netKg;
+
+                                doc.text(trailerNum, 25, yPos);
+                                doc.text(birdCount.toString(), 75, yPos);
+                                doc.text(netKg.toString(), 125, yPos);
+
+                                yPos += 6;  // Reduced from 7 to 6
+                            }
+                        });
+
+                        // Draw total row with separator line
+                        doc.setDrawColor(0);
+                        doc.line(20, yPos - 3, 200, yPos - 3);
+
+                        // ADD SPACING BEFORE TOTAL ROW
+                        yPos += 3;
+
+                        doc.setFont("helvetica", "bold");
+                        doc.text("Total", 25, yPos);
+                        doc.text(totalBirds.toString(), 75, yPos);
+                        doc.text(totalNetKg.toString(), 125, yPos);
+
+                        // Calculate average weight
+                        const avgWeight = totalBirds > 0 ? (totalNetKg / totalBirds).toFixed(2) : "0";
+                        doc.text("Average Weight", 180, yPos);
+                        doc.text(avgWeight, 220, yPos);
+                        doc.setFont("helvetica", "normal");
+
+                        // 3. Add Balance & Density Calculation section
+                        yPos += 10;  // Reduced from 12 to 10
+                        doc.setFontSize(14);  // Reduced from 16 to 14
+                        doc.text("Balance & Density Calculation", 20, yPos);
+                        doc.setFontSize(10);   // Back to content font
+                        yPos += 7;   // Reduced from 8 to 7
+
+                        // Draw table header for Balance & Density
+                        doc.setDrawColor(0);
+                        doc.setFillColor(40, 80, 140); // Blue header color
+                        doc.rect(20, yPos - 5, 250, 7, 'F');  // Reduced height from 8 to 7
+                        doc.setTextColor(255); // White text for header
+
+                        // Column headers with better spacing and centering
+                        doc.text("Floor", 25, yPos);
+                        doc.text("Total Placed", 75, yPos, { align: "center" });
+                        doc.text("Mortality", 100, yPos, { align: "center" });
+                        doc.text("Thin out", 125, yPos, { align: "center" });
+                        doc.text("Balance", 155, yPos, { align: "center" });
+                        doc.text("Avg Weight", 185, yPos, { align: "center" });
+                        doc.text("Barn SQF", 215, yPos, { align: "center" });
+                        doc.text("Density KG/SF", 250, yPos, { align: "center" });
+
+                        // Reset text color for data
+                        doc.setTextColor(0);
+                        yPos += 4;  // Reduced from 5 to 4
+
+                        // ADD SPACING AFTER HEADER
+                        yPos += 2;
+
+                        // Bottom Floor row
+                        const bottomTotalPlaced = form.querySelector("#bottom-total-placed")?.value || "0";
+                        const bottomMortality = form.querySelector("#bottom-floor-mortality")?.value || "0";
+                        const bottomThinOut = form.querySelector("#bottom-thin-out")?.value || "0";
+                        const balanceBottom = form.querySelector(".balanceBottom")?.value || "0";
+                        const avgWeightBottom = form.querySelector(".avgWeightBottom")?.value || avgWeight;
+                        const densityBottom = form.querySelector(".densityBottom")?.value || "0";
+
+                        // Bottom Floor row
+                        doc.setFont("helvetica", "bold");
+                        doc.text("Bottom Floor", 25, yPos);
+                        doc.setFont("helvetica", "normal");
+                        doc.text(bottomTotalPlaced, 75, yPos, { align: "center" });
+                        doc.text(bottomMortality, 100, yPos, { align: "center" });
+                        doc.text(bottomThinOut, 125, yPos, { align: "center" });
+                        doc.text(balanceBottom, 155, yPos, { align: "center" });
+                        doc.text(avgWeightBottom, 185, yPos, { align: "center" });
+                        doc.text("11,370", 215, yPos, { align: "center" });
+                        doc.text(densityBottom, 250, yPos, { align: "center" });
+
+                        yPos += 7;  // Reduced from 8 to 7
+
+                        // Top Floor row
+                        const topTotalPlaced = form.querySelector("#top-total-placed")?.value || "0";
+                        const topMortality = form.querySelector("#top-floor-mortality")?.value || "0";
+                        const topThinOut = form.querySelector("#top-thin-out")?.value || "0";
+                        const balanceTop = form.querySelector(".balanceTop")?.value || "0";
+                        const avgWeightTop = form.querySelector(".avgWeightTop")?.value || avgWeight;
+                        const densityTop = form.querySelector(".densityTop")?.value || "0";
+
+                        // Top Floor row
+                        doc.setFont("helvetica", "bold");
+                        doc.text("Top Floor", 25, yPos);
+                        doc.setFont("helvetica", "normal");
+                        doc.text(topTotalPlaced, 75, yPos, { align: "center" });
+                        doc.text(topMortality, 100, yPos, { align: "center" });
+                        doc.text(topThinOut, 125, yPos, { align: "center" });
+                        doc.text(balanceTop, 155, yPos, { align: "center" });
+                        doc.text(avgWeightTop, 185, yPos, { align: "center" });
+                        doc.text("11,450", 215, yPos, { align: "center" });
+                        doc.text(densityTop, 250, yPos, { align: "center" });
+
+                        // Generate a unique filename with the form number
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+                        doc.save(`Flock_Log_${formNumber}_${timestamp}.pdf`);
+
+                        console.log(`✅ PDF generated for form ${formNumber}`);
+                    }
+
+                    alert("PDF generation complete!");
+
+                } catch (error) {
+                    console.error("❌ Error generating PDF:", error);
+                    alert("Error generating PDF: " + error.message);
+                }
+            }
+
+            // Updated PDF generation function with bigger text and spacing
+            // Function to generate PDF for a single specific form
+            // Function to generate PDF for a single specific form
+            // Function to generate PDF for a single specific form
+            async function generateSingleFormPDF(formElement) {
+                try {
+                    console.log("Starting PDF generation for single form...");
+
+                    if (!window.jspdf || !window.jspdf.jsPDF) {
+                        console.error("jsPDF library not found!");
+                        alert("PDF generation failed: jsPDF library not found!");
+                        return;
+                    }
+
+                    const { jsPDF } = window.jspdf;
+                    console.log("Creating PDF document...");
+
+                    // Create a new document
+                    const doc = new jsPDF({
+                        orientation: "landscape",
+                        unit: "mm",
+                        format: "a4"
+                    });
+
+                    // Set default font
+                    doc.setFont("helvetica");
+
+                    // Extract form number from title
+                    const title = formElement.querySelector("#log-title").textContent;
+                    const formNumber = title.split(" ").pop(); // Get the last part (the number)
+
+                    // Add main title centered at the top
+                    doc.setFontSize(16);  // Slightly reduced from 18
+                    doc.text("Vassilakos - Barn 1", 150, 12, { align: "center" });
+                    doc.text(`Flock Log - Shipping Info ${formNumber}`, 150, 20, { align: "center" });
+
+                    // Set font for form content
+                    doc.setFontSize(10);  // Reduced from 12 to 10
+
+                    // Starting Y position for form fields
+                    let yPos = 30;
+
+                    // 1. Add the main form fields
+                    const mainFields = [
+                        { label: "Quota Period", value: window.quotaPeriod || "" },
+                        { label: "Date and Time of Catch", value: formElement.querySelector("input[name='catch_datetime']")?.value || "" },
+                        { label: "Name of Farm Rep on Duty", value: formElement.querySelector("input[name='farm_rep']")?.value || "" },
+                        { label: "Feeders and Waters Raised prior to Catch", value: formElement.querySelector("input[name='feeders_waters']")?.value || "" },
+                        { label: "Light Intensity Reduced prior to Catch", value: formElement.querySelector("input[name='light_intensity']")?.value || "" },
+                        { label: "Flock Evaluated for Fitness prior to Transport", value: formElement.querySelector("input[name='flock_fitness']")?.value || "" },
+                        { label: "Inside Barn Temp at Loading", value: formElement.querySelector("input[name='inside_barn_temp']")?.value || "" },
+                        { label: "Outside Barn Temp at Loading", value: formElement.querySelector("input[name='outside_barn_temp']")?.value || "" },
+                        { label: "Catching and Loading Comments", value: formElement.querySelector("textarea[name='additional_comments']")?.value || "" },
+                        { label: "Culls Left Over", value: formElement.querySelector("input[name='culls_left']")?.value || "" },
+                        { label: "Date and Time of Euthanasia of Leftover Birds", value: formElement.querySelector("input[name='euthanasia_datetime']")?.value || "" },
+                        { label: "Barn Temp was reduced prior to loading by 2 degrees 4hrs.", value: formElement.querySelector("input[name='barn_temp_reduction']")?.value || "" }
+                    ];
+
+                    // Display main form fields
+                    mainFields.forEach(field => {
+                        doc.text(`${field.label}: ${field.value}`, 20, yPos);
+                        yPos += 6;  // Reduced from 7 to 6
+                    });
+
+                    // 2. Add the Trailer Information section
+                    yPos += 8;  // Reduced from 10 to 8
+                    doc.setFontSize(14);  // Reduced from 16 to 14
+                    doc.text("Trailer Information", 20, yPos);
+                    doc.setFontSize(10);   // Back to content font
+                    yPos += 7;   // Reduced from 8 to 7
+
+                    // Draw table header for trailer information
+                    doc.setDrawColor(0);
+                    doc.setFillColor(240, 240, 240);
+                    doc.rect(20, yPos - 5, 180, 7, 'F');  // Reduced height
+                    doc.setTextColor(0);
+                    doc.text("Trailer #", 25, yPos);
+                    doc.text("Bird Count", 75, yPos);
+                    doc.text("Net KG", 125, yPos);
+
+                    yPos += 5;  // Reduced spacing
+                    yPos += 3;  // ADD SPACING - moves trailer data 3 pixels lower
+
+                    // Get active trailer data from THIS form's density table
+                    const trailerRows = formElement.querySelectorAll("#density-table tbody tr:not(#total-row)");
+                    let totalBirds = 0;
+                    let totalNetKg = 0;
+
+                    trailerRows.forEach(row => {
+                        const inputs = row.querySelectorAll("input");
+                        if (inputs.length >= 3 && inputs[0].value) {
+                            const trailerNum = inputs[0].value;
+                            const birdCount = Number(inputs[1].value) || 0;
+                            const netKg = Number(inputs[2].value) || 0;
+
+                            totalBirds += birdCount;
+                            totalNetKg += netKg;
+
+                            doc.text(trailerNum, 25, yPos);
+                            doc.text(birdCount.toString(), 75, yPos);
+                            doc.text(netKg.toString(), 125, yPos);
+
+                            yPos += 6;  // Reduced spacing
+                        }
+                    });
+
+                    // Draw total row with separator line
+                    doc.setDrawColor(0);
+                    doc.line(20, yPos - 3, 200, yPos - 3);
+
+                    // ADD SPACING BEFORE TOTAL ROW
+                    yPos += 3;
+
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Total", 25, yPos);
+                    doc.text(totalBirds.toString(), 75, yPos);
+                    doc.text(totalNetKg.toString(), 125, yPos);
+
+                    // Calculate average weight
+                    const avgWeight = totalBirds > 0 ? (totalNetKg / totalBirds).toFixed(2) : "0";
+                    doc.text("Average Weight", 180, yPos);
+                    doc.text(avgWeight, 220, yPos);
+                    doc.setFont("helvetica", "normal");
+
+                    // 3. Add Balance & Density Calculation section
+                    yPos += 10;  // Reduced spacing
+                    doc.setFontSize(14);  // Reduced section header size
+                    doc.text("Balance & Density Calculation", 20, yPos);
+                    doc.setFontSize(10);   // Back to content font
+                    yPos += 7;   // Reduced spacing
+
+                    // Draw table header for Balance & Density
+                    doc.setDrawColor(0);
+                    doc.setFillColor(40, 80, 140);
+                    doc.rect(20, yPos - 5, 250, 7, 'F');  // Reduced header height
+                    doc.setTextColor(255);
+
+                    // Column headers with better spacing and centering
+                    doc.text("Floor", 25, yPos);
+                    doc.text("Total Placed", 75, yPos, { align: "center" });
+                    doc.text("Mortality", 100, yPos, { align: "center" });
+                    doc.text("Thin out", 125, yPos, { align: "center" });
+                    doc.text("Balance", 155, yPos, { align: "center" });
+                    doc.text("Avg Weight", 185, yPos, { align: "center" });
+                    doc.text("Barn SQF", 215, yPos, { align: "center" });
+                    doc.text("Density KG/SF", 250, yPos, { align: "center" });
+
+                    // Reset text color for data
+                    doc.setTextColor(0);
+                    yPos += 4;  // Reduced spacing
+
+                    // ADD SPACING AFTER HEADER
+                    yPos += 2;
+
+                    // Bottom Floor row
+                    const bottomTotalPlaced = formElement.querySelector("#bottom-total-placed")?.value || "0";
+                    const bottomMortality = formElement.querySelector("#bottom-floor-mortality")?.value || "0";
+                    const bottomThinOut = formElement.querySelector("#bottom-thin-out")?.value || "0";
+                    const balanceBottom = formElement.querySelector(".balanceBottom")?.value || "0";
+                    const avgWeightBottom = formElement.querySelector(".avgWeightBottom")?.value || avgWeight;
+                    const densityBottom = formElement.querySelector(".densityBottom")?.value || "0";
+
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Bottom Floor", 25, yPos);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(bottomTotalPlaced, 75, yPos, { align: "center" });
+                    doc.text(bottomMortality, 100, yPos, { align: "center" });
+                    doc.text(bottomThinOut, 125, yPos, { align: "center" });
+                    doc.text(balanceBottom, 155, yPos, { align: "center" });
+                    doc.text(avgWeightBottom, 185, yPos, { align: "center" });
+                    doc.text("11,370", 215, yPos, { align: "center" });
+                    doc.text(densityBottom, 250, yPos, { align: "center" });
+
+                    yPos += 7;  // Reduced spacing
+
+                    // Top Floor row
+                    const topTotalPlaced = formElement.querySelector("#top-total-placed")?.value || "0";
+                    const topMortality = formElement.querySelector("#top-floor-mortality")?.value || "0";
+                    const topThinOut = formElement.querySelector("#top-thin-out")?.value || "0";
+                    const balanceTop = formElement.querySelector(".balanceTop")?.value || "0";
+                    const avgWeightTop = formElement.querySelector(".avgWeightTop")?.value || avgWeight;
+                    const densityTop = formElement.querySelector(".densityTop")?.value || "0";
+
+                    // Top Floor row
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Top Floor", 25, yPos);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(topTotalPlaced, 75, yPos, { align: "center" });
+                    doc.text(topMortality, 100, yPos, { align: "center" });
+                    doc.text(topThinOut, 125, yPos, { align: "center" });
+                    doc.text(balanceTop, 155, yPos, { align: "center" });
+                    doc.text(avgWeightTop, 185, yPos, { align: "center" });
+                    doc.text("11,450", 215, yPos, { align: "center" });
+                    doc.text(densityTop, 250, yPos, { align: "center" });
+
+                    // Generate filename with the form number
+                    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+                    doc.save(`Flock_Log_${formNumber}_${timestamp}.pdf`);
+
+                    console.log(`✅ PDF generated for form ${formNumber}`);
+                    alert("PDF generation complete!");
+
+                } catch (error) {
+                    console.error("❌ Error generating PDF:", error);
+                    alert("Error generating PDF: " + error.message);
+                }
+            }
+            // Make the function available globally
+            window.generateMultiPagePDF = generateMultiPagePDF;
+
+            // Make the function available globally
+            window.generateMultiPagePDF = generateMultiPagePDF;
+
+            document.getElementById("save-to-firestore").addEventListener("click", async function () {
+                let allLogs = document.querySelectorAll(".container");
+                let allData = {};
+                allLogs.forEach((log, index) => {
+                    let logKey = `log${index + 1}`;
+                    const { bottomTO, topTO } = getThinOutValues(log);
+                    let logData = {
+                        dateTimeOfCatch: log.querySelector("input[name='catch_datetime']")?.value || "",
+                        farmRepOnDuty: log.querySelector("input[name='farm_rep']")?.value || "",
+                        feedersAndWatersRaised: log.querySelector("input[name='feeders_waters']")?.value || "",
+                        lightIntensityReduced: log.querySelector("input[name='light_intensity']")?.value || "",
+                        flockEvaluated: log.querySelector("input[name='flock_fitness']")?.value || "",
+                        insideBarnTemp: log.querySelector("input[name='inside_barn_temp']")?.value || "",
+                        outsideBarnTemp: log.querySelector("input[name='outside_barn_temp']")?.value || "",
+                        catchingAndLoadingComments: log.querySelector("textarea[name='additional_comments']")?.value || "",
+
+                        cullsLeftOver: Number(log.querySelector("input[name='culls_left']")?.value) || 0,
+                        euthanasiaDateTime: log.querySelector("input[name='euthanasia_datetime']")?.value || "",
+                        barnTempReducedBeforeLoading: log.querySelector("input[name='barn_temp_reduction']")?.value || "",
+                        additionalComments: log.querySelector("textarea[name='additional_comments']")?.value || "",
+                        shippingInfo: {},
+                        bottomTO,
+                        topTO
+                    };
+                    let shippingRows = log.querySelectorAll(".shipping-row");
+                    shippingRows.forEach((row, shipIndex) => {
+                        let shippingKey = `shipping${shipIndex + 1}`;
+                        let inputs = row.querySelectorAll("input");
+                        logData.shippingInfo[shippingKey] = {
+                            trailersLoaded: inputs[0].value,
+                            birdCount: Number(inputs[1].value),
+                            netKG: Number(inputs[2].value)
+                        };
+                    });
+                    allData[logKey] = logData;
+                });
+
+                const { bottomTO, topTO } = getThinOutValues(document);
+                allData["bottom-TO"] = bottomTO;
+                allData["top-TO"] = topTO;
+
+                // …inside your click listener…
+                await setDoc(shippingLogRef, allData, { merge: true });
+
+
+                // Update the "startnewcrop" document ("vas-b1-snc") with the new thin out fields.
+                const cropDocRef = doc(db, "startnewcrop", "vas-b1-snc");
+                await setDoc(cropDocRef, {
+                    "f1-thin-out": bottomTO,
+                    "f2-thin-out": topTO
+                }, { merge: true });
+
+                alert("All forms, shipping data, and thin out values saved to Firestore successfully!");
+            });
+        });
+
+        function getThinOutValues(log) {
+            const bottomInput = log.querySelector("#bottom-thin-out");
+            const topInput = log.querySelector("#top-thin-out");
+            return {
+                bottomTO: bottomInput?.value || "",
+                topTO: topInput?.value || ""
+            };
+        }
+
+        // New function: auto-fill mortality totals from both collections
+        async function populateMortalityTotals() {
+            try {
+                const bottomSnap = await getDocs(collection(db, "vas-b1-f1-MC"));
+                const topSnap = await getDocs(collection(db, "vas-b1-f2-MC"));
+                let bottomTotal = 0, topTotal = 0;
+                bottomSnap.forEach(doc => {
+                    bottomTotal += parseInt(doc.data().totalDeadBirds) || 0;
+                });
+                topSnap.forEach(doc => {
+                    topTotal += parseInt(doc.data().totalDeadBirds) || 0;
+                });
+                const bottomInput = document.getElementById("bottom-floor-mortality");
+                const topInput = document.getElementById("top-floor-mortality");
+                if (bottomInput) bottomInput.value = bottomTotal;
+                if (topInput) topInput.value = topTotal;
+                console.log(`🟢 Mortality set - Bottom: ${bottomTotal}, Top: ${topTotal}`);
+            } catch (error) {
+                console.error("❌ Error fetching mortality totals:", error);
+            }
+        }
+        async function populateTotalPlacedFromCrop() {
+            const cropRef = doc(db, "startnewcrop", "vas-b1-snc");
+            const snapshot = await getDoc(cropRef);
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+                const bottom = data?.bottom_floor?.birds_placed || "0";
+                const top = data?.top_floor?.birds_placed || "0";
+                const quotaPeriod = data?.quota_period || ""; // Add this line
+
+                document.getElementById("bottom-total-placed").value = bottom;
+                document.getElementById("top-total-placed").value = top;
+
+                // Store quota period globally for PDF generation
+                window.quotaPeriod = quotaPeriod; // Add this line
+            } else {
+                console.warn("No startnewcrop/vas-b1-snc data found.");
+            }
+        }
+
+        // NEW: Function to populate thin out values from Firestore on page load.
+        async function populateThinOutValues() {
+            const cropRef = doc(db, "startnewcrop", "vas-b1-snc");
+            const snapshot = await getDoc(cropRef);
+            if (snapshot.exists()) {
+                const data = snapshot.data();
+                const bottomThinOut = data["f1-thin-out"] || "0";
+                const topThinOut = data["f2-thin-out"] || "0";
+                document.getElementById("bottom-thin-out").value = bottomThinOut;
+                document.getElementById("top-thin-out").value = topThinOut;
+            } else {
+                console.warn("No thin out values found in startnewcrop/vas-b1-snc");
+            }
+        }
+
+        // Enhanced saveTrailerData function that properly saves to the correct log
+        async function saveTrailerData(trailerData, formContainer) {
+            try {
+                // Find this form's index among all .container logs (1-based)
+                const all = Array.from(document.querySelectorAll('.container'));
+                const idx = all.indexOf(formContainer) + 1;
+                const logKey = `log${idx}`;
+
+                // Reference to the shippingLogs document
+                const shippingLogRef = doc(db, "shippingLogs", "fixedDocumentID");
+
+                // Save under shippingLogs/fixedDocumentID → logN.trailers.trailerNumber
+                await updateDoc(shippingLogRef, {
+                    [`${logKey}.trailers.${trailerData.trailerNumber}`]: trailerData
+                });
+
+                console.log(`✅ Saved trailer ${trailerData.trailerNumber} to ${logKey}`);
+
+                // Also update the totals in the density table
+                calculateTotals(formContainer);
+            } catch (error) {
+                console.error("❌ Error saving trailer data:", error);
+                alert("Error saving trailer data: " + error.message);
+            }
+        }
+
+
+
+
+        function appendDensityRow(trailerData) {
+            const densityTable = document.getElementById("density-table");
+            const totalRow = document.getElementById("total-row");
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = `
+    <td><input type="text" value="${trailerData.trailerNumber}" readonly style="pointer-events: none;"></td>
+    <td><input type="text" value="${trailerData.birdCount}" readonly style="pointer-events: none;"></td>
+    <td><input type="text" value="${trailerData.netKG}" readonly style="pointer-events: none;"></td>
+    <td><input type="text" value="${trailerData.avgWeight}" readonly style="pointer-events: none;"></td>
+    <!-- Add this cell for your "X" button -->
+    <td><button type="button" class="remove-row-btn">X</button></td>
+  `;
+
+            densityTable.appendChild(newRow);
+            densityTable.appendChild(totalRow);
+        }
+
+        // 2. Improve the populateDensityTableFromFirestore function to populate each form's density table correctly
+        async function populateDensityTableFromFirestore() {
+            const shippingLogRef = doc(db, "shippingLogs", "fixedDocumentID");
+            try {
+                const docSnap = await getDoc(shippingLogRef);
+                if (!docSnap.exists()) return;
+
+                const data = docSnap.data();
+
+                // Clear out all density tables first
+                document.querySelectorAll(".container").forEach((container, index) => {
+                    const densityTable = container.querySelector("#density-table tbody");
+                    if (densityTable) {
+                        // Remove all rows except total row
+                        const totalRow = densityTable.querySelector("#total-row");
+                        Array.from(densityTable.children).forEach(row => {
+                            if (row.id !== "total-row") row.remove();
+                        });
+
+                        // Re-append total row to ensure it's at the bottom
+                        if (totalRow) {
+                            densityTable.appendChild(totalRow);
+                        }
+                    }
+                });
+
+                // Now populate each form with its own trailers
+                document.querySelectorAll(".container").forEach((container, index) => {
+                    const logKey = `log${index + 1}`;
+                    const logData = data[logKey];
+
+                    if (logData && logData.trailers) {
+                        const densityTable = container.querySelector("#density-table tbody");
+                        const totalRow = densityTable?.querySelector("#total-row");
+
+                        Object.values(logData.trailers).forEach(trailer => {
+                            if (densityTable && totalRow) {
+                                const newRow = document.createElement("tr");
+                                newRow.innerHTML = `
+              <td><input type="text" value="${trailer.trailerNumber || ''}" readonly style="pointer-events: none;"></td>
+              <td><input type="text" value="${trailer.birdCount || ''}" readonly style="pointer-events: none;"></td>
+              <td><input type="text" value="${trailer.netKG || ''}" readonly style="pointer-events: none;"></td>
+              <td><input type="text" value="${trailer.avgWeight || ''}" readonly style="pointer-events: none;"></td>
+              <td><button type="button" class="remove-row-btn">X</button></td>
+            `;
+
+                                densityTable.insertBefore(newRow, totalRow);
+                            }
+                        });
+
+                        // Recalculate totals for this form
+                        calculateTotals(container);
+                    }
+                });
+
+                console.log("✅ Density tables populated from Firestore");
+            } catch (error) {
+                console.error("❌ Error populating density tables:", error);
+            }
+        }
+
+
+        async function updateTotalBirdCountFromFirestore() {
+            const shippingLogRef = doc(db, "shippingLogs", "fixedDocumentID");
+            try {
+                const docSnap = await getDoc(shippingLogRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const trailers = data.trailers || {};
+                    let total = 0;
+                    for (const key in trailers) {
+                        const trailer = trailers[key];
+                        total += parseInt(trailer.birdCount) || 0;
+                    }
+                    const totalBirdInput = document.querySelector(".totalBirds");
+                    if (totalBirdInput) totalBirdInput.value = total;
+                }
+            } catch (error) {
+                console.error("Error fetching total bird count:", error);
+            }
+        }
+
+        async function updateTotalNetKgFromFirestore() {
+            const shippingLogRef = doc(db, "shippingLogs", "fixedDocumentID");
+            try {
+                const docSnap = await getDoc(shippingLogRef);
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const trailers = data.trailers || {};
+                    let totalNetKg = 0;
+                    for (const key in trailers) {
+                        const trailer = trailers[key];
+                        totalNetKg += parseFloat(trailer.netKG) || 0;
+                    }
+                    const netKgInput = document.querySelector(".totalNetKg");
+                    if (netKgInput) netKgInput.value = totalNetKg;
+                }
+            } catch (error) {
+                console.error("Error fetching total net KG:", error);
+            }
+        }
+
+        await updateTotalBirdCountFromFirestore();
+        await updateTotalNetKgFromFirestore();
+
+
+
+        const shippingLogRef = doc(db, "shippingLogs", "fixedDocumentID");
+
+        onSnapshot(shippingLogRef, (docSnap) => {
+            if (!docSnap.exists()) return;
+
+            const data = docSnap.data();
+            const trailers = data.trailers || {};
+
+            // Total Bird Count
+            let totalBirds = 0;
+            for (const key in trailers) {
+                totalBirds += parseInt(trailers[key].birdCount) || 0;
+            }
+            const totalBirdInput = document.querySelector(".totalBirds");
+            if (totalBirdInput) totalBirdInput.value = totalBirds;
+
+            // Total Net KG
+            let totalNetKg = 0;
+            for (const key in trailers) {
+                totalNetKg += parseFloat(trailers[key].netKG) || 0;
+            }
+            const netKgInput = document.querySelector(".totalNetKg");
+            if (netKgInput) netKgInput.value = totalNetKg;
+
+            // Average Weight = Net KG / Bird Count
+            const avgWeightInput = document.querySelector(".avgWeight");
+            const avgWeightBottom = document.querySelector(".avgWeightBottom");
+            const avgWeightTop = document.querySelector(".avgWeightTop");
+
+            let avg = totalBirds > 0 ? (totalNetKg / totalBirds).toFixed(2) : "0";
+
+            // Update Flock Density total avg
+            if (avgWeightInput) avgWeightInput.value = avg;
+
+            // Push same value to Balance & Density section
+            if (avgWeightBottom) avgWeightBottom.value = avg;
+            if (avgWeightTop) avgWeightTop.value = avg;
+
+        });
+
+
+
+        // Function to set up event listeners for the Save to Firestore button
+        function setupSaveToFirestoreButton() {
+            document.getElementById("save-to-firestore").addEventListener("click", async function () {
+                try {
+                    let allLogs = document.querySelectorAll(".container");
+                    let allData = {};
+
+                    // Collect data from all logs
+                    allLogs.forEach((log, index) => {
+                        const logKey = `log${index + 1}`;
+
+                        // Get thin out values
+                        const bottomTO = log.querySelector("#bottom-thin-out")?.value || "";
+                        const topTO = log.querySelector("#top-thin-out")?.value || "";
+
+                        // Collect all shipping info rows
+                        const shippingInfo = {};
+                        const shippingRows = log.querySelectorAll(".shipping-row");
+                        shippingRows.forEach((row, shipIndex) => {
+                            const shippingKey = `shipping${shipIndex + 1}`;
+                            shippingInfo[shippingKey] = {
+                                trailersLoaded: row.querySelector("input[name='trailers_loaded']")?.value || "",
+                                birdCount: Number(row.querySelector(".bird-count")?.value) || 0,
+                                netKG: Number(row.querySelector(".net-kg")?.value) || 0
+                            };
+                        });
+
+                        // Collect trailers from the density table
+                        const trailers = {};
+                        const trailerRows = log.querySelectorAll("#density-table tbody tr:not(#total-row)");
+                        trailerRows.forEach(row => {
+                            const inputs = row.querySelectorAll("input");
+                            if (inputs.length >= 4) {
+                                const trailerNum = inputs[0].value;
+                                if (trailerNum) {
+                                    trailers[trailerNum] = {
+                                        trailerNumber: trailerNum,
+                                        birdCount: Number(inputs[1].value) || 0,
+                                        netKG: Number(inputs[2].value) || 0,
+                                        avgWeight: inputs[3].value || "0"
+                                    };
+                                }
+                            }
+                        });
+
+                        // Build log data object
+                        allData[logKey] = {
+                            dateTimeOfCatch: log.querySelector("input[name='catch_datetime']")?.value || "",
+                            farmRepOnDuty: log.querySelector("input[name='farm_rep']")?.value || "",
+                            feedersAndWatersRaised: log.querySelector("input[name='feeders_waters']")?.value || "",
+                            lightIntensityReduced: log.querySelector("input[name='light_intensity']")?.value || "",
+                            flockEvaluated: log.querySelector("input[name='flock_fitness']")?.value || "",
+                            insideBarnTemp: log.querySelector("input[name='inside_barn_temp']")?.value || "",
+                            outsideBarnTemp: log.querySelector("input[name='outside_barn_temp']")?.value || "",
+                            catchingAndLoadingComments: log.querySelector("textarea[name='additional_comments']")?.value || "",
+                            cullsLeftOver: Number(log.querySelector("input[name='culls_left']")?.value) || 0,
+                            euthanasiaDateTime: log.querySelector("input[name='euthanasia_datetime']")?.value || "",
+                            barnTempReducedBeforeLoading: log.querySelector("input[name='barn_temp_reduction']")?.value || "",
+                            additionalComments: log.querySelector("textarea[name='additional_comments']")?.value || "",
+                            shippingInfo,
+                            trailers,
+                            bottomTO,
+                            topTO
+                        };
+                    });
+
+                    // Also save top-level values
+                    allData["bottom-TO"] = allLogs[0]?.querySelector("#bottom-thin-out")?.value || "";
+                    allData["top-TO"] = allLogs[0]?.querySelector("#top-thin-out")?.value || "";
+
+                    // Save all data to Firestore
+                    const shippingLogRef = doc(db, "shippingLogs", "fixedDocumentID");
+                    await setDoc(shippingLogRef, allData, { merge: true });
+
+                    // Update the startnewcrop document
+                    const cropDocRef = doc(db, "startnewcrop", "vas-b1-snc");
+                    await setDoc(cropDocRef, {
+                        "f1-thin-out": allData["bottom-TO"],
+                        "f2-thin-out": allData["top-TO"]
+                    }, { merge: true });
+
+                    console.log("✅ All data saved to Firestore successfully!");
+                    alert("All forms, shipping data, and thin out values saved to Firestore successfully!");
+                } catch (error) {
+                    console.error("❌ Error saving data:", error);
+                    alert("Error saving data: " + error.message);
+                }
+            });
+        }
+
+        // Make sure you initialize event listeners for the original form as well
+        function initializeShippingLog() {
+            // Set up event listeners for the Save to Firestore button
+            if (document.getElementById("save-to-firestore")) {
+                document.getElementById("save-to-firestore").addEventListener("click", async function () {
+                    // Your save to Firestore code here
+                    // ...
+                });
+            }
+
+            // IMPORTANT: Set up event listeners for the first/original form
+            const originalForm = document.querySelector(".container");
+            if (originalForm) {
+                setupFormEventListeners(originalForm);
+            }
+
+            // Load data from Firestore
+            populateLogsFromFirestore();
+
+            console.log("✅ Shipping log initialized");
+        }
+        // Call the init function when the DOM is loaded
+        document.addEventListener("DOMContentLoaded", initializeShippingLog);
+
+
+        function setupFormEventListeners(formElement) {
+            // Get references to all buttons inside this specific form
+            const addShippingInfoBtn = formElement.querySelector("#add-shipping-info");
+            const savePdfBtn = formElement.querySelector("#save-pdf");
+            const saveToFirestoreBtn = formElement.querySelector("#save-to-firestore");
+            const duplicateLogBtn = formElement.querySelector("#duplicate-log");
+
+            // RENAME: Change "Save as PDF" to "Print as PDF"
+            if (savePdfBtn) {
+                savePdfBtn.textContent = "Print as PDF";
+            }
+
+            // Add shipping info row button
+            const shipTbl = formElement.querySelector("#shipping-info");
+            if (addShippingInfoBtn) {
+                // Remove any existing listeners
+                addShippingInfoBtn.replaceWith(addShippingInfoBtn.cloneNode(true));
+                // Add new listener
+                formElement.querySelector("#add-shipping-info").addEventListener("click", () => addShippingRow(shipTbl));
+            }
+
+            // Print as PDF button - generate PDF for this specific form only
+            if (savePdfBtn) {
+                savePdfBtn.replaceWith(savePdfBtn.cloneNode(true));
+                formElement.querySelector("#save-pdf").addEventListener("click", function () {
+                    generateSingleFormPDF(formElement);
+                });
+            }
+
+            // Save to Firestore button
+            if (saveToFirestoreBtn) {
+                saveToFirestoreBtn.replaceWith(saveToFirestoreBtn.cloneNode(true));
+                formElement.querySelector("#save-to-firestore").addEventListener("click", async function () {
+                    // Get all logs and save them
+                    let allLogs = document.querySelectorAll(".container");
+                    let allData = {};
+
+                    allLogs.forEach((log, index) => {
+                        let logKey = `log${index + 1}`;
+                        const { bottomTO, topTO } = getThinOutValues(log);
+                        let logData = {
+                            dateTimeOfCatch: log.querySelector("input[name='catch_datetime']")?.value || "",
+                            farmRepOnDuty: log.querySelector("input[name='farm_rep']")?.value || "",
+                            feedersAndWatersRaised: log.querySelector("input[name='feeders_waters']")?.value || "",
+                            lightIntensityReduced: log.querySelector("input[name='light_intensity']")?.value || "",
+                            flockEvaluated: log.querySelector("input[name='flock_fitness']")?.value || "",
+                            insideBarnTemp: log.querySelector("input[name='inside_barn_temp']")?.value || "",
+                            outsideBarnTemp: log.querySelector("input[name='outside_barn_temp']")?.value || "",
+                            catchingAndLoadingComments: log.querySelector("textarea[name='additional_comments']")?.value || "",
+                            cullsLeftOver: Number(log.querySelector("input[name='culls_left']")?.value) || 0,
+                            euthanasiaDateTime: log.querySelector("input[name='euthanasia_datetime']")?.value || "",
+                            barnTempReducedBeforeLoading: log.querySelector("input[name='barn_temp_reduction']")?.value || "",
+                            additionalComments: log.querySelector("textarea[name='additional_comments']")?.value || "",
+                            shippingInfo: {},
+                            bottomTO,
+                            topTO
+                        };
+
+                        // Add shipping info
+                        let shippingRows = log.querySelectorAll(".shipping-row");
+                        shippingRows.forEach((row, shipIndex) => {
+                            let shippingKey = `shipping${shipIndex + 1}`;
+                            let inputs = row.querySelectorAll("input");
+                            logData.shippingInfo[shippingKey] = {
+                                trailersLoaded: inputs[0].value,
+                                birdCount: Number(inputs[1].value),
+                                netKG: Number(inputs[2].value)
+                            };
+                        });
+
+                        // Add trailer data
+                        logData.trailers = {};
+                        const trailerRows = log.querySelectorAll("#density-table tbody tr:not(#total-row)");
+                        trailerRows.forEach(row => {
+                            const inputs = row.querySelectorAll("input");
+                            if (inputs.length >= 4) {
+                                const trailerNum = inputs[0].value;
+                                if (trailerNum) {
+                                    logData.trailers[trailerNum] = {
+                                        trailerNumber: trailerNum,
+                                        birdCount: Number(inputs[1].value) || 0,
+                                        netKG: Number(inputs[2].value) || 0,
+                                        avgWeight: inputs[3].value || "0"
+                                    };
+                                }
+                            }
+                        });
+
+                        allData[logKey] = logData;
+                    });
+
+                    const { bottomTO, topTO } = getThinOutValues(document);
+                    allData["bottom-TO"] = bottomTO;
+                    allData["top-TO"] = topTO;
+
+                    // Save data to Firestore
+                    await setDoc(shippingLogRef, allData, { merge: true });
+
+                    // Update the "startnewcrop" document with the new thin out fields
+                    const cropDocRef = doc(db, "startnewcrop", "vas-b1-snc");
+                    await setDoc(cropDocRef, {
+                        "f1-thin-out": bottomTO,
+                        "f2-thin-out": topTO
+                    }, { merge: true });
+
+                    alert("All forms, shipping data, and thin out values saved to Firestore successfully!");
+                });
+            }
+
+            // Duplicate log button
+            if (duplicateLogBtn) {
+                duplicateLogBtn.replaceWith(duplicateLogBtn.cloneNode(true));
+                formElement.querySelector("#duplicate-log").addEventListener("click", async () => {
+                    // Get the form container this button belongs to
+                    const originalLog = formElement;
+                    const newLog = originalLog.cloneNode(true);
+
+                    // Assign a unique log number
+                    logCounter++;
+                    newLog.querySelector("#log-title").textContent = `Flock Log - Shipping Info ${logCounter}`;
+
+                    // Clear input values in the new form
+                    newLog.querySelectorAll("input[type='text'], input[type='number'], textarea").forEach(input => {
+                        // Preserve only default values that should be retained
+                        const keepValue = ['farm_rep', 'feeders_waters', 'light_intensity', 'flock_fitness', 'barn_temp_reduction'].includes(input.name);
+
+                        if (!keepValue) {
+                            input.value = "";
+                        }
+                    });
+
+                    // Reset date/time fields to current time
+                    newLog.querySelectorAll("input[type='datetime-local']").forEach(input => {
+                        input.value = getCurrentDateTime();
+                    });
+
+                    // Clear all trailer rows in the shipping info table
+                    const shippingTable = newLog.querySelector("#shipping-info");
+                    const firstRow = shippingTable.querySelector(".shipping-row");
+                    if (firstRow) {
+                        // Keep only the first row but clear its values
+                        firstRow.querySelectorAll("input").forEach(input => {
+                            input.value = "";
+                        });
+
+                        // Remove any additional shipping rows
+                        const additionalRows = shippingTable.querySelectorAll(".shipping-row:not(:first-child)");
+                        additionalRows.forEach(row => row.remove());
+                    }
+
+                    // Clear the density table, keeping only the total row
+                    const densityTable = newLog.querySelector("#density-table tbody");
+                    const totalRow = densityTable.querySelector("#total-row");
+                    if (totalRow) {
+                        // Clear all rows except total row
+                        Array.from(densityTable.children).forEach(row => {
+                            if (row.id !== "total-row") {
+                                row.remove();
+                            }
+                        });
+
+                        // Reset total values
+                        totalRow.querySelectorAll("input").forEach(input => {
+                            input.value = "0";
+                        });
+                    }
+
+                    // Add remove button
+                    addRemoveButton(newLog);
+
+                    // Setup event listeners for the new form
+                    setupFormEventListeners(newLog);
+
+                    // Add the new form to the document
+                    document.body.appendChild(newLog);
+                    updateLogNumbers();
+
+                    // Create a new empty log data object
+                    const newLogData = {
+                        dateTimeOfCatch: getCurrentDateTime(),
+                        farmRepOnDuty: newLog.querySelector("input[name='farm_rep']")?.value || "",
+                        feedersAndWatersRaised: newLog.querySelector("input[name='feeders_waters']")?.value || "",
+                        lightIntensityReduced: newLog.querySelector("input[name='light_intensity']")?.value || "",
+                        flockEvaluated: newLog.querySelector("input[name='flock_fitness']")?.value || "",
+                        insideBarnTemp: "",
+                        outsideBarnTemp: "",
+                        catchingAndLoadingComments: "",
+                        cullsLeftOver: 0,
+                        euthanasiaDateTime: getCurrentDateTime(),
+                        barnTempReducedBeforeLoading: newLog.querySelector("input[name='barn_temp_reduction']")?.value || "",
+                        additionalComments: "",
+                        shippingInfo: {},
+                        trailers: {},
+                        bottomTO: newLog.querySelector("#bottom-thin-out")?.value || "",
+                        topTO: newLog.querySelector("#top-thin-out")?.value || ""
+                    };
+
+                    // Save to Firestore under the appropriate log key
+                    await updateDoc(shippingLogRef, {
+                        [`log${logCounter}`]: newLogData
+                    });
+
+                    // Initialize the totals for this new form
+                    calculateTotals(newLog);
+                });
+            }
+
+            // Move to density buttons for this specific form
+            shipTbl.addEventListener("click", (e) => {
+                if (e.target && e.target.classList.contains("move-to-density")) {
+                    moveTrailerData(e.target);
+                }
+            });
+
+            // Set up thin-out event listeners
+            const bottomThinOut = formElement.querySelector("#bottom-thin-out");
+            const topThinOut = formElement.querySelector("#top-thin-out");
+
+            if (bottomThinOut) {
+                bottomThinOut.addEventListener("input", () => calculateDensity(formElement));
+            }
+
+            if (topThinOut) {
+                topThinOut.addEventListener("input", () => calculateDensity(formElement));
+            }
+
+            // Set up density table remove buttons for this specific form
+            const densityTable = formElement.querySelector("#density-table");
+            if (densityTable) {
+                densityTable.addEventListener("click", async (e) => {
+                    if (!e.target.classList.contains("remove-row-btn")) return;
+
+                    // Get form index (1-based)
+                    const all = Array.from(document.querySelectorAll('.container'));
+                    const idx = all.indexOf(formElement) + 1;
+                    const logKey = `log${idx}`;
+
+                    // Get trailer number
+                    const row = e.target.closest("tr");
+                    const trailerNum = row.querySelector("input").value;
+
+                    // Remove from DOM
+                    row.remove();
+
+                    // Remove from Firestore for this specific log
+                    const shippingLogRef = doc(db, "shippingLogs", "fixedDocumentID");
+                    await updateDoc(shippingLogRef, {
+                        [`${logKey}.trailers.${trailerNum}`]: deleteField()
+                    });
+
+                    console.log(`✅ Removed trailer ${trailerNum} from ${logKey}`);
+
+                    // Recalculate totals for this form
+                    calculateTotals(formElement);
+                });
+            }
+        }
+
+        // 3. Run this code when the page loads to rename existing buttons
+        document.addEventListener("DOMContentLoaded", function () {
+            // Rename all existing "Save as PDF" buttons to "Print as PDF"
+            document.querySelectorAll("#save-pdf").forEach(button => {
+                button.textContent = "Print as PDF";
+            });
+        });
+        async function moveTrailerData(button) {
+            // Get the form container and shipping row
+            const row = button.closest("tr");
+            const formContainer = button.closest('.container');
+
+            // Extract values
+            const trailerNum = row.querySelector("input[name='trailers_loaded']").value;
+            const birdCountStr = row.querySelector("input[name='bird_count']").value;
+            const netKgStr = row.querySelector("input[name='net_kg']").value;
+
+            // Validate inputs
+            if (!trailerNum) {
+                alert("Please enter a trailer number");
+                return;
+            }
+
+            if (!birdCountStr || !netKgStr) {
+                alert("Please enter both bird count and net KG values");
+                return;
+            }
+
+            // Convert to numbers
+            const birdCount = parseFloat(birdCountStr) || 0;
+            const netKg = parseFloat(netKgStr) || 0;
+
+            // Calculate average weight for this individual trailer (Net KG / Bird Count)
+            const avgWeight = birdCount > 0 ? (netKg / birdCount).toFixed(2) : "0";
+
+            // Create trailer data object
+            const trailerData = {
+                trailerNumber: trailerNum,
+                birdCount: birdCount,
+                netKG: netKg,
+                avgWeight: avgWeight
+            };
+
+            // Get the form's index in the document (1-based)
+            const all = Array.from(document.querySelectorAll('.container'));
+            const idx = all.indexOf(formContainer) + 1;
+            const logKey = `log${idx}`;
+
+            // Add to this specific form's density table
+            const densityTable = formContainer.querySelector("#density-table tbody");
+            const totalRow = densityTable.querySelector("#total-row");
+
+            // Create new row
+            const newRow = document.createElement("tr");
+            newRow.innerHTML = `
+    <td><input type="text" value="${trailerNum}" readonly style="pointer-events: none;"></td>
+    <td><input type="text" value="${birdCount}" readonly style="pointer-events: none;"></td>
+    <td><input type="text" value="${netKg}" readonly style="pointer-events: none;"></td>
+    <td><input type="text" value="${avgWeight}" readonly style="pointer-events: none;"></td>
+    <td><button type="button" class="remove-row-btn">X</button></td>
+  `;
+
+            // Insert the new row before the total row
+            if (totalRow) {
+                densityTable.insertBefore(newRow, totalRow);
+            } else {
+                densityTable.appendChild(newRow);
+            }
+
+            // Save to Firestore under the specific log key
+            const shippingLogRef = doc(db, "shippingLogs", "fixedDocumentID");
+            await updateDoc(shippingLogRef, {
+                [`${logKey}.trailers.${trailerNum}`]: trailerData
+            });
+
+            console.log(`✅ Added trailer ${trailerNum} to ${logKey}`);
+
+            // Clear the inputs
+            row.querySelector("input[name='trailers_loaded']").value = "";
+            row.querySelector("input[name='bird_count']").value = "";
+            row.querySelector("input[name='net_kg']").value = "";
+
+            // Calculate totals for the density table
+            // Get all trailer rows from this form's density table
+            const trailerRows = formContainer.querySelectorAll("#density-table tbody tr:not(#total-row)");
+            let totalBirds = 0, totalNetKg = 0;
+
+            trailerRows.forEach(row => {
+                const inputs = row.querySelectorAll("input");
+                if (inputs.length >= 3) {
+                    totalBirds += Number(inputs[1].value) || 0;
+                    totalNetKg += Number(inputs[2].value) || 0;
+                }
+            });
+
+            // Update the total values in this form's density table
+            const totalBirdInput = formContainer.querySelector(".totalBirds");
+            const totalNetInput = formContainer.querySelector(".totalNetKg");
+            const avgWeightInput = formContainer.querySelector(".avgWeight");
+
+            if (totalBirdInput) totalBirdInput.value = totalBirds;
+            if (totalNetInput) totalNetInput.value = totalNetKg;
+
+            // Calculate the TOTAL average weight based on total birds and total net KG
+            if (avgWeightInput) {
+                // Formula: Total Net KG ÷ Total Bird Count
+                avgWeightInput.value = totalBirds > 0 ? (totalNetKg / totalBirds).toFixed(2) : "0";
+            }
+
+            // Update the average weight values in Balance & Density section using the same value
+            const avgWeightBottom = formContainer.querySelector(".avgWeightBottom");
+            const avgWeightTop = formContainer.querySelector(".avgWeightTop");
+
+            // Use the same average weight calculation for Balance & Density
+            let avg = totalBirds > 0 ? (totalNetKg / totalBirds).toFixed(2) : "0";
+
+            if (avgWeightBottom) avgWeightBottom.value = avg;
+            if (avgWeightTop) avgWeightTop.value = avg;
+
+            // Calculate density for this form
+            calculateDensity(formContainer);
+        }
+        window.moveTrailerData = moveTrailerData;
+
+        // Attach the calculateRowWeight function to the global window object so inline calls work.
+        window.calculateRowWeight = calculateRowWeight;
+    </script>
+
+
+
+</body>
+
+</html>

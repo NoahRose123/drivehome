@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <head>
+        <link rel="icon" type="image/png" href="/icon.png?v=2">
+        <link rel="apple-touch-icon" href="/icon.png?v=2">
+        <link rel="icon" type="image/png" sizes="192x192" href="/iconcropped.png">
+        <link rel="icon" type="image/png" sizes="512x512" href="/iconcropped.png">
+        <link rel="manifest" href="/manifest.json">
+        <meta name="theme-color" content="#1a365d">
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Farm Management Hub</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>VAS Barn 1 - Visitor Log</title>
+
+        <!-- Barn Software Styles -->
+        <link rel="stylesheet" href="../barnsoftwares-css/barn-software-styles.css">
+        <link rel="stylesheet" href="../barnsoftwares-css/vistorlog.css">
+        <script src="../barnsoftwares-css/barn-header.js"></script>
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+            import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, query, where, onSnapshot }
+                from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+            // ✅ Initialize Firebase
+            const firebaseConfig = {
+                apiKey: "AIzaSyB20OmcQemfIXm4712im9mqiBnpeVt8sJQ",
+                authDomain: "chicken-project-2.firebaseapp.com",
+                projectId: "chicken-project-2",
+                storageBucket: "chicken-project-2.firebasestorage.app",
+                messagingSenderId: "596273529964",
+                appId: "1:596273529964:web:bd51e2646d5ed48afa4449",
+                measurementId: "G-9YLPHR08DB"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+
+            // ✅ Attach Firebase functions to window for non-module scripts
+            window.db = db;
+            window.collection = collection;
+            window.addDoc = addDoc;
+            window.getDocs = getDocs;
+            window.deleteDoc = deleteDoc;
+            window.doc = doc;
+            window.getDoc = getDoc;
+            window.query = query;
+            window.where = where;
+            window.onSnapshot = onSnapshot;
+
+            // ✅ Fetch Farm Info
+            async function fetchFarmInfo() {
+                console.log("📥 Fetching Farm Info...");
+                const docRef = doc(db, "startnewcrop", "vas-b1-snc");
+
+                onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        document.getElementById("farmName").innerText = data.farm_name || "Unknown";
+                        document.getElementById("barnNumber").innerText = data.barn_number || "Unknown";
+                        document.getElementById("farmNumber").innerText = data.farm_number || "Unknown";
+                        document.getElementById("quotaPeriod").innerText = data.quota_period || "No Data";
+                    } else {
+                        console.error("❌ Document does not exist in `startnewcrop`!");
+                    }
+                });
+            }
+
+            window.fetchFarmInfo = fetchFarmInfo;
+        </script>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+        <script>
+            window.loadVisitors = async function () {
+                console.log("📥 Loading Visitor Logs...");
+                const visitorLogs = document.getElementById("visitorLogs");
+                visitorLogs.innerHTML = "";
+
+                try {
+                    const q = collection(db, "visitor_logs");
+                    const querySnapshot = await getDocs(q);
+
+                    if (querySnapshot.empty) {
+                        visitorLogs.innerHTML = `<tr><td colspan='5'>No visitors found.</td></tr>`;
+                        return;
+                    }
+
+                    // ✅ Convert documents to an array and sort by date (newest first)
+                    const visitors = querySnapshot.docs
+                        .map(docSnap => ({
+                            id: docSnap.id,
+                            ...docSnap.data(),
+                            date: docSnap.data().date ? new Date(docSnap.data().date) : null
+                        }))
+                        .sort((a, b) => (a.date - b.date)); // 🔥 Sorting ascending (oldest first)
+
+                    visitors.forEach((visitor) => {
+                        const visitorDate = visitor.date ? visitor.date.toLocaleDateString() : "N/A";
+                        const visitorName = visitor.name || "Unknown";
+                        const visitorReason = visitor.reason || "No reason provided";
+                        const visitorContact = visitor.contact_with_poultry || "N/A";
+
+                        const row = document.createElement("tr");
+                        row.setAttribute("data-id", visitor.id);
+                        row.innerHTML = `
+    <td>${visitorDate}</td>
+    <td>${visitorName}</td>
+    <td>${visitorContact}</td>
+    <td>${visitorReason}</td>
+    <td class="delete-hover">❌</td>
+`;
+
+                        row.lastElementChild.addEventListener("click", async () => {
+                            if (confirm(`Are you sure you want to delete ${visitorName}?`)) {
+                                await deleteDoc(doc(db, "visitor_logs", visitor.id));
+                                alert(`✅ ${visitorName} has been deleted.`);
+                                loadVisitors();
+                            }
+                        });
+
+                        visitorLogs.appendChild(row);
+                    });
+
+                    console.log("✅ Visitors successfully loaded and sorted!");
+                } catch (error) {
+                    console.error("🔥 Error Fetching Visitors", error);
+                    visitorLogs.innerHTML = `<tr><td colspan='5'>Error Fetching Visitors</td></tr>`;
+                }
+            };
+
+            window.downloadLogs = async function () {
+                console.log("📥 Downloading Logs as PDF...");
+
+                try {
+                    const { jsPDF } = window.jspdf;
+                    if (!jsPDF) {
+                        console.error("❌ jsPDF is not loaded correctly.");
+                        alert("❌ Error downloading logs. Please try again.");
+                        return;
+                    }
+
+                    // ✅ Create landscape PDF
+                    const pdfDoc = new jsPDF('landscape');
+
+                    // ✅ Colors and styling
+                    const primaryColor = [41, 128, 185]; // Professional blue
+                    const lightGray = [248, 249, 250];
+                    const darkGray = [52, 58, 64];
+                    const borderColor = [206, 212, 218];
+
+                    // ✅ Header Section with background
+                    pdfDoc.setFillColor(...lightGray);
+                    pdfDoc.rect(0, 0, 297, 55, 'F');
+
+                    // ✅ Main Title
+                    pdfDoc.setTextColor(...primaryColor);
+                    pdfDoc.setFontSize(24);
+                    pdfDoc.setFont(undefined, 'bold');
+                    pdfDoc.text("VISITOR LOG", 15, 20);
+
+                    // ✅ Decorative line under title
+                    pdfDoc.setDrawColor(...primaryColor);
+                    pdfDoc.setLineWidth(2);
+                    pdfDoc.line(15, 25, 100, 25);
+
+                    // ✅ Farm Information Section
+                    pdfDoc.setTextColor(...darkGray);
+                    pdfDoc.setFontSize(12);
+                    pdfDoc.setFont(undefined, 'bold');
+                    pdfDoc.text("FARM INFORMATION", 15, 35);
+
+                    pdfDoc.setFont(undefined, 'normal');
+                    pdfDoc.setFontSize(10);
+                    const farmName = document.getElementById("farmName").innerText;
+                    const barnNumber = document.getElementById("barnNumber").innerText;
+                    const farmNumber = document.getElementById("farmNumber").innerText;
+                    const quotaPeriod = document.getElementById("quotaPeriod").innerText;
+
+                    pdfDoc.text(`Farm: ${farmName}`, 15, 42);
+                    pdfDoc.text(`Manager: Chris Rose # 905-741-1544`, 15, 47);
+                    pdfDoc.text(`Barn: ${barnNumber}`, 150, 42);
+                    pdfDoc.text(`Farm Number: ${farmNumber}`, 150, 47);
+                    pdfDoc.text(`Quota Period: ${quotaPeriod}`, 230, 42);
+
+                    // ✅ Table Header Background
+                    let y = 70;
+                    pdfDoc.setFillColor(...primaryColor);
+                    pdfDoc.rect(10, y - 8, 275, 12, 'F');
+
+                    // ✅ Table Headers
+                    pdfDoc.setTextColor(255, 255, 255);
+                    pdfDoc.setFontSize(11);
+                    pdfDoc.setFont(undefined, 'bold');
+                    pdfDoc.text("DATE", 15, y);
+                    pdfDoc.text("VISITOR NAME", 45, y);
+                    pdfDoc.text("POULTRY CONTACT (24H)", 85, y);
+                    pdfDoc.text("REASON FOR VISIT", 140, y);
+
+                    y += 15;
+
+                    // ✅ Load Visitor Data
+                    const q = collection(db, "visitor_logs");
+                    const querySnapshot = await getDocs(q);
+
+                    if (querySnapshot.empty) {
+                        pdfDoc.setTextColor(...darkGray);
+                        pdfDoc.setFont(undefined, 'italic');
+                        pdfDoc.setFontSize(12);
+                        pdfDoc.text("No visitor logs found.", 15, y + 20);
+                    } else {
+                        // ✅ Sort by date (newest first)
+                        const visitors = querySnapshot.docs
+                            .map(docSnap => ({
+                                ...docSnap.data(),
+                                date: docSnap.data().date ? new Date(docSnap.data().date) : null
+                            }))
+                            .sort((a, b) => (a.date - b.date));
+                        let rowIndex = 0;
+                        // Replace the visitor row rendering section in your downloadLogs function
+                        // Find this part and replace it:
+
+                        visitors.forEach((visitor) => {
+                            const date = visitor.date ? visitor.date.toLocaleDateString() : "N/A";
+                            const name = visitor.name || "Unknown";
+                            const contact = visitor.contact_with_poultry || "N/A";
+                            const reason = visitor.reason || "No reason provided";
+
+                            // ✅ Handle long reason text with line wrapping
+                            const maxReasonWidth = 180; // Full width for reason column
+                            const reasonLines = pdfDoc.splitTextToSize(reason, maxReasonWidth);
+                            const lineHeight = 5;
+                            const totalReasonHeight = reasonLines.length * lineHeight;
+                            const rowHeight = Math.max(12, totalReasonHeight + 4);
+
+                            // ✅ Alternating row background for better readability
+                            if (rowIndex % 2 === 0) {
+                                pdfDoc.setFillColor(248, 249, 250);
+                                pdfDoc.rect(10, y - 2, 275, rowHeight, 'F');
+                            }
+
+                            // ✅ Row content - ALL TEXT ALIGNED TO SAME BASELINE
+                            pdfDoc.setTextColor(...darkGray);
+                            pdfDoc.setFont(undefined, 'normal');
+                            pdfDoc.setFontSize(9);
+
+                            // ✅ All content starts at the same Y position (top of the row)
+                            const textStartY = y + 3;
+
+                            pdfDoc.text(date, 15, textStartY);
+                            pdfDoc.text(name, 45, textStartY);
+                            pdfDoc.text(contact, 85, textStartY);
+
+                            // ✅ Reason text starts at the same Y as other columns
+                            reasonLines.forEach((line, index) => {
+                                pdfDoc.text(line, 140, textStartY + (index * lineHeight));
+                            });
+
+                            // ✅ Subtle row border
+                            pdfDoc.setDrawColor(...borderColor);
+                            pdfDoc.setLineWidth(0.2);
+                            pdfDoc.line(10, y + rowHeight - 2, 285, y + rowHeight - 2);
+
+                            y += rowHeight;
+                            rowIndex++;
+
+                            // ✅ Page break if needed
+                            if (y > 180) {
+                                pdfDoc.addPage('landscape');
+                                y = 20;
+                                rowIndex = 0;
+                            }
+                        });
+                    }
+
+                    // ✅ Footer
+                    const pageCount = pdfDoc.internal.getNumberOfPages();
+                    for (let i = 1; i <= pageCount; i++) {
+                        pdfDoc.setPage(i);
+                        pdfDoc.setFontSize(8);
+                        pdfDoc.setTextColor(100, 100, 100);
+                    }
+
+                    // ✅ Save PDF
+                    pdfDoc.save(`Visitor_Log_${new Date().toISOString().split('T')[0]}.pdf`);
+                } catch (error) {
+                    console.error("❌ Error downloading logs:", error);
+                    alert("❌ Error downloading logs. Please try again.");
+                }
+            };
+
+            // ✅ Add Visitor (Fixed)
+            window.addVisitor = async function () {
+                console.log("➕ Adding Visitor...");
+
+                const visitorName = document.getElementById("visitorName").value.trim();
+                const visitorReason = document.getElementById("reason").value.trim();
+                const visitorContact = document.querySelector('input[name="contactPoultry"]:checked')?.value || "N/A";
+                const visitorDateInput = document.getElementById("visitorDate").value;
+
+                // Ensure a valid date is provided
+                const visitorDate = visitorDateInput ? new Date(visitorDateInput).toISOString() : new Date().toISOString();
+
+                if (!visitorName) {
+                    alert("⚠ Please enter a visitor name.");
+                    return;
+                }
+
+                try {
+                    // ✅ Add to Firestore
+                    await addDoc(collection(db, "visitor_logs"), {
+                        name: visitorName,
+                        reason: visitorReason || "No reason provided",
+                        contact_with_poultry: visitorContact,
+                        date: visitorDate
+                    });
+
+                    alert("✅ Visitor added successfully!");
+
+                    // ✅ Clear form after submission
+                    document.getElementById("visitorName").value = "";
+                    document.getElementById("reason").value = "";
+                    document.getElementById("visitorDate").value = "";
+                    document.querySelectorAll('input[name="contactPoultry"]').forEach(radio => radio.checked = false);
+
+                    // ✅ Refresh visitor list
+                    loadVisitors();
+                } catch (error) {
+                    console.error("❌ Error adding visitor:", error);
+                    alert("❌ Error adding visitor. Please try again.");
+                }
+            };
+
+
+            window.onload = function () {
+                fetchFarmInfo();
+                loadVisitors();
+            };
+        </script>
+    </head>
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>VAS Barn 1 - Visitor Log</title>
+
+    </head>
+
+<body>
+    <h1>VAS Barn 1 - Visitor Log</h1>
+
+    <!-- Farm Information Section -->
+    <div class="info-section">
+        <h2>Farm Name: <span id="farmName">Loading...</span></h2>
+        <h2>Barn: <span id="barnNumber">Loading...</span></h2>
+        <h2>Farm Number: <span id="farmNumber">Loading...</span></h2>
+        <h2>Quota Period: <span id="quotaPeriod">Loading...</span></h2>
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-section">
+        <input type="date" id="visitorDate">
+        <input type="text" id="visitorName" placeholder="Visitor Name">
+        <textarea id="reason" placeholder="Reason for Visit"></textarea>
+
+        <div class="radio-section">
+            <label>Contact with poultry in the last 24 hours?</label>
+            <div class="radio-group">
+                <div class="radio-option">
+                    <input type="radio" name="contactPoultry" value="Yes" id="contactYes">
+                    <label for="contactYes">Yes</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" name="contactPoultry" value="No" id="contactNo">
+                    <label for="contactNo">No</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button onclick="addVisitor()">Add Visitor</button>
+            <button onclick="downloadLogs()">Download Logs as PDF</button>
+            <button onclick="resetForm()">Reset Form</button>
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-container">
+        <table>
+            <!-- Replace the existing table header section with this: -->
+            <!-- Replace the table header section with this: -->
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Name</th>
+                    <th>Contact with Poultry in the Last 24 Hours</th>
+                    <th>Reason for Visit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody id="visitorLogs">
+                <!-- Visitor logs will be populated here -->
+            </tbody>
+        </table>
+    </div>
+    <script>
+        // Set today's date as default
+        document.getElementById('visitorDate').value = new Date().toISOString().split('T')[0];
+    </script>
+</body>
+
+</html>

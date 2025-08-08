@@ -1,0 +1,25 @@
+{
+  "name": "claude-code-api-demo",
+  "version": "1.0.0",
+  "description": "Demo project for using Claude Code API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "web": "node web-interface.js",
+    "claude": "node claude-dev.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.18.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
+  },
+  "keywords": [
+    "claude",
+    "api",
+    "code",
+    "ai"
+  ],
+  "author": "",
+  "license": "MIT"
+}

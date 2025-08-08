@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <head>
+        <link rel="icon" type="image/png" href="/icon.png?v=2">
+        <link rel="apple-touch-icon" href="/icon.png?v=2">
+        <link rel="icon" type="image/png" sizes="192x192" href="/iconcropped.png">
+        <link rel="icon" type="image/png" sizes="512x512" href="/iconcropped.png">
+        <link rel="manifest" href="/manifest.json">
+        <meta name="theme-color" content="#1a365d">
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Farm Management Hub</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Start New Crop</title>
+
+        <!-- Barn Software Styles -->
+        <link rel="stylesheet" href="../barnsoftwares-css/barn-software-styles.css">
+        <link rel="stylesheet" href="../barnsoftwares-css/startnewcrop.css">
+        <script src="../barnsoftwares-css/barn-header.js"></script>
+        <script type="module">
+            // Import Firebase modules
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+            import {
+                getFirestore, collection, doc, setDoc, getDoc, Timestamp, getDocs, deleteDoc
+            } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+            // ✅ Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyB20OmcQemfIXm4712im9mqiBnpeVt8sJQ",
+                authDomain: "chicken-project-2.firebaseapp.com",
+                projectId: "chicken-project-2",
+                storageBucket: "chicken-project-2.firebasestorage.app",
+                messagingSenderId: "596273529964",
+                appId: "1:596273529964:web:bd51e2646d5ed48afa4449",
+                measurementId: "G-9YLPHR08DB"
+            };
+
+            // ✅ Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+
+            // ✅ Function to Load Data from Firestore and Pre-fill Form
+            async function loadData() {
+                console.log("📥 Fetching data from Firestore...");
+
+                const docRef = doc(db, "startnewcrop", "vas-b1-snc");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    console.log("✅ Document Found! Data:", docSnap.data());
+                    const data = docSnap.data();
+
+                    // ✅ Pre-fill inputs with saved data
+                    document.getElementById("hatchery").value = data.Hatchery || "";
+                    document.getElementById("hatch_id").value = data["Hatch ID#"] || "";
+                    document.getElementById("farm_name").value = data.farm_name || "";
+                    document.getElementById("farm_number").value = data.farm_number || "";
+                    document.getElementById("barn_number").value = data.barn_number || "";
+                    document.getElementById("quota_period").value = data.quota_period || "";
+
+                    // ✅ Convert Firestore Timestamp to "yyyy-MM-dd" format
+                    if (data.date_started && data.date_started.seconds) {
+                        let storedDate = new Date(data.date_started.seconds * 1000);
+                        let localISODate = new Date(storedDate.getTime() - storedDate.getTimezoneOffset() * 60000) // Adjust for timezone shift
+                            .toISOString()
+                            .split('T')[0];
+
+                        document.getElementById("date_started").value = localISODate;
+
+                    } else {
+                        document.getElementById("date_started").value = "";
+                    }
+
+                    // ✅ Ensure bottom floor data exists before accessing it
+                    document.getElementById("bottom_floor_birds").value = data.bottom_floor?.birds_placed || "";
+                    document.getElementById("bottom_floor_sex").value = data.bottom_floor?.sex || "male";
+                    document.getElementById("bottom_floor_notes").value = data.bottom_floor?.notes || "";
+
+                    // ✅ Ensure top floor data exists before accessing it
+                    document.getElementById("top_floor_birds").value = data.top_floor?.birds_placed || "";
+                    document.getElementById("top_floor_sex").value = data.top_floor?.sex || "male";
+                    document.getElementById("top_floor_notes").value = data.top_floor?.notes || "";
+
+                } else {
+                    console.log("📭 No existing data found. (Check Firestore Console)");
+                }
+            }
+
+            // ✅ Function to Update Firestore with Form Data
+            async function updateData() {
+                console.log("🔵 Updating data in Firestore (startnewcrop database)...");
+
+                const docRef = doc(db, "startnewcrop", "vas-b1-snc");
+
+                // ✅ Convert date to Firestore Timestamp
+                let dateValue = document.getElementById("date_started").value;
+                let localDate = new Date(dateValue + "T00:00:00"); // Ensure time is midnight
+                let firestoreDate = Timestamp.fromDate(localDate);
+
+
+                await setDoc(docRef, {
+                    Hatchery: document.getElementById("hatchery").value,
+                    "Hatch ID#": document.getElementById("hatch_id").value,
+                    farm_name: document.getElementById("farm_name").value,
+                    farm_number: document.getElementById("farm_number").value,
+                    barn_number: document.getElementById("barn_number").value,
+                    quota_period: document.getElementById("quota_period").value,
+                    date_started: firestoreDate, // ✅ Ensure Firestore timestamp is correctly set
+
+                    bottom_floor: {
+                        birds_placed: document.getElementById("bottom_floor_birds").value || "",
+                        sex: document.getElementById("bottom_floor_sex").value || "male",
+                        notes: document.getElementById("bottom_floor_notes").value || ""
+                    },
+
+                    top_floor: {
+                        birds_placed: document.getElementById("top_floor_birds").value || "",
+                        sex: document.getElementById("top_floor_sex").value || "male",
+                        notes: document.getElementById("top_floor_notes").value || ""
+                    }
+                });
+
+                console.log("✅ Firestore update successful!");
+                alert("Data successfully updated in startnewcrop!");
+            }
+
+            async function resetBottomFloorData() {
+                console.log("🔄 Resetting Mortality Records and Levels...");
+
+                try {
+                    // 1. Delete all mortality records from vas-b1-f1-MC
+                    const mortalityCollection = collection(db, "vas-b1-f1-MC");
+                    const snapshot = await getDocs(mortalityCollection);
+
+                    if (!snapshot.empty) {
+                        const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+                        await Promise.all(deletePromises);
+                        console.log("🗑️ All Mortality Data Deleted Successfully!");
+                    } else {
+                        console.log("📭 No Mortality Records to Delete.");
+                    }
+
+                    // 2. Reset all values in fixed_days to 0
+                    const fixedDaysRef = doc(db, "fixed_days", "fixed_days");
+                    await setDoc(fixedDaysRef, {
+                        day_21: 0,
+                        day_28: 0,
+                        day_35: 0,
+                        day_42: 0,
+                        day_49: 0,
+                        day_56: 0,
+                        timestamp: Timestamp.now()
+                    });
+                    console.log("✅ Fixed days reset to 0");
+
+                    // 3. Reset ammonia_levels to 0
+                    const ammoniaRef = doc(db, "ammonia_levels", "fixed_days");
+                    await setDoc(ammoniaRef, {
+                        day_21: 0,
+                        day_28: 0,
+                        day_35: 0,
+                        day_42: 0,
+                        day_49: 0,
+                        day_56: 0,
+                        timestamp: Timestamp.now()
+                    });
+                    console.log("✅ Ammonia levels reset to 0");
+
+                    alert("All mortality records, fixed days, and ammonia levels have been reset!");
+
+                } catch (error) {
+                    console.error("❌ Error resetting data:", error);
+                    alert("Failed to reset data. Check console for details.");
+                }
+            }
+
+            // ✅ Ensure function is accessible globally
+            window.resetBottomFloorData = resetBottomFloorData;
+
+
+            // ✅ Make function globally accessible
+            window.resetBottomFloorData = resetBottomFloorData;
+
+            async function resetTopFloorData() {
+                console.log("🔄 Resetting Top Floor Data Collection and Ammonia Levels...");
+
+                try {
+                    // 🔥 Step 1: Delete all documents in vas-b1-f2-MC
+                    const topCollection = collection(db, "vas-b1-f2-MC");
+                    const snapshot = await getDocs(topCollection);
+
+                    if (!snapshot.empty) {
+                        const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+                        await Promise.all(deletePromises);
+                        console.log("🗑️ All documents in vas-b1-f2-MC deleted!");
+                    } else {
+                        console.log("📭 No documents found in vas-b1-f2-MC.");
+                    }
+
+                    // 🌫️ Step 2: Reset ammonia_levels_f2/fixed_days document
+                    const ammoniaDocRef = doc(db, "ammonia_levels_f2", "fixed_days");
+                    await setDoc(ammoniaDocRef, {
+                        day_21: 0,
+                        day_22: 0,
+                        day_28: 0,
+                        day_35: 0,
+                        day_42: 0,
+                        day_49: 0,
+                        day_56: 0,
+                        day_57: 0,
+                        timestamp: Timestamp.now()
+                    });
+                    console.log("✅ Ammonia levels (ammonia_levels_f2/fixed_days) reset to 0");
+
+                    alert("✅ Top Floor mortality and ammonia data have been reset!");
+                } catch (error) {
+                    console.error("❌ Error during reset:", error);
+                    alert("Failed to reset top floor data. See console for details.");
+                }
+            }
+
+            // ✅ Ensure function runs on page load
+            window.onload = loadData;
+            window.updateData = updateData;
+            window.resetBottomFloorData = resetBottomFloorData;
+            window.resetTopFloorData = resetTopFloorData;
+
+        </script>
+
+    </head>
+
+<body>
+    <div class="container">
+        <h2>Start New Crop</h2>
+
+        <label>Farm Name:</label>
+        <input type="text" id="farm_name" readonly>
+
+        <label>Farm #:</label>
+        <input type="text" id="farm_number" readonly>
+
+        <label>Barn #:</label>
+        <input type="text" id="barn_number" readonly>
+
+        <label>Quota Period:</label>
+        <input type="text" id="quota_period">
+
+        <label>Date Started:</label>
+        <input type="date" id="date_started">
+
+        <label>Hatchery:</label>
+        <input type="text" id="hatchery">
+
+        <label>Hatch ID#:</label>
+        <input type="text" id="hatch_id">
+
+        <h3>Bottom Floor</h3>
+        <label>Number of Birds Placed:</label>
+        <input type="number" id="bottom_floor_birds">
+
+        <label>Sex:</label>
+        <select id="bottom_floor_sex">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="mixed">Mixed</option>
+        </select>
+
+        <label>Notes:</label>
+        <input type="text" id="bottom_floor_notes">
+
+        <!-- Reset Button for Bottom Floor -->
+        <button onclick="resetBottomFloorData()">Reset Bottom Floor</button>
+
+        <h3>Top Floor</h3>
+        <label>Number of Birds Placed:</label>
+        <input type="number" id="top_floor_birds">
+
+        <label>Sex:</label>
+        <select id="top_floor_sex">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="mixed">Mixed</option>
+        </select>
+
+        <label>Notes:</label>
+        <input type="text" id="top_floor_notes">
+
+        <!-- Reset Button for Top Floor -->
+        <button onclick="resetTopFloorData()">Reset Top Floor</button>
+
+        <button onclick="updateData()">Update</button>
+    </div>
+</body>
+
+</body>
+
+</html>

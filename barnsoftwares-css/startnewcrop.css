@@ -1,0 +1,466 @@
+/* Start New Crop Page Specific Styles */
+
+/* Import base styles */
+@import url('barn-software-styles.css');
+
+/* New Crop Form Container */
+.new-crop-container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+}
+
+.new-crop-header {
+    background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+    color: var(--white);
+    padding: 30px;
+    text-align: center;
+}
+
+.new-crop-header h2 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 600;
+}
+
+.new-crop-header p {
+    margin: 15px 0 0 0;
+    opacity: 0.9;
+    font-size: 18px;
+    line-height: 1.5;
+}
+
+.new-crop-content {
+    padding: 40px;
+}
+
+/* Form Sections */
+.crop-form-section {
+    margin-bottom: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+    border-radius: var(--border-radius);
+    border: 2px solid var(--gray-200);
+    position: relative;
+    overflow: hidden;
+}
+
+.crop-form-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+}
+
+.crop-form-section:hover {
+    border-color: var(--success-color);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(40, 167, 69, 0.1);
+}
+
+.section-title {
+    color: var(--gray-800);
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--success-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-title i {
+    color: var(--success-color);
+    font-size: 24px;
+}
+
+/* Form Grid Layout */
+.crop-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label i {
+    color: var(--success-color);
+    font-size: 16px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 15px;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    font-size: 15px;
+    transition: var(--transition);
+    background-color: var(--white);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--success-color);
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    transform: translateY(-1px);
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Full Width Fields */
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Crop Details Summary */
+.crop-summary {
+    background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+    color: var(--white);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    margin: 30px 0;
+    text-align: center;
+}
+
+.crop-summary h3 {
+    margin: 0 0 15px 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.crop-summary p {
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+/* Action Buttons */
+.crop-form-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 3px solid var(--gray-200);
+}
+
+.btn-start-crop {
+    background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+    color: var(--white);
+    border: none;
+    padding: 18px 35px;
+    border-radius: var(--border-radius);
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-start-crop:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(40, 167, 69, 0.4);
+}
+
+.btn-start-crop:active {
+    transform: translateY(-1px);
+}
+
+.btn-reset-crop {
+    background: linear-gradient(135deg, var(--secondary-color) 0%, #6c757d 100%);
+    color: var(--white);
+    border: none;
+    padding: 18px 35px;
+    border-radius: var(--border-radius);
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-reset-crop:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(108, 117, 125, 0.3);
+}
+
+/* Required Field Indicator */
+.required-field::after {
+    content: ' *';
+    color: var(--danger-color);
+    font-weight: bold;
+    font-size: 18px;
+}
+
+/* Validation Styles */
+.form-group.error input,
+.form-group.error select,
+.form-group.error textarea {
+    border-color: var(--danger-color);
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.error-message {
+    color: var(--danger-color);
+    font-size: 13px;
+    margin-top: 8px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.error-message i {
+    font-size: 14px;
+}
+
+/* Success Message */
+.success-message {
+    background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+    color: var(--white);
+    padding: 20px 25px;
+    border-radius: var(--border-radius);
+    margin: 25px 0;
+    text-align: center;
+    font-weight: 600;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.success-message i {
+    font-size: 20px;
+}
+
+/* Progress Indicator */
+.progress-indicator {
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+    gap: 10px;
+}
+
+.progress-step {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gray-300);
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    transition: var(--transition);
+}
+
+.progress-step.active {
+    background: var(--success-color);
+    color: var(--white);
+    transform: scale(1.1);
+}
+
+.progress-step.completed {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+/* Responsive Design for Start New Crop */
+@media (max-width: 768px) {
+    .new-crop-container {
+        margin: 10px;
+    }
+
+    .new-crop-content {
+        padding: 25px;
+    }
+
+    .new-crop-header {
+        padding: 25px;
+    }
+
+    .new-crop-header h2 {
+        font-size: 28px;
+    }
+
+    .new-crop-header p {
+        font-size: 16px;
+    }
+
+    .crop-form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .crop-form-section {
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+
+    .section-title {
+        font-size: 20px;
+    }
+
+    .crop-form-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .btn-start-crop,
+    .btn-reset-crop {
+        width: 100%;
+        padding: 15px 25px;
+        font-size: 16px;
+    }
+
+    .crop-summary {
+        padding: 20px;
+        margin: 25px 0;
+    }
+
+    .crop-summary h3 {
+        font-size: 18px;
+    }
+
+    .crop-summary p {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .new-crop-content {
+        padding: 20px;
+    }
+
+    .new-crop-header {
+        padding: 20px;
+    }
+
+    .new-crop-header h2 {
+        font-size: 24px;
+    }
+
+    .new-crop-header p {
+        font-size: 14px;
+    }
+
+    .crop-form-section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-size: 18px;
+    }
+
+    .section-title i {
+        font-size: 20px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .form-group label {
+        font-size: 14px;
+    }
+
+    .btn-start-crop,
+    .btn-reset-crop {
+        padding: 12px 20px;
+        font-size: 14px;
+        min-width: auto;
+    }
+
+    .crop-summary {
+        padding: 15px;
+        margin: 20px 0;
+    }
+
+    .crop-summary h3 {
+        font-size: 16px;
+    }
+
+    .crop-summary p {
+        font-size: 13px;
+    }
+
+    .progress-indicator {
+        gap: 8px;
+    }
+
+    .progress-step {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+}
+
+/* Print Styles for Start New Crop */
+@media print {
+    .new-crop-container {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+
+    .crop-form-actions {
+        display: none !important;
+    }
+
+    .crop-form-section {
+        background: white !important;
+        border: 1px solid #ccc;
+        box-shadow: none;
+    }
+
+    .crop-summary {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+    }
+
+    .progress-indicator {
+        display: none !important;
+    }
+}

@@ -1,0 +1,453 @@
+/* Mortality Card Page Specific Styles */
+
+/* Import base styles */
+@import url('barn-software-styles.css');
+
+/* Mortality Card Container */
+.mortality-card-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+}
+
+.mortality-card-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+    color: var(--white);
+    padding: 25px;
+    text-align: center;
+}
+
+.mortality-card-header h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.mortality-card-header p {
+    margin: 10px 0 0 0;
+    opacity: 0.9;
+    font-size: 16px;
+}
+
+.mortality-card-content {
+    padding: 30px;
+}
+
+/* Mortality Summary Cards */
+.mortality-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background: linear-gradient(135deg, var(--white) 0%, var(--gray-50) 100%);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.summary-card h3 {
+    color: var(--gray-700);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.summary-card .value {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.summary-card .unit {
+    font-size: 14px;
+    color: var(--gray-600);
+    font-weight: 500;
+}
+
+/* Mortality Records Table */
+.mortality-records-container {
+    margin-top: 30px;
+}
+
+.mortality-records-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.mortality-records-header h3 {
+    color: var(--gray-800);
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.mortality-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+}
+
+.mortality-table th {
+    background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%);
+    color: var(--white);
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+}
+
+.mortality-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--gray-200);
+    vertical-align: middle;
+}
+
+.mortality-table tr:nth-child(even) {
+    background-color: var(--gray-50);
+}
+
+.mortality-table tr:hover {
+    background-color: var(--gray-100);
+}
+
+/* Mortality Trend Chart */
+.mortality-trend-container {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    padding: 25px;
+    margin: 30px 0;
+}
+
+.trend-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.trend-header h3 {
+    color: var(--gray-800);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.trend-chart {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--gray-200);
+}
+
+.trend-chart-placeholder {
+    color: var(--gray-600);
+    font-size: 16px;
+    text-align: center;
+}
+
+/* Filter and Search */
+.mortality-filters {
+    background: var(--gray-50);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
+    border: 1px solid var(--gray-200);
+}
+
+.filter-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 8px 12px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    background-color: var(--white);
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+/* Action Buttons */
+.mortality-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 2px solid var(--gray-200);
+}
+
+.btn-export-mortality {
+    background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+    color: var(--white);
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-export-mortality:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-print-mortality {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+    color: var(--white);
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-print-mortality:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+/* Status Indicators */
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-indicator.normal {
+    background-color: var(--success-color);
+}
+
+.status-indicator.warning {
+    background-color: var(--warning-color);
+}
+
+.status-indicator.critical {
+    background-color: var(--danger-color);
+}
+
+/* Responsive Design for Mortality Card */
+@media (max-width: 768px) {
+    .mortality-card-container {
+        margin: 10px;
+    }
+
+    .mortality-card-content {
+        padding: 20px;
+    }
+
+    .mortality-card-header {
+        padding: 20px;
+    }
+
+    .mortality-card-header h2 {
+        font-size: 24px;
+    }
+
+    .mortality-summary {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .summary-card {
+        padding: 15px;
+    }
+
+    .summary-card .value {
+        font-size: 28px;
+    }
+
+    .mortality-records-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .filter-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .filter-group {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .mortality-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-export-mortality,
+    .btn-print-mortality {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .mortality-table {
+        font-size: 12px;
+    }
+
+    .mortality-table th,
+    .mortality-table td {
+        padding: 8px 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mortality-card-content {
+        padding: 15px;
+    }
+
+    .mortality-card-header {
+        padding: 15px;
+    }
+
+    .mortality-card-header h2 {
+        font-size: 20px;
+    }
+
+    .mortality-card-header p {
+        font-size: 14px;
+    }
+
+    .mortality-summary {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .summary-card {
+        padding: 12px;
+    }
+
+    .summary-card .value {
+        font-size: 24px;
+    }
+
+    .mortality-filters {
+        padding: 15px;
+    }
+
+    .mortality-table {
+        font-size: 11px;
+    }
+
+    .mortality-table th,
+    .mortality-table td {
+        padding: 6px 4px;
+    }
+
+    .trend-chart {
+        padding: 15px;
+        min-height: 200px;
+    }
+}
+
+/* Print Styles for Mortality Card */
+@media print {
+    .mortality-card-container {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+
+    .mortality-actions {
+        display: none !important;
+    }
+
+    .mortality-table {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+
+    .mortality-table th {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+    }
+
+    .summary-card {
+        border: 1px solid #ccc;
+        box-shadow: none;
+    }
+
+    .trend-chart {
+        border: 1px solid #ccc;
+        background: white;
+    }
+}

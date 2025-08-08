@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rose Web Creation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            height: 100%;
+            overflow: hidden;
+            background-color: #ffffff;
+            font-family: 'Inter', 'Arial', sans-serif;
+        }
+        #file-upload-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        #file-input {
+            margin-bottom: 20px;
+        }
+        #start-button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #1E90FF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%; /* Added full height */
+            position: absolute; /* Ensure absolute positioning */
+            top: 0;
+            left: 0;
+        }
+        #logo {
+            font-size: 4.5rem;
+            font-weight: 900;
+            color: #1E90FF;
+            letter-spacing: -3px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-align: center;
+            width: 100%;
+        }
+        #subtext {
+            font-size: 1.5rem;
+            color: #808080;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            text-align: center;
+            width: 100%;
+        }
+        .light-overlay {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(
+                circle at center, 
+                rgba(30, 144, 255, 0.1) 0%, 
+                rgba(30, 144, 255, 0) 70%
+            );
+            animation: light-pulse 4s infinite alternate;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            background-color: rgba(30, 144, 255, 0.2);
+            border-radius: 50%;
+            animation: particle-float 6s infinite alternate;
+        }
+        @keyframes particle-float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+        @keyframes light-pulse {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div id="file-upload-overlay">
+        <h2>Upload Your Sound File</h2>
+        <input type="file" id="file-input" accept="audio/mp3">
+        <button id="start-button" disabled>Start Animation</button>
+    </div>
+
+    <div id="scene" style="display:none;">
+        <audio id="background-sound"></audio>
+        <div class="light-overlay"></div>
+        <div id="container">
+            <div id="logo">Rose Web Creation</div>
+            <div id="subtext">A Creation By Noah</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('file-input');
+            const startButton = document.getElementById('start-button');
+            const fileUploadOverlay = document.getElementById('file-upload-overlay');
+            const scene = document.getElementById('scene');
+            const logo = document.getElementById('logo');
+            const subtext = document.getElementById('subtext');
+            const sceneElement = document.getElementById('scene');
+            let backgroundSound;
+
+            // File input event listener
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    // Enable start button
+                    startButton.disabled = false;
+
+                    // Create audio source
+                    backgroundSound = document.getElementById('background-sound');
+                    backgroundSound.src = URL.createObjectURL(file);
+                }
+            });
+
+            // Start button event listener
+            startButton.addEventListener('click', () => {
+                // Hide file upload overlay
+                fileUploadOverlay.style.display = 'none';
+                
+                // Show scene
+                scene.style.display = 'block';
+
+                // Play sound
+                backgroundSound.play().catch(error => {
+                    console.error('Error playing sound:', error);
+                    alert('Unable to play sound. Please check the audio file.');
+                });
+
+                // Create floating particles
+                function createParticles(count) {
+                    for (let i = 0; i < count; i++) {
+                        const particle = document.createElement('div');
+                        particle.classList.add('particle');
+                        
+                        // Randomize particle properties
+                        particle.style.width = `${Math.random() * 10 + 5}px`;
+                        particle.style.height = particle.style.width;
+                        particle.style.top = `${Math.random() * 100}%`;
+                        particle.style.left = `${Math.random() * 100}%`;
+                        particle.style.animationDelay = `-${Math.random() * 6}s`;
+                        
+                        sceneElement.appendChild(particle);
+                    }
+                }
+
+                // Create 20 floating particles
+                createParticles(20);
+
+                // First fade in and scale
+                setTimeout(() => {
+                    logo.style.opacity = '1';
+                    logo.style.transform = 'scale(1)';
+                }, 500);
+
+                // Fade in subtext
+                setTimeout(() => {
+                    subtext.style.opacity = '1';
+                    subtext.style.transform = 'translateY(0)';
+                }, 2000);
+
+                // Final fade out
+                setTimeout(() => {
+                    logo.style.opacity = '0';
+                    subtext.style.opacity = '0';
+                }, 5000);
+
+                // Redirect or close animation
+                setTimeout(() => {
+                    // Replace with your desired action after animation
+                    window.location.href = '#'; // Change to your desired page
+                }, 6000);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+/* Flock Log Page Specific Styles */
+
+/* Import base styles */
+@import url('barn-software-styles.css');
+
+/* Section Navigator */
+.section-navigator {
+    position: fixed;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    z-index: 100;
+    max-height: 80vh;
+    overflow-y: auto;
+    min-width: 200px;
+}
+
+.section-nav-header {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 15px;
+    font-weight: 600;
+    text-align: center;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.section-nav-items {
+    padding: 10px 0;
+}
+
+.section-nav-item {
+    display: block;
+    padding: 12px 20px;
+    color: var(--gray-700);
+    text-decoration: none;
+    transition: var(--transition);
+    border-left: 3px solid transparent;
+    font-size: 14px;
+}
+
+.section-nav-item:hover {
+    background-color: var(--gray-100);
+    color: var(--primary-color);
+    border-left-color: var(--primary-color);
+}
+
+.section-nav-item.active {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border-left-color: var(--white);
+}
+
+.section-nav-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.section-nav-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Section Styles */
+.section {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.section-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+    color: var(--white);
+    padding: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.section-content {
+    padding: 20px;
+}
+
+/* Table Enhancements */
+.table-header-dark {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+}
+
+.table-header-dark th {
+    background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%);
+    color: var(--white);
+    padding: 15px 12px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+}
+
+.table-header-dark td {
+    padding: 12px;
+    border-bottom: 1px solid var(--gray-200);
+    vertical-align: middle;
+}
+
+.table-header-dark tr:nth-child(even) {
+    background-color: var(--gray-50);
+}
+
+.table-header-dark tr:hover {
+    background-color: var(--gray-100);
+}
+
+/* Table Input Styles */
+.table-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    font-size: 14px;
+    transition: var(--transition);
+    background-color: var(--white);
+}
+
+.table-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+.table-input[type="date"] {
+    min-width: 120px;
+}
+
+.table-input[type="number"] {
+    min-width: 80px;
+}
+
+/* Form Group Styles */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    transition: var(--transition);
+    background-color: var(--white);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Button Styles */
+.btn-add-row {
+    background-color: var(--success-color);
+    color: var(--white);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition);
+    margin: 10px 0;
+}
+
+.btn-add-row:hover {
+    background-color: #059669;
+    transform: translateY(-1px);
+}
+
+.delete-row {
+    background-color: var(--danger-color);
+    color: var(--white);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: var(--transition);
+}
+
+.delete-row:hover {
+    background-color: #dc2626;
+    transform: scale(1.05);
+}
+
+/* Signature Section */
+.signature-section {
+    background: var(--gray-50);
+    border: 2px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.signature-section h3 {
+    color: var(--gray-800);
+    margin-bottom: 15px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Note Rows */
+.note-row {
+    background-color: var(--gray-50);
+}
+
+.note-row td {
+    padding: 15px;
+    border-bottom: 2px solid var(--gray-300);
+}
+
+.entry-note-input {
+    width: 100%;
+    min-height: 60px;
+    padding: 10px;
+    border: 1px solid var(--gray-300);
+    border-radius: 4px;
+    font-size: 14px;
+    resize: vertical;
+    background-color: var(--white);
+}
+
+.entry-note-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+/* Responsive Design for Flock Log */
+@media (max-width: 1024px) {
+    .section-navigator {
+        position: fixed;
+        left: 10px;
+        top: 90px;
+        transform: none;
+        max-height: calc(100vh - 100px);
+        min-width: 180px;
+    }
+
+    .section-content {
+        margin-left: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-navigator {
+        position: fixed;
+        left: 0;
+        top: 70px;
+        width: 100%;
+        max-height: none;
+        min-width: auto;
+        border-radius: 0;
+        z-index: 999;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .section-navigator.active {
+        transform: translateX(0);
+    }
+
+    .section-content {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .section-header {
+        padding: 15px;
+        font-size: 16px;
+    }
+
+    .table-header-dark {
+        font-size: 12px;
+    }
+
+    .table-header-dark th,
+    .table-header-dark td {
+        padding: 8px 6px;
+    }
+
+    .table-input {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-content {
+        padding: 10px;
+    }
+
+    .section-header {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .table-header-dark {
+        font-size: 11px;
+    }
+
+    .table-header-dark th,
+    .table-header-dark td {
+        padding: 6px 4px;
+    }
+
+    .table-input {
+        padding: 4px 6px;
+        font-size: 11px;
+    }
+
+    .btn-add-row {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .delete-row {
+        padding: 4px 8px;
+        font-size: 10px;
+    }
+}
+
+/* Print Styles for Flock Log */
+@media print {
+
+    .section-navigator,
+    .modern-header,
+    .btn-add-row,
+    .delete-row {
+        display: none !important;
+    }
+
+    .section-content {
+        margin-left: 0 !important;
+    }
+
+    .section {
+        break-inside: avoid;
+        margin: 10px 0;
+    }
+
+    .table-header-dark {
+        box-shadow: none;
+        border: 1px solid #ccc;
+    }
+
+    .table-header-dark th {
+        background: #f0f0f0 !important;
+        color: #000 !important;
+    }
+}

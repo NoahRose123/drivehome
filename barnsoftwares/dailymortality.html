@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <link rel="icon" type="image/png" href="/icon.png?v=2">
+    <link rel="apple-touch-icon" href="/icon.png?v=2">
+    <link rel="icon" type="image/png" sizes="192x192" href="/iconcropped.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/iconcropped.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a365d">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Management Hub</title>
+
+    <!-- Barn Software Styles -->
+    <link rel="stylesheet" href="../barnsoftwares-css/barn-software-styles.css">
+    <link rel="stylesheet" href="../barnsoftwares-css/dailymortality.css">
+    <script src="../barnsoftwares-css/barn-header.js"></script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import {
+            getFirestore, collection, addDoc, serverTimestamp, doc, onSnapshot,
+            query, where, getDocs, deleteDoc, updateDoc, getDoc, setDoc
+        } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB20OmcQemfIXm4712im9mqiBnpeVt8sJQ",
+            authDomain: "chicken-project-2.firebaseapp.com",
+            projectId: "chicken-project-2",
+            storageBucket: "chicken-project-2.firebasestorage.app",
+            messagingSenderId: "596273529964",
+            appId: "1:596273529964:web:bd51e2646d5ed48afa4449",
+            measurementId: "G-9YLPHR08DB"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let startCropDate = null;
+        let currentFloor = 2; // Track current active floor
+
+        function fetchStartDate() {
+            const docRef = doc(db, "startnewcrop", "vas-b1-snc");
+            const dateInput = document.getElementById("date");
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const localToday = `${year}-${month}-${day}`;
+
+            if (!dateInput.value) {
+                dateInput.value = localToday;
+            }
+
+            console.log(`📅 Defaulting Bird Adder Date to Today's Date: ${localToday}`);
+
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists() && docSnap.data().date_started) {
+                    const data = docSnap.data();
+                    const firestoreTimestamp = data.date_started.seconds * 1000;
+                    const originalStartDate = new Date(firestoreTimestamp);
+                    originalStartDate.setUTCHours(0, 0, 0, 0);
+
+                    if (currentFloor === 1) {
+                        // Floor 1 logic - use original date
+                        startCropDate = new Date(originalStartDate);
+                        console.log(`📅 Floor 1 Start Date: ${startCropDate.toISOString().split('T')[0]}`);
+                    } else {
+                        // Floor 2 logic - use the SAME date as Floor 1, don't subtract
+                        startCropDate = new Date(originalStartDate);
+                        console.log(`📅 Floor 2 Start Date (same as Floor 1): ${startCropDate.toISOString().split('T')[0]}`);
+                    }
+
+                    const dateStartedField = document.getElementById("date_started");
+                    if (dateStartedField) {
+                        dateStartedField.value = startCropDate.toISOString().split('T')[0];
+                    }
+
+                    setTimeout(checkAmmoniaInput, 200);
+                } else {
+                    console.warn("⚠️ No Start Date Found in Firestore. Birds can be added anytime.");
+                }
+            });
+        }
+        window.checkAmmoniaInput = function () {
+            if (!startCropDate) return;
+
+            const selectedDate = new Date(document.getElementById("date").value);
+            selectedDate.setUTCHours(0, 0, 0, 0);
+
+            const daysDiff = Math.floor((selectedDate - startCropDate) / (1000 * 60 * 60 * 24)) + 1;
+            const birdCycleDay = daysDiff;
+
+            console.log(`📅 Bird Cycle Day: ${birdCycleDay}`);
+
+            let ammoniaDays, displayDay;
+            if (currentFloor === 1) {
+                ammoniaDays = [21, 28, 35, 42, 49, 56];
+                displayDay = birdCycleDay;
+            } else {
+                // Floor 2: Check for the same days as Floor 1, but save to different collection
+                ammoniaDays = [21, 28, 35, 42, 49, 56]; // Same days as Floor 1
+                displayDay = birdCycleDay; // Same display
+            }
+
+            console.log(`🔍 Checking if day ${birdCycleDay} is in ammonia days:`, ammoniaDays);
+            console.log(`📊 Current Floor: ${currentFloor}`);
+
+            if (ammoniaDays.includes(birdCycleDay)) {
+                document.getElementById("ammonia-input-box").style.display = "block";
+                document.getElementById("ammonia-day").innerText = displayDay;
+                console.log(`✅ Showing ammonia input for day ${displayDay}`);
+            } else {
+                document.getElementById("ammonia-input-box").style.display = "none";
+                console.log(`❌ Hiding ammonia input - day ${birdCycleDay} not in required days`);
+            }
+        };
+
+        // Add this event listener in the window.onload function
+        document.getElementById("date").addEventListener('change', checkAmmoniaInput);
+
+        function validateDateRange() {
+            if (!startCropDate) return true;
+
+            const selectedDate = new Date(document.getElementById("date").value);
+            selectedDate.setUTCHours(0, 0, 0, 0);
+
+            const maxDate = new Date(startCropDate);
+            if (currentFloor === 1) {
+                maxDate.setDate(startCropDate.getDate() + 55);
+            } else {
+                maxDate.setDate(startCropDate.getDate() + 56);
+            }
+            maxDate.setUTCHours(0, 0, 0, 0);
+
+            if (selectedDate < startCropDate) {
+                alert("⚠️ Date reset to Date Placed. Cannot select earlier dates.");
+                document.getElementById("date").value = startCropDate.toISOString().split('T')[0];
+                return false;
+            }
+
+            if (selectedDate > maxDate) {
+                const maxDays = currentFloor === 1 ? 56 : 56;
+                alert(`⚠️ Date reset to maximum allowed (${maxDays} days after Date Placed).`);
+                document.getElementById("date").value = maxDate.toISOString().split('T')[0];
+                return false;
+            }
+
+            return true;
+        }
+
+        window.saveData = async function () {
+            if (!validateDateRange()) return;
+
+            const date = document.getElementById("date").value;
+            const culls = parseInt(document.getElementById("culls").value) || 0;
+            const mortality = parseInt(document.getElementById("mortality").value) || 0;
+            const totalDeadBirds = culls + mortality;
+            const ammoniaLevel = document.getElementById("ammonia-level").value.trim();
+            const formattedDate = date;
+
+            if (!startCropDate) {
+                alert("⚠️ Start Date not available. Cannot add birds until it's set in Firestore.");
+                return;
+            }
+
+            const selectedDate = new Date(date);
+            selectedDate.setUTCHours(0, 0, 0, 0);
+            const daysDiff = Math.floor((selectedDate - startCropDate) / (1000 * 60 * 60 * 24)) + 1;
+            const birdCycleDay = daysDiff;
+
+            try {
+                const collectionName = currentFloor === 1 ? "vas-b1-f1-MC" : "vas-b1-f2-MC";
+                const mortalityCollection = collection(db, collectionName);
+
+                if (currentFloor === 1) {
+                    // Floor 1: Delete existing records first
+                    const q = query(mortalityCollection, where("date", "==", formattedDate));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        const deletePromises = querySnapshot.docs.map((doc) => deleteDoc(doc.ref));
+                        await Promise.all(deletePromises);
+                        console.log(`🗑️ Deleted existing records for ${formattedDate}`);
+                    }
+                }
+
+                let firestoreData = {
+                    date: formattedDate,
+                    culls: culls,
+                    mortality: mortality,
+                    totalDeadBirds: totalDeadBirds,
+                    timestamp: serverTimestamp()
+                };
+
+                await addDoc(mortalityCollection, firestoreData);
+                console.log(`✅ Saved mortality/culls data for ${formattedDate} on Floor ${currentFloor}`);
+
+                // In saveData function, change this part:
+                let ammoniaDays, ammoniaCollection, ammoniaField;
+                if (currentFloor === 1) {
+                    ammoniaDays = [21, 28, 35, 42, 49, 56]; // Same as checkAmmoniaInput
+                    ammoniaCollection = "ammonia_levels";
+                    ammoniaField = `day_${birdCycleDay}`;
+                } else {
+                    ammoniaDays = [21, 28, 35, 42, 49, 56]; // Same as checkAmmoniaInput and Floor 1
+                    ammoniaCollection = "ammonia_levels_f2";
+                    ammoniaField = `day_${birdCycleDay}`; // Same as Floor 1
+                }
+
+                if (ammoniaDays.includes(birdCycleDay)) {
+                    if (ammoniaLevel === "") {
+                        alert("⚠️ Please enter an ammonia level for this required day.");
+                        return;
+                    }
+
+                    const ammoniaDocRef = doc(db, ammoniaCollection, "fixed_days");
+
+                    try {
+                        const docSnap = await getDoc(ammoniaDocRef);
+
+                        if (docSnap.exists()) {
+                            await updateDoc(ammoniaDocRef, {
+                                [ammoniaField]: Number(ammoniaLevel),
+                                timestamp: serverTimestamp()
+                            });
+                            console.log(`✅ Updated Ammonia Level ${ammoniaField}: ${ammoniaLevel} PPM in ${ammoniaCollection}`);
+                        } else {
+                            console.error(`❌ 'fixed_days' document does not exist in ${ammoniaCollection}!`);
+                            // Create the document if it doesn't exist
+                            await setDoc(ammoniaDocRef, {
+                                [ammoniaField]: Number(ammoniaLevel),
+                                timestamp: serverTimestamp()
+                            });
+                            console.log(`✅ Created new document and saved ammonia level ${ammoniaField}: ${ammoniaLevel} PPM`);
+                        }
+                    } catch (error) {
+                        console.error(`❌ Error saving ammonia level:`, error);
+                        alert("Failed to save ammonia level. Check console for details.");
+                    }
+                }
+
+                alert(`✅ Data saved successfully for ${formattedDate} on Floor ${currentFloor}`);
+            } catch (error) {
+                console.error("❌ Error saving data:", error);
+                alert("Failed to save data. Check the console for details.");
+            }
+        };
+
+        // Adjustment functions for quick +/- buttons
+        window.adjustCull = function (change) {
+            const cullInput = document.getElementById('culls');
+            const currentValue = parseInt(cullInput.value) || 0;
+            const newValue = Math.max(0, currentValue + change);
+            cullInput.value = newValue;
+
+            cullInput.style.background = '#e8f5e8';
+            setTimeout(() => {
+                cullInput.style.background = '';
+            }, 300);
+        };
+
+        window.adjustMortality = function (change) {
+            const mortalityInput = document.getElementById('mortality');
+            const currentValue = parseInt(mortalityInput.value) || 0;
+            const newValue = Math.max(0, currentValue + change);
+            mortalityInput.value = newValue;
+
+            mortalityInput.style.background = '#e8f5e8';
+            setTimeout(() => {
+                mortalityInput.style.background = '';
+            }, 300);
+        };
+
+        // Touch swipe functionality for mobile
+        let touchStartX = null;
+        let touchStartY = null;
+        const minSwipeDistance = 50; // Minimum distance for a swipe
+        const maxVerticalDistance = 100; // Maximum vertical movement to still count as horizontal swipe
+
+        function handleTouchStart(e) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }
+
+        window.switchFloor = function (floor) {
+            currentFloor = floor;
+
+            // Update toggle position to match floor
+            const toggle = document.getElementById('floor_toggle');
+            toggle.checked = (floor === 2); // FIXED: Floor 1 = checked (right/top), Floor 2 = unchecked (left/bottom)
+
+            // Update header to show correct floor number
+            document.getElementById('floor-title').textContent = `Vassilakos Farm - Barn 1 - Floor ${floor}`;
+
+            // Clear form
+            document.getElementById("date").value = "";
+            document.getElementById("culls").value = "";
+            document.getElementById("mortality").value = "";
+            document.getElementById("ammonia-level").value = "";
+            document.getElementById("ammonia-input-box").style.display = "none";
+
+            // Refresh start date for new floor
+            fetchStartDate();
+
+            // Update button panel visibility
+            updateButtonPanel();
+        };
+
+        window.switchFloorToggle = function () {
+            const toggle = document.getElementById('floor_toggle');
+            const newFloor = toggle.checked ? 2 : 1; // FLIPPED: checked = bottom (Floor 2), unchecked = top (Floor 1)
+            switchFloor(newFloor);
+        };
+        function handleTouchEnd(e) {
+            if (!touchStartX || !touchStartY) return;
+
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = Math.abs(touchEndY - touchStartY);
+
+            // Check if it's a horizontal swipe (not too much vertical movement)
+            if (deltaY > maxVerticalDistance) {
+                touchStartX = null;
+                touchStartY = null;
+                return;
+            }
+
+            // Check if swipe distance is sufficient
+            if (Math.abs(deltaX) > minSwipeDistance) {
+                if (deltaX > 0) {
+                    // Swipe right - go to Floor 1
+                    if (currentFloor !== 1) {
+                        switchFloor(1);
+                    }
+                } else {
+                    // Swipe left - go to Floor 2
+                    if (currentFloor !== 2) {
+                        switchFloor(2);
+                    }
+                }
+            }
+
+            touchStartX = null;
+            touchStartY = null;
+        }
+
+        // Add touch event listeners
+        document.addEventListener('touchstart', handleTouchStart, { passive: true });
+        document.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+        window.onload = function () {
+            console.log("🚀 Combined Farm Management page loaded");
+
+            // Set initial floor to 2 (Bottom Floor)
+            switchFloor(1);
+
+
+
+            // Initialize touch events for swipe functionality
+            console.log("📱 Touch swipe functionality enabled");
+        };
+    </script>
+
+</head>
+<script src="load-header.js"></script>
+
+<body>
+    <!-- Floor Toggle Navigation -->
+    <div class="floor-toggle-container">
+        <span class="floor-label">Bottom Floor</span>
+        <label class="floor-toggle">
+            <input type="checkbox" id="floor_toggle" checked onchange="switchFloorToggle()">
+            <span class="floor-toggle-slider"></span>
+        </label>
+        <span class="floor-label">Top Floor</span>
+    </div>
+    <h2 id="floor-title">Vassilakos Farm - Barn 1 - Floor 1</h2>
+
+    <div class="container">
+        <label>Date</label><br>
+        <input type="date" id="date" required onchange="checkAmmoniaInput()"><br>
+
+        <label>Culls</label><br>
+        <input type="number" id="culls" min="0" placeholder="Enter culls"><br>
+
+        <label>Mortality</label><br>
+        <input type="number" id="mortality" min="0" placeholder="Enter mortality"><br>
+
+        <!-- Ammonia Level Input (Hidden by Default) -->
+        <div id="ammonia-input-box" class="ammonia-box" style="display: none;">
+            <h3>Enter Ammonia Level for Day <span id="ammonia-day"></span></h3>
+            <label for="ammonia-level">PPM:</label>
+            <input type="number" id="ammonia-level" placeholder="Enter PPM">
+        </div>
+
+        <button onclick="saveData()">SAVE</button>
+    </div>
+
+
+
+    <script>
+        // Add this to handle showing/hiding the button panel based on floor
+        function updateButtonPanel() {
+            const buttonPanel = document.getElementById('button-panel');
+            if (currentFloor === 1) {
+                buttonPanel.style.display = 'flex';
+            } else {
+                buttonPanel.style.display = 'none';
+            }
+        }
+
+        // Initialize button panel on load
+        window.addEventListener('load', updateButtonPanel);
+    </script>
+
+</html>

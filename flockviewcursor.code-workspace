@@ -1,0 +1,33 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"terminal.integrated.defaultProfile.windows": "PowerShell",
+		"terminal.integrated.profiles.windows": {
+			"PowerShell": {
+				"source": "PowerShell",
+				"args": [
+					"-NoExit",
+					"-Command",
+					"cd '${workspaceFolder}'"
+				]
+			}
+		},
+		"files.associations": {
+			"*.claude": "javascript"
+		},
+		"emmet.includeLanguages": {
+			"javascript": "javascriptreact"
+		},
+		"workbench.colorCustomizations": {
+			"activityBar.background": "#667eea",
+			"activityBar.foreground": "#ffffff",
+			"activityBar.activeBackground": "#764ba2",
+			"titleBar.activeBackground": "#667eea",
+			"titleBar.activeForeground": "#ffffff"
+		}
+	}
+}

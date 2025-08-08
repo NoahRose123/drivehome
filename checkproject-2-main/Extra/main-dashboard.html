@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Management Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #1a365d;
+            --secondary-blue: #2c5282;
+            --accent-blue: #3182ce;
+            --light-blue: #4299e1;
+            --success-green: #38a169;
+            --warning-orange: #ed8936;
+            --danger-red: #e53e3e;
+            --neutral-gray: #4a5568;
+            --light-gray: #718096;
+            --bg-primary: #f7fafc;
+            --bg-secondary: #edf2f7;
+            --bg-white: #ffffff;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --text-light: #718096;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header Navigation */
+        .top-nav {
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .logo-img {
+            height: 80px;
+            /* Increased from 40px */
+            width: auto;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-left: 50%;
+        }
+
+        /* For mobile */
+        @media (max-width: 768px) {
+            .logo-img {
+                height: 60px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-img {
+                height: 50px;
+            }
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent-blue);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-btn.primary {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .nav-btn.danger {
+            background: var(--danger-red);
+            color: white;
+            border-color: var(--danger-red);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .page-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+        }
+
+        .stat-icon.blue {
+            background: var(--accent-blue);
+        }
+
+        .stat-icon.green {
+            background: var(--success-green);
+        }
+
+        .stat-icon.orange {
+            background: var(--warning-orange);
+        }
+
+        .stat-icon.red {
+            background: var(--danger-red);
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-trend {
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background: var(--bg-secondary);
+            color: var(--text-light);
+        }
+
+        /* Farms Grid */
+        .farms-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .farms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .farm-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .farm-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-color);
+            transform: scaleY(0);
+            transition: transform 0.2s ease;
+        }
+
+        .farm-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .farm-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--accent-color);
+        }
+
+        .farm-card:nth-child(1) {
+            --accent-color: var(--accent-blue);
+        }
+
+        .farm-card:nth-child(2) {
+            --accent-color: var(--success-green);
+        }
+
+        .farm-card:nth-child(3) {
+            --accent-color: var(--warning-orange);
+        }
+
+        .farm-card:nth-child(4) {
+            --accent-color: var(--danger-red);
+        }
+
+        .farm-card:nth-child(5) {
+            --accent-color: var(--neutral-gray);
+        }
+
+        .farm-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .farm-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            background: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: white;
+            letter-spacing: -0.025em;
+        }
+
+        .farm-info h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .farm-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: rgba(56, 161, 105, 0.1);
+            color: var(--success-green);
+            border: 1px solid rgba(56, 161, 105, 0.2);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .farm-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 1rem 0.5rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-value {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Action Button */
+        .action-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .action-button:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-xl);
+            background: var(--secondary-blue);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .nav-container {
+                padding: 0 1rem;
+                flex-direction: row;
+                gap: 1rem;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .logo {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .logo-img {
+                height: 60px;
+            }
+
+            .nav-actions {
+                width: auto;
+                justify-content: flex-end;
+                flex-wrap: nowrap;
+                flex-shrink: 0;
+            }
+
+            .nav-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .page-title {
+                font-size: 1.875rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .farms-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .farm-card {
+                padding: 1rem;
+            }
+
+            .farm-header {
+                flex-direction: row;
+                text-align: left;
+                gap: 1rem;
+                align-items: center;
+            }
+
+            .farm-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 0.9rem;
+                flex-shrink: 0;
+            }
+
+            .farm-info h3 {
+                font-size: 1.1rem;
+            }
+
+            .farm-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-button {
+                bottom: 1rem;
+                right: 1rem;
+                width: 48px;
+                height: 48px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-container {
+                flex-direction: row;
+                /* Keep horizontal even on small screens */
+            }
+
+            .logo-img {
+                height: 50px;
+            }
+
+            .nav-btn {
+                padding: 0.3rem 0.6rem;
+                /* Even smaller padding */
+                font-size: 0.75rem;
+                /* Smaller font */
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .farm-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .farm-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .farm-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .farm-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .farm-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .farm-card:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        /* Focus States for Accessibility */
+        .nav-btn:focus,
+        .farm-card:focus,
+        .action-button:focus {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <img src="/rosefarmmangement.jpeg" alt="Rose Farm Management" class="logo-img">
+            </a>
+            <div class="nav-actions">
+
+                <a href="#" class="nav-btn primary">📋 Settings</a>
+                <a href="#" class="nav-btn danger">Log Out</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Main Menu</h1>
+        </div>
+
+        <!-- Farms Section -->
+        <div class="farms-section">
+            <div class="section-header">
+                <h2 class="section-title">Farm Facilities</h2>
+            </div>
+
+            <div class="farms-grid">
+                <a href="http://127.0.0.1:5501/Farms/farm-1.html" class="farm-card loading">
+                    <div class="farm-header">
+                        <div class="farm-icon">VAS</div>
+                        <div class="farm-info">
+                            <h3>Vassilakos Farm</h3>
+
+                        </div>
+                    </div>
+
+                </a>
+
+                <a href="farm-2.html" class="farm-card loading">
+                    <div class="farm-header">
+                        <div class="farm-icon">EDG</div>
+                        <div class="farm-info">
+                            <h3>EDG Farm</h3>
+
+                        </div>
+                    </div>
+
+                </a>
+
+                <a href="farm-3.html" class="farm-card loading">
+                    <div class="farm-header">
+                        <div class="farm-icon">APO</div>
+                        <div class="farm-info">
+                            <h3>Apostolakos Farm</h3>
+
+                        </div>
+                    </div>
+
+                </a>
+
+                <a href="farm-4.html" class="farm-card loading">
+                    <div class="farm-header">
+                        <div class="farm-icon">SIG</div>
+                        <div class="farm-info">
+                            <h3>Sigma Farm</h3>
+
+                        </div>
+                    </div>
+
+                </a>
+
+                <a href="farm-5.html" class="farm-card loading">
+                    <div class="farm-header">
+                        <div class="farm-icon">DFI</div>
+                        <div class="farm-info">
+                            <h3>DFI Farm</h3>
+
+                        </div>
+                    </div>
+
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Button -->
+    <button class="action-button" onclick="window.location.reload()" title="Refresh Data">
+        ↻
+    </button>
+
+    <script>
+        // Professional interactions and functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            // Intersection Observer for loading animations
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            // Observe all farm cards
+            document.querySelectorAll('.farm-card').forEach(card => {
+                observer.observe(card);
+            });
+
+            // Add professional click feedback
+            document.querySelectorAll('.farm-card, .nav-btn').forEach(element => {
+                element.addEventListener('click', function (e) {
+                    this.style.transform = 'scale(0.98)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+
+            // Action button functionality
+            const actionButton = document.querySelector('.action-button');
+            actionButton.addEventListener('click', function () {
+                this.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                    window.location.reload();
+                }, 200);
+            });
+
+            // Navigation button interactions
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const text = this.textContent.trim();
+
+                    if (text.includes('Emergency')) {
+                        if (confirm('Are you sure you want to access emergency procedures?')) {
+                            alert('Emergency protocols activated. Contact: +1-555-FARM-911');
+                        }
+                    } else if (text.includes('Analytics')) {
+                        alert('Analytics dashboard coming soon...');
+                    } else if (text.includes('Reports')) {
+                        alert('Generating reports...');
+                    }
+                });
+            });
+        });
+
+        // Professional data updates with validation
+        function updateDashboardData() {
+            const statNumbers = document.querySelectorAll('.stat-number');
+            const trends = document.querySelectorAll('.stat-trend');
+
+            statNumbers.forEach((stat, index) => {
+                const currentText = stat.textContent;
+
+                if (currentText.includes('K')) {
+                    const currentValue = parseFloat(currentText);
+                    const variation = (Math.random() - 0.5) * 0.05; // Smaller, more realistic variations
+                    const newValue = Math.max(10, currentValue + variation).toFixed(1);
+                    stat.textContent = newValue + 'K';
+                } else if (currentText.includes('%')) {
+                    const currentValue = parseFloat(currentText);
+                    const variation = (Math.random() - 0.5) * 0.1;
+                    const newValue = Math.max(0, Math.min(100, currentValue + variation)).toFixed(1);
+                    stat.textContent = newValue + '%';
+
+                    // Update trend indicator
+                    if (trends[index]) {
+                        const change = variation > 0 ? '+' : '';
+                        trends[index].textContent = `${change}${variation.toFixed(1)}% today`;
+                        trends[index].style.color = variation > 0 ? 'var(--success-green)' : 'var(--danger-red)';
+                    }
+                }
+            });
+        }
+
+        // Update data every 30 seconds (more professional interval)
+        setInterval(updateDashboardData, 30000);
+
+        // Keyboard accessibility
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'r' && e.ctrlKey) {
+                e.preventDefault();
+                document.querySelector('.action-button').click();
+            }
+        });
+    </script>
+</body>
+
+</html>

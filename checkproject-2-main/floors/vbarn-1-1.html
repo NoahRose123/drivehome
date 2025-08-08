@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/png" href="/icon.png?v=2">
+<link rel="apple-touch-icon" href="/icon.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="/iconcropped.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/iconcropped.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1a365d">
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Mortality Card - Rose Farm</title>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+   
+   <style>
+/* Tooltip styles */
+.tooltip {
+   position: relative;
+   display: inline-block;
+   width: 100%;
+   height: 100%;
+}
+
+.tooltip .tooltiptext {
+   visibility: hidden;
+   width: 200px;
+   background-color: #333;
+   color: #fff;
+   text-align: center;
+   border-radius: 6px;
+   padding: 8px;
+   position: absolute;
+   z-index: 1000;
+   bottom: 125%;
+   left: 50%;
+   margin-left: -100px;
+   font-size: 12px;
+   box-shadow: 0px 2px 8px rgba(0,0,0,0.2);
+   opacity: 0;
+   transition: opacity 0.3s;
+   pointer-events: none;
+   white-space: nowrap;
+}
+
+.tooltip .tooltiptext::after {
+   content: "";
+   position: absolute;
+   top: 100%;
+   left: 50%;
+   margin-left: -5px;
+   border-width: 5px;
+   border-style: solid;
+   border-color: #333 transparent transparent transparent;
+}
+
+tr:first-child .tooltip .tooltiptext {
+   bottom: auto;
+   top: 125%;
+}
+
+tr:first-child .tooltip .tooltiptext::after {
+   top: auto;
+   bottom: 100%;
+   border-color: transparent transparent #333 transparent;
+}
+
+.tooltip:hover .tooltiptext {
+   visibility: visible;
+   opacity: 1;
+}
+
+.mortality-cell {
+   position: relative;
+   cursor: pointer;
+}
+
+/* Floor Toggle Styles */
+.floor-toggle-container {
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   margin-bottom: 20px;
+   padding: 15px;
+   background: #fff;
+   border-radius: 10px;
+   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.floor-toggle {
+   position: relative;
+   display: inline-block;
+   width: 200px;
+   height: 50px;
+   background-color: #e0e0e0;
+   border-radius: 25px;
+   cursor: pointer;
+   transition: background-color 0.3s ease;
+}
+
+.floor-toggle input {
+   opacity: 0;
+   width: 0;
+   height: 0;
+}
+
+.floor-toggle-slider {
+   position: absolute;
+   cursor: pointer;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background-color: #d32f2f;
+   transition: .4s;
+   border-radius: 25px;
+}
+
+.floor-toggle-slider:before {
+   position: absolute;
+   content: "";
+   height: 42px;
+   width: 42px;
+   left: 4px;
+   bottom: 4px;
+   background-color: white;
+   transition: .4s;
+   border-radius: 50%;
+}
+
+.floor-toggle input:checked + .floor-toggle-slider {
+   background-color: #d32f2f;
+}
+
+.floor-toggle input:checked + .floor-toggle-slider:before {
+   transform: translateX(146px);
+}
+
+.floor-toggle-labels {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   position: absolute;
+   width: 100%;
+   height: 100%;
+   padding: 0 20px;
+   font-weight: bold;
+   color: white;
+   font-size: 14px;
+   z-index: 1;
+}
+
+.floor-toggle-label {
+   transition: opacity 0.3s ease;
+}
+
+.floor-toggle input:not(:checked) ~ .floor-toggle-labels .top-label {
+   opacity: 1;
+}
+
+.floor-toggle input:not(:checked) ~ .floor-toggle-labels .bottom-label {
+   opacity: 0.5;
+}
+
+.floor-toggle input:checked ~ .floor-toggle-labels .top-label {
+   opacity: 0.5;
+}
+
+.floor-toggle input:checked ~ .floor-toggle-labels .bottom-label {
+   opacity: 1;
+}
+
+/* Base styles */
+body {
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   background-color: #f9f9f9;
+   margin: 0;
+   padding: 20px;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+}
+
+h2 {
+   color: #d32f2f;
+   text-align: center;
+   margin-bottom: 24px;
+   font-size: clamp(21px, 5vw, 30px);
+   font-weight: 600;
+}
+h3 {
+   font-size: clamp(16px, 3vw, 20px);
+   margin-top: 10px;
+   margin-bottom: 10px;
+}
+
+/* Main Layout - Keeps Everything Centered */
+.main-layout {
+   display: flex;
+   flex-direction: column;
+   width: 100%;
+   max-width: 1200px;
+   margin: 0 auto;
+}
+
+/* Farm Info Box */
+.farm-info-box {
+   width: 100%;
+   padding: 15px;
+   margin-bottom: 20px;
+}
+
+.header-box {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+   gap: 10px;
+}
+
+/* Flexbox Layout for Calendar + Ammonia Section */
+.content-layout {
+   display: flex;
+   flex-direction: row;
+   flex-wrap: wrap;
+   justify-content: space-between;
+   align-items: flex-start;
+   gap: 20px;
+   width: 100%;
+}
+
+/* Calendar Container */
+.calendar-container {
+   flex: 1 1 600px;
+   min-width: 0;
+}
+
+/* Mortality Table */
+#mortality_table {
+   width: 100%;
+   border-collapse: collapse;
+   margin: 0 auto;
+   background-color: white;
+   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+   border-radius: 8px;
+   overflow: hidden;
+   border: none;
+   font-size: clamp(12px, 2vw, 16px);
+   table-layout: fixed;
+}
+
+#mortality_table th {
+   text-align: center;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: clip;
+   font-size: 15px;
+   padding: 4px;
+   background-color:#d32f2f;
+   color:#fff;
+}
+#mortality_table td {
+   width: 100px;  
+   height: 100px; 
+   max-width: 100px; 
+   max-height: 100px;
+   overflow: visible;
+   text-align: center;
+   vertical-align: middle;
+   padding: 0;
+}
+.calendar-header h3 {
+   font-size: 28px;
+}
+#mortality_table tr:last-child td {
+   border-bottom: none;
+}
+
+#mortality_table tr:nth-child(even) {
+   background-color: #f8f8f8;
+}
+
+#mortality_table tr:hover {
+   background-color: #fff3f3;
+}
+
+#mortality_table td:first-child {
+   font-weight: 500;
+   color: #555;
+}
+
+#mortality_table td:nth-child(2) {
+   color: #333;
+}
+.custom-info-box {
+   display: flex;
+   flex-direction: column;
+   justify-content: stretch;
+   height: 100%;
+}
+.side-column,
+.custom-info-box {
+   height: 831px !important;
+}
+
+.custom-info-title {
+   font-size: clamp(14px, 2.5vw, 16px);
+   margin-top: 5px;
+   margin-bottom: 5px;
+}
+
+.side-column {
+   width: 280px;
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+   flex-shrink: 0;
+   position: relative;
+   padding-top: 110px;
+}
+
+.custom-ammonia-table {
+   width: 100%;
+   height: 100%;
+   table-layout: fixed;
+   border-collapse: collapse;
+   flex-grow: 1;
+}
+
+.custom-ammonia-table tbody {
+   display: flex;
+   flex-direction: column;
+   justify-content: space-between;
+   flex-grow: 1;
+   width: 100%;
+   height:95%;
+}
+.custom-ammonia-table tr {
+   flex-grow: 1;
+   display: flex;
+   width: 100%;
+}
+.custom-ammonia-table thead {
+   display: table;
+   width: 100%;
+   table-layout: fixed;
+}
+
+.custom-ammonia-table th, 
+.custom-ammonia-table td {
+   padding: 8px;
+   text-align: center;
+   border: 1px solid #d32f2f;
+   flex: 1;
+}
+
+.custom-ammonia-table th {
+   background-color: #f8d7da;
+   border: 1px solid #d32f2f;
+}
+
+.custom-ammonia-table td {
+   background-color: #fff;
+}
+
+.farm-totals-box {
+   margin-top: 15px;
+   padding: 10px;
+   background: #fff;
+   border: 2px solid #d32f2f;
+   border-radius: 8px;
+   width: clamp(200px, 30%, 250px);
+   text-align: center;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: bold;
+   color: #333;
+   order: 1;
+}
+
+.cell-content {
+   position: relative;
+   width: 100%;
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+}
+
+.cell-content span {
+   font-size: clamp(10px, 1.8vw, 14px);
+}
+
+.cell-content span.top-left {
+   position: absolute;
+   top: 5px;
+   left: 5px;
+}
+
+.cell-content span.center {
+   position: relative;
+   font-weight: bold;
+}
+
+.cell-content span.bottom-right {
+   position: absolute;
+   bottom: 5px;
+   right: 5px;
+}
+
+.save-button-container {
+ display: flex;
+ justify-content: flex-end;
+ margin-top: 15px;
+ width: 100%;
+}
+
+.save-button {
+ background-color: #d32f2f;
+ color: white;
+ border: none;
+ border-radius: 5px;
+ padding: 10px 20px;
+ font-size: 16px;
+ font-weight: bold;
+ cursor: pointer;
+ box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+ transition: all 0.3s ease;
+}
+
+.save-button:hover {
+ background-color: #b71c1c;
+ box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.save-button:active {
+ transform: translateY(2px);
+ box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.calendar-header {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-bottom: 10px;
+}
+
+.farm-totals-box {
+   margin-top: 0;
+   padding: 10px;
+   background: #fff;
+   border: 2px solid #d32f2f;
+   border-radius: 8px;
+   width: clamp(200px, 30%, 250px);
+   text-align: center;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: bold;
+   color: #333;
+}
+
+.notes-info-box {
+   width: 250px;
+   padding: 10px;
+   background-color: #ffffff;
+   border: 2px solid #d32f2f;
+   border-radius: 10px;
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+   text-align: left;
+   flex: 0 1 auto;
+   margin-top: 20px;
+   order: 3;
+}
+
+.notes-content {
+   padding: 10px;
+   background-color: #fff;
+   border: 1px solid #eee;
+   border-radius: 5px;
+   min-height: 80px;
+   max-height: 200px;
+   overflow-y: auto;
+   word-wrap: break-word;
+   line-height: 1.4;
+   font-size: clamp(12px, 1.8vw, 14px);
+   height:200px;
+}
+
+.content-layout {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+   gap: 20px;
+   width: 100%;
+}
+
+.calendar-container {
+   flex: 1;
+   min-width: 0;
+}
+
+.side-column {
+   width: 280px;
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+   flex-shrink: 0;
+   position: relative;
+   padding-top: 110px;
+   margin-top:-25px;
+   height:900px;
+}
+
+.notes-info-box {
+   width: 100%;
+   padding: 15px;
+   background-color: #ffffff;
+   border: 2px solid #d32f2f;
+   margin-top:-100px;
+   order: 1;
+   height:400px;
+}
+
+.custom-info-box {
+   width: 100%;
+   padding: 15px;
+   border-radius: 10px;
+   order: 2;
+   flex-grow: 1;
+   display: flex;
+   flex-direction: column;
+}
+
+.hide-notes-duplicate {
+   display: none;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 1024px) {
+   .content-layout {
+       gap: 15px;
+   }
+   
+   .calendar-container {
+       flex: 1 0 100%;
+       order: 1;
+   }
+   
+   .custom-info-box {
+       width: 100%;
+       max-width: 400px;
+       margin: 0 auto;
+       order: 3;
+   }
+   
+   .notes-info-box {
+       order: 3;
+   }
+   
+   .custom-info-box {
+       order: 4;
+   }
+}
+
+@media (max-width: 768px) {
+   .save-button {
+       font-size: 14px;
+       padding: 8px 16px;
+   }
+   
+   .floor-toggle {
+       width: 160px;
+       height: 40px;
+   }
+   
+   .floor-toggle-slider:before {
+       height: 32px;
+       width: 32px;
+   }
+   
+   .floor-toggle input:checked + .floor-toggle-slider:before {
+       transform: translateX(116px);
+   }
+}
+
+@media (max-width: 650px) {
+   body {
+       padding: 10px;
+   }
+   
+   .farm-info-box {
+       padding: 10px;
+   }
+   
+   .header-box {
+       grid-template-columns: 1fr;
+   }
+   
+   #mortality_table {
+       font-size: 12px;
+   }
+   
+   #mortality_table th, 
+   #mortality_table td {
+       padding: 8px;
+   }
+   
+   .calendar-header {
+       flex-direction: column;
+       align-items: flex-start;
+   }
+   
+   .farm-totals-box {
+       margin-top: 10px;
+       width: 100%;
+       max-width: none;
+   }
+}
+
+@media (max-width: 480px) {
+   body {
+       padding: 5px;
+   }
+   
+   .farm-info-box,
+   .custom-info-box {
+       padding: 8px;
+       border-width: 1px;
+   }
+   
+   .farm-totals-box {
+       width: 90%;
+       max-width: none;
+   }
+   
+   h2 {
+       margin-bottom: 15px;
+   }
+   
+   .save-button-container {
+       justify-content: center;
+   }
+   
+   .notes-info-box {
+       padding: 8px;
+       border-width: 1px;
+   }
+   
+   .notes-content {
+       min-height: 60px;
+       padding: 8px;
+   }
+}
+</style>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Mortality Card - Rose Farm</title>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+   
+   <style>
+/* Tooltip styles */
+.tooltip {
+   position: relative;
+   display: inline-block;
+   width: 100%;
+   height: 100%;
+}
+
+.tooltip .tooltiptext {
+   visibility: hidden;
+   width: 200px;
+   background-color: #333;
+   color: #fff;
+   text-align: center;
+   border-radius: 6px;
+   padding: 8px;
+   position: absolute;
+   z-index: 1000;
+   bottom: 125%;
+   left: 50%;
+   margin-left: -100px;
+   font-size: 12px;
+   box-shadow: 0px 2px 8px rgba(0,0,0,0.2);
+   opacity: 0;
+   transition: opacity 0.3s;
+   pointer-events: none;
+   white-space: nowrap;
+}
+
+.tooltip .tooltiptext::after {
+   content: "";
+   position: absolute;
+   top: 100%;
+   left: 50%;
+   margin-left: -5px;
+   border-width: 5px;
+   border-style: solid;
+   border-color: #333 transparent transparent transparent;
+}
+
+tr:first-child .tooltip .tooltiptext {
+   bottom: auto;
+   top: 125%;
+}
+
+tr:first-child .tooltip .tooltiptext::after {
+   top: auto;
+   bottom: 100%;
+   border-color: transparent transparent #333 transparent;
+}
+
+.tooltip:hover .tooltiptext {
+   visibility: visible;
+   opacity: 1;
+}
+
+.mortality-cell {
+   position: relative;
+   cursor: pointer;
+}
+
+/* Floor Toggle Styles */
+.floor-toggle-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.floor-label {
+    font-weight: bold;
+    color: #333;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+.floor-toggle {
+    position: relative;
+    display: inline-block;
+    width: 200px;
+    height: 50px;
+    cursor: pointer;
+}
+
+.floor-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.floor-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #d32f2f;
+    transition: .4s;
+    border-radius: 25px;
+}
+
+.floor-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 42px;
+    width: 42px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.floor-toggle input:checked + .floor-toggle-slider:before {
+    transform: translateX(150px);
+}
+
+/* Active label styling */
+.floor-toggle input:not(:checked) ~ .floor-toggle-container .floor-label:first-child,
+.floor-toggle-container:has(input:not(:checked)) .floor-label:first-child {
+    color: #d32f2f;
+}
+
+.floor-toggle input:checked ~ .floor-toggle-container .floor-label:last-child,
+.floor-toggle-container:has(input:checked) .floor-label:last-child {
+    color: #d32f2f;
+}
+
+@media (max-width: 768px) {
+    .floor-toggle-container {
+        gap: 15px;
+    }
+    
+    .floor-label {
+        font-size: 14px;
+    }
+    
+    .floor-toggle {
+        width: 160px;
+        height: 40px;
+    }
+    
+    .floor-toggle-slider:before {
+        height: 32px;
+        width: 32px;
+    }
+    
+    .floor-toggle input:checked + .floor-toggle-slider:before {
+        transform: translateX(116px);
+    }
+}
+/* Base styles */
+body {
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   background-color: #f9f9f9;
+   margin: 0;
+   padding: 20px;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+}
+
+h2 {
+   color: #d32f2f;
+   text-align: center;
+   margin-bottom: 24px;
+   font-size: clamp(21px, 5vw, 30px);
+   font-weight: 600;
+}
+h3 {
+   font-size: clamp(16px, 3vw, 20px);
+   margin-top: 10px;
+   margin-bottom: 10px;
+}
+
+/* Main Layout - Keeps Everything Centered */
+.main-layout {
+   display: flex;
+   flex-direction: column;
+   width: 100%;
+   max-width: 1200px;
+   margin: 0 auto;
+}
+
+/* Farm Info Box */
+.farm-info-box {
+   width: 100%;
+   padding: 15px;
+   margin-bottom: 20px;
+}
+
+.header-box {
+   display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+   gap: 10px;
+}
+
+/* Flexbox Layout for Calendar + Ammonia Section */
+.content-layout {
+   display: flex;
+   flex-direction: row;
+   flex-wrap: wrap;
+   justify-content: space-between;
+   align-items: flex-start;
+   gap: 20px;
+   width: 100%;
+}
+
+/* Calendar Container */
+.calendar-container {
+   flex: 1 1 600px;
+   min-width: 0;
+}
+
+/* Mortality Table */
+#mortality_table {
+   width: 100%;
+   border-collapse: collapse;
+   margin: 0 auto;
+   background-color: white;
+   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+   border-radius: 8px;
+   overflow: hidden;
+   border: none;
+   font-size: clamp(12px, 2vw, 16px);
+   table-layout: fixed;
+}
+
+#mortality_table th {
+   text-align: center;
+   white-space: nowrap;
+   overflow: hidden;
+   text-overflow: clip;
+   font-size: 15px;
+   padding: 4px;
+   background-color:#d32f2f;
+   color:#fff;
+}
+#mortality_table td {
+   width: 100px;  
+   height: 100px; 
+   max-width: 100px; 
+   max-height: 100px;
+   overflow: visible;
+   text-align: center;
+   vertical-align: middle;
+   padding: 0;
+}
+.calendar-header h3 {
+   font-size: 28px;
+}
+#mortality_table tr:last-child td {
+   border-bottom: none;
+}
+
+#mortality_table tr:nth-child(even) {
+   background-color: #f8f8f8;
+}
+
+#mortality_table tr:hover {
+   background-color: #fff3f3;
+}
+
+#mortality_table td:first-child {
+   font-weight: 500;
+   color: #555;
+}
+
+#mortality_table td:nth-child(2) {
+   color: #333;
+}
+.custom-info-box {
+   display: flex;
+   flex-direction: column;
+   justify-content: stretch;
+   height: 100%;
+}
+.side-column,
+.custom-info-box {
+   height: 831px !important;
+}
+
+.custom-info-title {
+   font-size: clamp(14px, 2.5vw, 16px);
+   margin-top: 5px;
+   margin-bottom: 5px;
+}
+
+.side-column {
+   width: 280px;
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+   flex-shrink: 0;
+   position: relative;
+   padding-top: 110px;
+}
+
+.custom-ammonia-table {
+   width: 100%;
+   height: 100%;
+   table-layout: fixed;
+   border-collapse: collapse;
+   flex-grow: 1;
+}
+
+.custom-ammonia-table tbody {
+   display: flex;
+   flex-direction: column;
+   justify-content: space-between;
+   flex-grow: 1;
+   width: 100%;
+   height:95%;
+}
+.custom-ammonia-table tr {
+   flex-grow: 1;
+   display: flex;
+   width: 100%;
+}
+.custom-ammonia-table thead {
+   display: table;
+   width: 100%;
+   table-layout: fixed;
+}
+
+.custom-ammonia-table th, 
+.custom-ammonia-table td {
+   padding: 8px;
+   text-align: center;
+   border: 1px solid #d32f2f;
+   flex: 1;
+}
+
+.custom-ammonia-table th {
+   background-color: #f8d7da;
+   border: 1px solid #d32f2f;
+}
+
+.custom-ammonia-table td {
+   background-color: #fff;
+}
+
+.farm-totals-box {
+   margin-top: 15px;
+   padding: 10px;
+   background: #fff;
+   border: 2px solid #d32f2f;
+   border-radius: 8px;
+   width: clamp(200px, 30%, 250px);
+   text-align: center;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: bold;
+   color: #333;
+   order: 1;
+}
+
+.cell-content {
+   position: relative;
+   width: 100%;
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+}
+
+.cell-content span {
+   font-size: clamp(10px, 1.8vw, 14px);
+}
+
+.cell-content span.top-left {
+   position: absolute;
+   top: 5px;
+   left: 5px;
+}
+
+.cell-content span.center {
+   position: relative;
+   font-weight: bold;
+}
+
+.cell-content span.bottom-right {
+   position: absolute;
+   bottom: 5px;
+   right: 5px;
+}
+
+.save-button-container {
+ display: flex;
+ justify-content: flex-end;
+ margin-top: 15px;
+ width: 100%;
+}
+
+.save-button {
+ background-color: #d32f2f;
+ color: white;
+ border: none;
+ border-radius: 5px;
+ padding: 10px 20px;
+ font-size: 16px;
+ font-weight: bold;
+ cursor: pointer;
+ box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+ transition: all 0.3s ease;
+}
+
+.save-button:hover {
+ background-color: #b71c1c;
+ box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.save-button:active {
+ transform: translateY(2px);
+ box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.calendar-header {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   margin-bottom: 10px;
+}
+
+.farm-totals-box {
+   margin-top: 0;
+   padding: 10px;
+   background: #fff;
+   border: 2px solid #d32f2f;
+   border-radius: 8px;
+   width: clamp(200px, 30%, 250px);
+   text-align: center;
+   font-size: clamp(14px, 2vw, 16px);
+   font-weight: bold;
+   color: #333;
+}
+
+.notes-info-box {
+   width: 250px;
+   padding: 10px;
+   background-color: #ffffff;
+   border: 2px solid #d32f2f;
+   border-radius: 10px;
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+   text-align: left;
+   flex: 0 1 auto;
+   margin-top: 20px;
+   order: 3;
+}
+
+.notes-content {
+   padding: 10px;
+   background-color: #fff;
+   border: 1px solid #eee;
+   border-radius: 5px;
+   min-height: 80px;
+   max-height: 200px;
+   overflow-y: auto;
+   word-wrap: break-word;
+   line-height: 1.4;
+   font-size: clamp(12px, 1.8vw, 14px);
+   height:200px;
+}
+
+.content-layout {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+   gap: 20px;
+   width: 100%;
+}
+
+.calendar-container {
+   flex: 1;
+   min-width: 0;
+}
+
+.side-column {
+   width: 280px;
+   display: flex;
+   flex-direction: column;
+   gap: 20px;
+   flex-shrink: 0;
+   position: relative;
+   padding-top: 110px;
+   margin-top:-25px;
+   height:900px;
+}
+
+.notes-info-box {
+   width: 100%;
+   padding: 15px;
+   background-color: #ffffff;
+   border: 2px solid #d32f2f;
+   margin-top:-100px;
+   order: 1;
+   height:400px;
+}
+
+.custom-info-box {
+   width: 100%;
+   padding: 15px;
+   border-radius: 10px;
+   order: 2;
+   flex-grow: 1;
+   display: flex;
+   flex-direction: column;
+}
+
+.hide-notes-duplicate {
+   display: none;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 1024px) {
+   .content-layout {
+       gap: 15px;
+   }
+   
+   .calendar-container {
+       flex: 1 0 100%;
+       order: 1;
+   }
+   
+   .custom-info-box {
+       width: 100%;
+       max-width: 400px;
+       margin: 0 auto;
+       order: 3;
+   }
+   
+   .notes-info-box {
+       order: 3;
+   }
+   
+   .custom-info-box {
+       order: 4;
+   }
+}
+
+@media (max-width: 768px) {
+   .save-button {
+       font-size: 14px;
+       padding: 8px 16px;
+   }
+   
+   .floor-toggle {
+       width: 160px;
+       height: 40px;
+   }
+   
+   .floor-toggle-slider:before {
+       height: 32px;
+       width: 32px;
+   }
+   
+   .floor-toggle input:checked + .floor-toggle-slider:before {
+       transform: translateX(116px);
+   }
+}
+
+@media (max-width: 650px) {
+   body {
+       padding: 10px;
+   }
+   
+   .farm-info-box {
+       padding: 10px;
+   }
+   
+   .header-box {
+       grid-template-columns: 1fr;
+   }
+   
+   #mortality_table {
+       font-size: 12px;
+   }
+   
+   #mortality_table th, 
+   #mortality_table td {
+       padding: 8px;
+   }
+   
+   .calendar-header {
+       flex-direction: column;
+       align-items: flex-start;
+   }
+   
+   .farm-totals-box {
+       margin-top: 10px;
+       width: 100%;
+       max-width: none;
+   }
+}
+
+@media (max-width: 480px) {
+   body {
+       padding: 5px;
+   }
+   
+   .farm-info-box,
+   .custom-info-box {
+       padding: 8px;
+       border-width: 1px;
+   }
+   
+   .farm-totals-box {
+       width: 90%;
+       max-width: none;
+   }
+   
+   h2 {
+       margin-bottom: 15px;
+   }
+   
+   .save-button-container {
+       justify-content: center;
+   }
+   
+   .notes-info-box {
+       padding: 8px;
+       border-width: 1px;
+   }
+   
+   .notes-content {
+       min-height: 60px;
+       padding: 8px;
+   }
+}
+</style>
+
+   <script type="module">
+       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+       import { 
+           getFirestore, collection, doc, onSnapshot, deleteDoc, getDocs
+       } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+       const firebaseConfig = {
+           apiKey: "API_KEY",
+           authDomain: "chicken-project-2.firebaseapp.com",
+           projectId: "chicken-project-2",
+           storageBucket: "chicken-project-2.firebasestorage.app",
+           messagingSenderId: "596273529964",
+           appId: "1:596273529964:web:bd51e2646d5ed48afa4449",
+           measurementId: "G-9YLPHR08DB"
+       };
+
+       const app = initializeApp(firebaseConfig);
+       const db = getFirestore(app);
+
+       let startDate = null;
+       let birdPlacement = 0;
+       let currentFloor = 'bottom'; // Default to bottom floor
+
+       function getCurrentFloorData() {
+           return currentFloor === 'top' ? 'top_floor' : 'bottom_floor';
+       }
+
+       function getCurrentCollection() {
+           return currentFloor === 'top' ? 'vas-b1-f2-MC' : 'vas-b1-f1-MC';
+       }
+
+       function getCurrentAmmoniaCollection() {
+           return currentFloor === 'top' ? 'ammonia_levels_f2' : 'ammonia_levels';
+       }
+
+       function fetchFirestoreData() {
+           const docRef = doc(db, "startnewcrop", "vas-b1-snc");
+
+           onSnapshot(docRef, (docSnap) => {
+               if (docSnap.exists()) {
+                   const data = docSnap.data();
+                   const floorData = data[getCurrentFloorData()] || {};
+
+                   document.getElementById("barn_number").innerText = data.barn_number || "N/A";
+                   birdPlacement = parseInt(floorData.birds_placed) || 0;
+                   document.getElementById("amount_placed").innerText = birdPlacement;
+                   document.getElementById("sex").innerText = floorData.sex || "N/A";
+                   document.getElementById("quota_period").innerText = data.quota_period || "N/A";
+                   document.getElementById("hatchery").innerText = data.Hatchery || "N/A";
+                   document.getElementById("hatch_id").innerText = data["Hatch ID#"] || "N/A";
+                   document.getElementById("notes").innerText = floorData.notes || "No notes available.";
+                   document.getElementById("notes_display").innerText = floorData.notes || "No notes available.";
+
+                   document.getElementById("farm_name").innerText = data.farm_name || "N/A";
+                   document.getElementById("farm_number").innerText = data.farm_number || "N/A";
+
+                   // Update floor indicator
+                   document.getElementById("floor_indicator").innerText = currentFloor === 'top' ? '-Top' : '-Bottom';
+
+                   if (data.date_started && data.date_started.seconds) {
+                       const tempDate = new Date(data.date_started.seconds * 1000);
+                       const localYear = tempDate.getFullYear();
+                       const localMonth = (tempDate.getMonth() + 1).toString().padStart(2, '0');
+                       const localDay = tempDate.getDate().toString().padStart(2, '0');
+                       const localDateString = `${localYear}-${localMonth}-${localDay}`;
+                       
+                       startDate = new Date(localYear, tempDate.getMonth(), tempDate.getDate());
+                       startDate.setHours(0, 0, 0, 0);
+
+                       document.getElementById("date_placed").innerText = localDateString;
+                       
+                       console.log("✅ Correctly parsed start date:", localDateString);
+
+                       generateCalendar();
+                       updateMortalityTable();
+                   }
+               }
+           });
+       }
+
+       function generateCalendar() {
+           if (!startDate) return;
+
+           const table = document.getElementById("mortality_table");
+           const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+           const startDayIndex = startDate.getDay();
+           
+          let thead = "<thead><tr><th>Week</th>";
+           for (let i = 0; i < 7; i++) {
+               thead += `<th>${weekDays[(startDayIndex + i) % 7]}</th>`;
+           }
+           thead += "<th>Week Total</th><th>Grand Total</th></tr></thead>";
+
+           let tbody = "<tbody>";
+           for (let week = 1; week <= 8; week++) {
+               tbody += `<tr><td>Week ${week}</td>`;
+               for (let day = 0; day < 7; day++) {
+                   const cellDate = new Date(startDate.getTime());
+                   cellDate.setDate(startDate.getDate() + (week - 1) * 7 + day);
+                   cellDate.setHours(0, 0, 0, 0); 
+
+                   const year = cellDate.getFullYear();
+                   const month = String(cellDate.getMonth() + 1).padStart(2, '0');
+                   const dayOfMonth = String(cellDate.getDate()).padStart(2, '0');
+                   const cellId = `${year}-${month}-${dayOfMonth}`;
+
+                   const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                   const formattedDate = cellDate.toLocaleDateString('en-US', options);
+
+                   tbody += `
+                       <td id="${cellId}" class="mortality-cell" data-date="${cellId}">
+                           <div class="cell-content tooltip">
+                               <span class="tooltiptext">${formattedDate}</span>
+                               <span class="cell-data"></span>
+                           </div>
+                       </td>`;
+               }
+               tbody += `<td id="week_total_${week}">0</td><td id="grand_total_${week}">0</td></tr>`;
+           }
+           tbody += "</tbody>";
+
+           table.innerHTML = thead + tbody;
+       }
+
+       function updateMortalityTable() {
+           const collectionRef = collection(db, getCurrentCollection());
+           const weekTotals = Array(8).fill(0);
+           const cullsPerWeek = Array(8).fill(0);
+           const mortalityPerWeek = Array(8).fill(0);
+           let totalBirds = 0;
+
+           onSnapshot(collectionRef, (snapshot) => {
+               // Clear previous data
+               weekTotals.fill(0);
+               cullsPerWeek.fill(0);
+               mortalityPerWeek.fill(0);
+               totalBirds = 0;
+
+               // Clear all cells
+               const cells = document.querySelectorAll('.mortality-cell .cell-data');
+               cells.forEach(cell => cell.innerHTML = '');
+
+               snapshot.forEach((doc) => {
+                   const data = doc.data();
+                   const date = data.date;
+                   const cell = document.getElementById(date);
+
+                   if (cell) {
+                       const cellContent = cell.querySelector(".cell-data");
+                       if (cellContent) {
+                           const culls = parseInt(data.culls) || 0;
+                           const mortality = parseInt(data.mortality) || 0;
+                           const total = culls + mortality;
+
+                           cellContent.innerHTML = `
+                               <span class="top-left">${culls}</span>
+                               <span class="center"><b>${total}</b></span>
+                               <span class="bottom-right">${mortality}</span>
+                           `;
+
+                           const cellDate = new Date(date);
+                           const dayDifference = Math.floor((cellDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+                           const weekIndex = Math.floor(dayDifference / 7);
+
+                           if (weekIndex >= 0 && weekIndex < 8) {
+                               weekTotals[weekIndex] += total;
+                               cullsPerWeek[weekIndex] += culls;
+                               mortalityPerWeek[weekIndex] += mortality;
+                               totalBirds += total;
+                           }
+                       }
+                   }
+               });
+
+               let cumulativeTotal = 0;
+
+               weekTotals.forEach((weekTotal, index) => {
+                   cumulativeTotal += weekTotal;
+
+                   if (index === 0) {
+                       document.getElementById(`week_total_${index + 1}`).innerHTML = `
+                           Cull: ${cullsPerWeek[index]}<br>
+                           Mort: ${mortalityPerWeek[index]}
+                       `;
+                   } else {
+                       document.getElementById(`week_total_${index + 1}`).innerText = weekTotal;
+                   }
+
+                   document.getElementById(`grand_total_${index + 1}`).innerText = cumulativeTotal;
+               });
+
+               document.getElementById("total_mortality").innerText = cumulativeTotal;
+               document.getElementById("mortality_percentage").innerText = birdPlacement > 0 ? 
+                   ((totalBirds / birdPlacement) * 100).toFixed(2) + "%" : "0.00%";
+           });
+       }
+
+       function fetchAmmoniaLevels() {
+           console.log("📊 Fetching ammonia levels data...");
+           
+           const checkStartDate = setInterval(() => {
+               if (startDate) {
+                   clearInterval(checkStartDate);
+                   console.log("✅ Start date available:", startDate);
+                   
+                   const dayIntervals = [21, 28, 35, 42, 49, 56];
+                   
+                   for (let i = 0; i < dayIntervals.length; i++) {
+                       const targetDate = new Date(startDate.getTime());
+                       targetDate.setDate(startDate.getDate() + dayIntervals[i] - 1);
+                       
+                       const year = targetDate.getFullYear();
+                       const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+                       const day = String(targetDate.getDate()).padStart(2, '0');
+                       const dateStr = `${year}-${month}-${day}`;
+                       
+                       document.getElementById(`date_${i + 1}`).innerText = dateStr;
+                   }
+                   
+                   fetchAmmoniaReadings();
+               }
+           }, 500);
+       }
+
+       function fetchAmmoniaReadings() {
+           const ammoniaDocRef = doc(db, getCurrentAmmoniaCollection(), "fixed_days");
+           
+           onSnapshot(ammoniaDocRef, (docSnap) => {
+               if (!docSnap.exists()) {
+                   console.warn(`No ammonia doc found at ${getCurrentAmmoniaCollection()}/fixed_days`);
+                   for (let i = 1; i <= 6; i++) {
+                       document.getElementById(`level_${i}`).innerText = "N/A";
+                   }
+                   return;
+               }
+               
+               const data = docSnap.data();
+               const dayIntervals = [21, 28, 35, 42, 49, 56];
+               for (let i = 0; i < dayIntervals.length; i++) {
+                   const fieldName = `day_${dayIntervals[i]}`;
+                   const val = data[fieldName] !== undefined ? data[fieldName] : "N/A";
+                   document.getElementById(`level_${i + 1}`).innerText = val;
+               }
+           }, (err) => {
+               console.error("Error fetching ammonia levels:", err);
+               for (let i = 1; i <= 6; i++) {
+                   document.getElementById(`level_${i}`).innerText = "N/A";
+               }
+           });
+       }
+
+function switchFloor() {
+    const toggle = document.getElementById('floor_toggle');
+    currentFloor = toggle.checked ? 'top' : 'bottom';  // Flipped the logic
+    
+    console.log(`Switching to ${currentFloor} floor`);
+    
+    // Clear existing data
+    document.getElementById("mortality_table").innerHTML = "";
+    document.getElementById("total_mortality").innerText = "0";
+    document.getElementById("mortality_percentage").innerText = "0%";
+    
+    // Fetch new data
+    fetchFirestoreData();
+    fetchAmmoniaLevels();
+}
+
+       window.resetCalendar = async function() {
+           try {                  
+               const mortalityCollection = collection(db, getCurrentCollection());
+               const snapshot = await getDocs(mortalityCollection);
+
+               if (snapshot.empty) {
+                   alert("No data to reset.");
+                   return;
+               }
+
+               const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
+               await Promise.all(deletePromises);
+
+               alert("🗑️ All data has been reset successfully!");
+
+               // Clear the calendar visually
+               document.getElementById("mortality_table").innerHTML = "";
+               document.getElementById("total_mortality").innerText = "0";
+               document.getElementById("mortality_percentage").innerText = "0%";
+
+               // Re-generate an empty calendar
+               generateCalendar();
+
+           } catch (error) {
+               console.error("Error resetting calendar:", error);
+               alert("❌ Failed to reset data. Check the console for details.");
+           }
+       };
+
+          window.onload = () => {
+           console.log("🚀 Page loaded, initializing...");
+           
+           // Set up floor toggle event listener
+           document.getElementById('floor_toggle').addEventListener('change', switchFloor);
+           
+           // Initialize with bottom floor (default)
+           fetchFirestoreData();
+           fetchAmmoniaLevels();
+       };
+document.addEventListener('DOMContentLoaded', function() {
+           document.getElementById("save_button").addEventListener("click", async function () {
+               console.log("📄 Generating PDF with Centered & Scaled Content...");
+               
+               const reportContent = document.querySelector(".main-layout");
+               const saveButton = document.getElementById("save_button");
+               saveButton.style.display = "none";
+               
+               try {
+                   const mortalityTable = document.getElementById("mortality_table");
+                   const originalBorder = mortalityTable.style.border;
+                   mortalityTable.style.border = "1px solid black";
+                   mortalityTable.style.borderCollapse = "collapse";
+
+                   const canvas = await html2canvas(reportContent, {
+                       scale: 3,
+                       useCORS: true,
+                       logging: false,
+                       backgroundColor: "#ffffff",
+                       width: reportContent.scrollWidth,
+                       height: reportContent.scrollHeight
+                   });
+
+                   mortalityTable.style.border = originalBorder;
+                   mortalityTable.style.borderCollapse = "";
+                   
+                   saveButton.style.display = "block";
+                   
+                   const imgData = canvas.toDataURL("image/png");
+                   
+                   const { jsPDF } = window.jspdf;
+                   const pdf = new jsPDF({
+                       orientation: 'landscape',
+                       unit: 'mm',
+                       format: 'a4'
+                   });
+                   
+                   const pdfWidth = pdf.internal.pageSize.getWidth();
+                   const pdfHeight = pdf.internal.pageSize.getHeight();
+                   const imgWidth = canvas.width;
+                   const imgHeight = canvas.height;
+                   
+                   const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight) * 0.95;
+                   
+                   const scaledWidth = imgWidth * ratio;
+                   const scaledHeight = imgHeight * ratio;
+                   const marginX = (pdfWidth - scaledWidth) / 2;
+                   const marginY = (pdfHeight - scaledHeight) / 2;
+                   
+                   pdf.addImage(imgData, 'PNG', marginX, marginY, scaledWidth, scaledHeight);
+                   
+                   const floorName = currentFloor.charAt(0).toUpperCase() + currentFloor.slice(1);
+                   pdf.save(`Mortality_Card_${floorName}_Floor.pdf`);
+                   
+                   console.log("✅ PDF saved successfully with Centered & Scaled Content!");
+               } catch (error) {
+                   console.error("❌ Error generating PDF:", error);
+                   alert("Failed to generate PDF. Check console for details.");
+                   saveButton.style.display = "block";
+               }
+           });
+       });
+   </script>
+   </head>
+<body>
+   <!-- Main Layout Wrapper -->
+   <div class="main-layout">
+<!-- Floor Toggle at the Top -->
+<div class="floor-toggle-container">
+    <span class="floor-label">Bottom Floor</span>
+    <label class="floor-toggle">
+        <input type="checkbox" id="floor_toggle" unchecked>
+        <span class="floor-toggle-slider"></span>
+    </label>
+    <span class="floor-label">Top Floor</span>
+</div>
+
+       <!-- Farm Info at the Top -->
+       <div class="farm-info-box">
+<h2 id="rsmsize">Vassilakos Barn 1</h2>
+           <div class="header-box">
+               <div><strong>Farm Name:</strong> <span id="farm_name">Loading...</span></div>
+               <div><strong>Farm Number:</strong> <span id="farm_number">Loading...</span></div>
+               <div><strong>Quota Period:</strong> <span id="quota_period">Loading...</span></div>
+               <div><strong>Amount Placed:</strong> <span id="amount_placed">Loading...</span></div>
+               <div><strong>Sex:</strong> <span id="sex">Loading...</span></div>
+               <div><strong>Barn #:</strong> <span id="barn_number">Loading...</span><span id="floor_indicator"> -Bottom</span></div>
+               <div><strong>Date Placed:</strong> <span id="date_placed">Loading...</span></div>
+               <div><strong>Hatchery:</strong> <span id="hatchery">Loading...</span></div>
+               <div><strong>Hatch ID#:</strong> <span id="hatch_id">Loading...</span></div>
+               <div><strong class="notev hide-notes-duplicate">Notes:</strong> <span id="notes" class="notev hide-notes-duplicate">Loading...</span></div>
+           </div>
+       </div>
+    
+       <!-- Calendar Section (Left) -->
+       <div class="calendar-container">
+          <div class="content-layout">
+               <!-- Calendar Section (Left) -->
+               <div class="calendar-container">
+                   <div class="calendar-header">
+                       <h3>Mortality Card</h3>
+                       <div class="farm-totals-box">
+                           <strong>Total Mortality:</strong> <span id="total_mortality">0</span><br>
+                           <strong>Mortality Percentage:</strong> <span id="mortality_percentage">0%</span>
+                       </div>
+                   </div>
+                   
+                   <table id="mortality_table" border="1"></table>
+
+                   <!-- Save Button -->
+                   <div class="save-button-container">
+                       <button id="save_button" class="save-button">Save as PDF</button>
+                   </div>
+               </div>
+               
+               <!-- Right Side Column for Ammonia and Notes -->
+               <div class="side-column">
+                   <!-- Notes Box (appears first/top) -->
+                   <div class="notes-info-box">
+                       <h3 class="custom-info-title">Notes</h3>
+                       <div class="notes-content" id="notes_display">Loading...</div>
+                   </div>
+                   
+                   <!-- Ammonia Levels Box (appears second/bottom) -->
+                   <div class="custom-info-box">
+                       <h3 class="custom-info-title">Ammonia Levels</h3>
+                       <table class="custom-ammonia-table">
+                           <thead>
+                               <tr>
+                                   <th>Level</th>
+                                   <th>Day</th>
+                                   <th>Date</th>
+                               </tr>
+                           </thead>
+                           <tbody>
+                               <tr>
+                                   <td><span id="level_1">Loading...</span> PPM</td>
+                                   <td>21</td>
+                                   <td><span id="date_1">Loading...</span></td>
+                               </tr>
+                               <tr>
+                                   <td><span id="level_2">Loading...</span> PPM</td>
+                                   <td>28</td>
+                                   <td><span id="date_2">Loading...</span></td>
+                               </tr>
+                               <tr>
+                                   <td><span id="level_3">Loading...</span> PPM</td>
+                                   <td>35</td>
+                                   <td><span id="date_3">Loading...</span></td>
+                               </tr>
+                               <tr>
+                                   <td><span id="level_4">Loading...</span> PPM</td>
+                                   <td>42</td>
+                                   <td><span id="date_4">Loading...</span></td>
+                               </tr>
+                               <tr>
+                                   <td><span id="level_5">Loading...</span> PPM</td>
+                                   <td>49</td>
+                                   <td><span id="date_5">Loading...</span></td>
+                               </tr>
+                               <tr>
+                                   <td><span id="level_6">Loading...</span> PPM</td>
+                                   <td>56</td>
+                                   <td><span id="date_6">Loading...</span></td>
+                               </tr>
+                           </tbody>
+                       </table>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </div>
+</body>
+</html>

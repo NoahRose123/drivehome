@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <head>
+  <link rel="icon" type="image/png" href="/icon.png?v=2">
+<link rel="apple-touch-icon" href="/icon.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="/iconcropped.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/iconcropped.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1a365d">
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Management Hub</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mortality Card - Rose Farm</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { 
+      getFirestore, collection, doc, onSnapshot, deleteDoc, getDocs
+    } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "API_KEY",
+      authDomain: "chicken-project-2.firebaseapp.com",
+      projectId: "chicken-project-2",
+      storageBucket: "chicken-project-2.firebasestorage.app",
+      messagingSenderId: "596273529964",
+      appId: "1:596273529964:web:bd51e2646d5ed48afa4449",
+      measurementId: "G-9YLPHR08DB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let startDate = null;
+    let birdPlacement = 0;
+    // In this case we still use the same document from startnewcrop
+    // but we only use top_floor data for floor-related info.
+    const docRef = doc(db, "startnewcrop", "vas-b1-snc");
+
+    /**
+     * Fetches data from startnewcrop/vas-b1-snc and populates the Mortality Card.
+     * Only data from top_floor is used for floor-specific fields.
+     */
+     function fetchFirestoreData() {
+  const docRef = doc(db, "startnewcrop", "vas-b1-snc");
+
+  onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+
+      // Update general farm info
+      document.getElementById("barn_number").innerText = data.barn_number || "N/A";
+      document.getElementById("farm_name").innerText   = data.farm_name || "N/A";
+      document.getElementById("farm_number").innerText = data.farm_number || "N/A";
+      document.getElementById("quota_period").innerText= data.quota_period || "N/A";
+      document.getElementById("hatchery").innerText    = data.Hatchery || "N/A";
+      document.getElementById("hatch_id").innerText    = data["Hatch ID#"] || "N/A";
+
+      // Use top_floor data only
+      const topFloor = data.top_floor || {};
+      const topBirds = parseInt(topFloor.birds_placed) || 0;
+      document.getElementById("amount_placed").innerText = topBirds;
+      document.getElementById("sex").innerText           = topFloor.sex || "N/A";
+
+      // Use notes from top_floor
+      const notesText = topFloor.notes || "No notes available.";
+      document.getElementById("notes").innerText         = notesText;
+      document.getElementById("notes_display").innerText = notesText;
+
+      // Convert date_started (assumed to be a Firestore Timestamp)
+      if (data.date_started && data.date_started.seconds) {
+        const tempDate = new Date(data.date_started.seconds * 1000);
+        tempDate.setHours(0, 0, 0, 0);
+        startDate = tempDate; // Global variable used by calendar functions
+
+        // Display the start date in YYYY-MM-DD format
+        const y  = tempDate.getFullYear();
+        const m  = String(tempDate.getMonth() + 1).padStart(2, '0');
+        const d  = String(tempDate.getDate()).padStart(2, '0');
+        document.getElementById("date_placed").innerText = `${y}-${m}-${d}`;
+
+        console.log("✅ Correctly parsed start date:", `${y}-${m}-${d}`);
+
+        // Generate the calendar and update the mortality table
+        generateCalendar();
+        updateMortalityTable();
+      }
+    } else {
+      console.warn("❌ No document found in startnewcrop/vas-b1-snc");
+    }
+  });
+}
+
+    function adjustTableHeaders(hoveredDate) {
+      const date = new Date(hoveredDate);
+      const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const startDayIndex = date.getDay();
+      const reorderedDays = [];
+      for (let i = 0; i < 7; i++) {
+        reorderedDays.push(weekDays[(startDayIndex + i + 1) % 7]);
+      }
+      const headers = document.querySelector("#mortality_table thead tr").children;
+      for (let i = 1; i <= 7; i++) {
+        headers[i].innerText = reorderedDays[i - 1];
+      }
+    }
+
+    function generateCalendar() {
+  if (!startDate) return;
+
+  const table = document.getElementById("mortality_table");
+  const weekDays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const startDayIndex = startDate.getDay();
+
+let thead = "<thead><tr><th>Week</th>";
+// Reorder headers to start from the actual start day
+for (let i = 0; i < 7; i++) {
+    thead += `<th>${weekDays[(startDayIndex + i) % 7]}</th>`;
+}
+thead += "<th>Week Total</th><th>Grand Total</th></tr></thead>";
+  let tbody = "<tbody>";
+  // Create 8 weeks (rows)
+  for (let week = 1; week <= 8; week++) {
+    tbody += `<tr><td>Week ${week}</td>`;
+    // Create 7 days (cells) per week
+    for (let day = 0; day < 7; day++) {
+      const cellDate = new Date(startDate.getTime());
+      cellDate.setDate(startDate.getDate() + (week - 1) * 7 + day);
+      cellDate.setHours(0, 0, 0, 0);
+
+      const year = cellDate.getFullYear();
+      const month = String(cellDate.getMonth() + 1).padStart(2, '0');
+      const dayOfMonth = String(cellDate.getDate()).padStart(2, '0');
+      const cellId = `${year}-${month}-${dayOfMonth}`;
+
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const formattedDate = cellDate.toLocaleDateString('en-US', options);
+
+      tbody += `
+        <td id="${cellId}" class="mortality-cell" data-date="${cellId}">
+          <div class="cell-content tooltip">
+            <span class="tooltiptext">${formattedDate}</span>
+            <span class="cell-data"></span>
+          </div>
+        </td>`;
+    }
+    tbody += `<td id="week_total_${week}">0</td><td id="grand_total_${week}">0</td></tr>`;
+  }
+  tbody += "</tbody>";
+  table.innerHTML = thead + tbody;
+}
+
+    /**
+     * Reads daily mortality from the "vas-b1-f2-MC" collection and fills in the calendar.
+     */
+     function updateMortalityTable() {
+  if (!startDate) return;
+
+  const collectionRef = collection(db, "vas-b1-f2-MC");
+  const weekTotals = Array(8).fill(0);
+  const cullsPerWeek = Array(8).fill(0);
+  const mortalityPerWeek = Array(8).fill(0);
+  let totalBirds = 0;
+
+  onSnapshot(collectionRef, (snapshot) => {
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      const date = data.date;  // Must be in YYYY-MM-DD format
+      const cell = document.getElementById(date);
+      if (!cell) return;
+
+      const cellContent = cell.querySelector(".cell-data");
+      if (!cellContent) return;
+
+      const culls = parseInt(data.culls) || 0;
+      const mortality = parseInt(data.mortality) || 0;
+      const total = culls + mortality;
+
+      // Fill the cell with the data
+      cellContent.innerHTML = `
+        <span class="top-left">${culls}</span>
+        <span class="center"><b>${total}</b></span>
+        <span class="bottom-right">${mortality}</span>
+      `;
+     
+
+      // Calculate which day this is relative to startDate
+      const cellDate = new Date(date);
+      const dayDifference = Math.floor((cellDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+      const weekIndex = Math.floor(dayDifference / 7);
+
+      if (weekIndex >= 0 && weekIndex < 8) {
+        weekTotals[weekIndex] += total;
+        cullsPerWeek[weekIndex] += culls;
+        mortalityPerWeek[weekIndex] += mortality;
+        totalBirds += total;
+      }
+    });
+
+    let cumulativeTotal = 0;
+    for (let i = 0; i < 8; i++) {
+      cumulativeTotal += weekTotals[i];
+      if (i === 0) {
+        document.getElementById(`week_total_${i + 1}`).innerHTML = `
+          Cull: ${cullsPerWeek[i]}<br>
+          Mort: ${mortalityPerWeek[i]}
+        `;
+      } else {
+        document.getElementById(`week_total_${i + 1}`).innerText = weekTotals[i];
+      }
+      document.getElementById(`grand_total_${i + 1}`).innerText = cumulativeTotal;
+    }
+    document.getElementById("total_mortality").innerText = cumulativeTotal;
+    document.getElementById("mortality_percentage").innerText =
+      totalBirds > 0
+        ? ((totalBirds / parseInt(document.getElementById("amount_placed").innerText)) * 100).toFixed(2) + "%"
+        : "0.00%";
+  });
+}
+
+window.resetCalendar = async function() {
+  try {
+    const mortalityCollection = collection(db, "vas-b1-f2-MC");
+    const snapshot = await getDocs(mortalityCollection);
+    if (snapshot.empty) {
+      alert("No data to reset.");
+      return;
+    }
+    const deletePromises = snapshot.docs.map((docSnap) => deleteDoc(docSnap.ref));
+    await Promise.all(deletePromises);
+    alert("🗑️ All data has been reset successfully!");
+    document.getElementById("mortality_table").innerHTML = "";
+    document.getElementById("total_mortality").innerText = "0";
+    document.getElementById("mortality_percentage").innerText = "0%";
+    generateCalendar();
+  } catch (error) {
+    console.error("Error resetting calendar:", error);
+    alert("❌ Failed to reset data. Check the console for details.");
+  }
+}
+
+
+function fetchAmmoniaLevels() {
+  console.log("📊 Fetching ammonia levels data...");
+  const checkStartDate = setInterval(() => {
+    if (startDate) {
+      clearInterval(checkStartDate);
+      const dayIntervals = [21, 28, 35, 42, 49, 56];
+      for (let i = 0; i < dayIntervals.length; i++) {
+        const targetDate = new Date(startDate.getTime());
+        targetDate.setDate(startDate.getDate() + dayIntervals[i] - 1);
+        const y = targetDate.getFullYear();
+        const m = String(targetDate.getMonth() + 1).padStart(2, '0');
+        const d = String(targetDate.getDate()).padStart(2, '0');
+        document.getElementById(`date_${i + 1}`).innerText = `${y}-${m}-${d}`;
+      }
+      fetchAmmoniaReadings();
+    }
+  }, 500);
+}
+
+function fetchAmmoniaReadings() {
+  const ammoniaDocRef = doc(db, "ammonia_levels_f2", "fixed_days");
+  onSnapshot(ammoniaDocRef, (docSnap) => {
+    if (!docSnap.exists()) {
+      console.warn("No ammonia doc found at ammonia_levels_f2/fixed_days");
+      return;
+    }
+    const data = docSnap.data();
+    const dayIntervals = [21, 28, 35, 42, 49, 56];
+    for (let i = 0; i < dayIntervals.length; i++) {
+      const fieldName = `day_${dayIntervals[i]}`;
+      const val = data[fieldName] !== undefined ? data[fieldName] : "N/A";
+      document.getElementById(`level_${i + 1}`).innerText = val;
+    }
+  }, (err) => {
+    console.error("Error fetching ammonia levels:", err);
+    for (let i = 1; i <= 6; i++) {
+      document.getElementById(`level_${i}`).innerText = "N/A";
+    }
+  });
+}
+
+   // Initialize the Mortality Card on page load
+window.onload = () => {
+  console.log("🚀 Mortality Card page loaded, initializing...");
+  window.adjustTableHeaders = adjustTableHeaders; // if needed globally
+  fetchFirestoreData();
+  fetchAmmoniaLevels();
+};
+  </script>
+</head>
+<body>
+  <!-- Main Layout Wrapper -->
+  <div class="main-layout">
+    <!-- Farm Info at the Top -->
+    <div class="farm-info-box">
+      <h2 id="rsmsize">Rose Farm Management Inc.</h2>
+      <div class="header-box">
+        <div><strong>Farm Name:</strong> <span id="farm_name">Loading...</span></div>
+        <div><strong>Farm Number:</strong> <span id="farm_number">Loading...</span></div>
+        <div><strong>Quota Period:</strong> <span id="quota_period">Loading...</span></div>
+        <div><strong>Amount Placed:</strong> <span id="amount_placed">Loading...</span></div>
+        <div><strong>Sex:</strong> <span id="sex">Loading...</span></div>
+        <div><strong>Barn #:</strong> <span id="barn_number">Loading...</span> -Top</div>
+        <div><strong>Date Placed:</strong> <span id="date_placed">Loading...</span></div>
+        <div><strong>Hatchery:</strong> <span id="hatchery">Loading...</span></div>
+        <div><strong>Hatch ID#:</strong> <span id="hatch_id">Loading...</span></div>
+        <div><strong class="notev hide-notes-duplicate">Notes:</strong> <span id="notes" class="notev hide-notes-duplicate">Loading...</span></div>
+      </div>
+    </div>
+
+    <!-- Calendar Section (Left) -->
+    <div class="calendar-container">
+      <div class="content-layout">
+        <!-- Calendar Section (Left) -->
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <h3>Mortality Card</h3>
+            <div class="farm-totals-box">
+              <strong>Total Mortality:</strong> <span id="total_mortality">0</span><br>
+              <strong>Mortality Percentage:</strong> <span id="mortality_percentage">0%</span>
+            </div>
+          </div>
+          <table id="mortality_table" border="1"></table>
+          <!-- Save Button -->
+          <div class="save-button-container">
+            <button id="save_button" class="save-button">Save as PDF</button>
+          </div>
+        </div>
+
+        <!-- Right Side Column for Ammonia and Notes -->
+        <div class="side-column">
+          <!-- Ammonia Levels Box -->
+          <div class="custom-info-box">
+            <h3 class="custom-info-title">Ammonia Levels</h3>
+            <table class="custom-ammonia-table">
+              <thead>
+                <tr>
+                  <th>Level</th>
+                  <th>Day</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span id="level_1">Loading...</span> PPM</td>
+                  <td>21</td>
+                  <td><span id="date_1">Loading...</span></td>
+                </tr>
+                <tr>
+                  <td><span id="level_2">Loading...</span> PPM</td>
+                  <td>28</td>
+                  <td><span id="date_2">Loading...</span></td>
+                </tr>
+                <tr>
+                  <td><span id="level_3">Loading...</span> PPM</td>
+                  <td>35</td>
+                  <td><span id="date_3">Loading...</span></td>
+                </tr>
+                <tr>
+                  <td><span id="level_4">Loading...</span> PPM</td>
+                  <td>42</td>
+                  <td><span id="date_4">Loading...</span></td>
+                </tr>
+                <tr>
+                  <td><span id="level_5">Loading...</span> PPM</td>
+                  <td>49</td>
+                  <td><span id="date_5">Loading...</span></td>
+                </tr>
+                <tr>
+                  <td><span id="level_6">Loading...</span> PPM</td>
+                  <td>56</td>
+                  <td><span id="date_6">Loading...</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Notes Box -->
+          <div class="notes-info-box">
+            <h3 class="custom-info-title">Notes</h3>
+            <div class="notes-content" id="notes_display">Loading...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Base styles */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    h2 {
+        color: #d32f2f;
+        text-align: center;
+        margin-bottom: 24px;
+        font-size: clamp(21px, 5vw, 30px);
+        font-weight: 600;
+    }
+    h3 {
+        font-size: clamp(16px, 3vw, 20px);
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+    
+    /* Main Layout - Keeps Everything Centered */
+    .main-layout {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    /* Farm Info Box */
+    .farm-info-box {
+        width: 100%;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .header-box {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+    }
+    
+    /* Flexbox Layout for Calendar + Ammonia Section */
+    .content-layout {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap; /* Added wrap to ensure proper stacking */
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        width: 100%;
+    }
+    
+    /* Calendar Container */
+    .calendar-container {
+        flex: 1 1 600px; /* Minimum width of 600px, will grow and can shrink */
+        min-width: 0; /* Allow shrinking below content size */
+    }
+    
+    /* Mortality Table */
+    #mortality_table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0 auto;
+        background-color: white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        border: none;
+        font-size: clamp(12px, 2vw, 16px);
+        table-layout: fixed;
+    }
+    
+    #mortality_table th {
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: clip;
+        font-size: 15px;
+        padding: 4px;
+        background-color:#d32f2f;
+        color:#fff;
+    }
+    #mortality_table td {
+        width: 100px;  /* Fixed width */
+        height: 100px; /* Fixed height */
+        max-width: 100px; 
+        max-height: 100px;
+        overflow: hidden;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0;
+    }
+    .calendar-header h3 {
+        font-size: 28px;
+    }
+    #mortality_table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    #mortality_table tr:nth-child(even) {
+        background-color: #f8f8f8;
+    }
+    
+    #mortality_table tr:hover {
+        background-color: #fff3f3;
+    }
+    
+    /* Style for the date column */
+    #mortality_table td:first-child {
+        font-weight: 500;
+        color: #555;
+    }
+    
+    /* Style for the details column */
+    #mortality_table td:nth-child(2) {
+        color: #333;
+    }
+    .custom-info-box {
+        display: flex;
+        flex-direction: column;
+        justify-content: stretch;
+        height: 100%; /* Ensure full height of the container */
+        
+    }
+    .side-column,
+    .custom-info-box {
+        height: 831px !important;
+    }
+    /* Ammonia title */
+    .custom-info-title {
+        font-size: clamp(14px, 2.5vw, 16px);
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+    
+    .side-column {
+        width: 280px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        flex-shrink: 0;
+        position: relative;
+        padding-top: 110px; /* Add padding to vertically align with mortality table's 3rd row */
+    }
+    
+    .custom-ammonia-table {
+        width: 100%;
+        height: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        flex-grow: 1; /* Allow table to expand */
+        
+    }
+    
+    .custom-ammonia-table tbody {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Distribute rows evenly */
+        flex-grow: 1; /* Allow tbody to take full height */
+        width: 100%;
+        height:95%;
+    }
+    .custom-ammonia-table tr {
+        flex-grow: 1;
+        display: flex;
+        width: 100%;
+    }
+    .custom-ammonia-table thead {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+    
+    .custom-ammonia-table th, 
+    .custom-ammonia-table td {
+        padding: 8px;
+        text-align: center;
+        border: 1px solid #d32f2f;
+        flex: 1;
+    }
+    
+    .custom-ammonia-table th {
+        background-color: #f8d7da;
+        border: 1px solid #d32f2f;
+    }
+    
+    .custom-ammonia-table td {
+        background-color: #fff;
+    }
+    /* Keep Total Mortality Below Calendar */
+    .farm-totals-box {
+        margin-top: 15px;
+        padding: 10px;
+        background: #fff;
+        border: 2px solid #d32f2f;
+        border-radius: 8px;
+        width: clamp(200px, 30%, 250px);
+        text-align: center;
+        font-size: clamp(14px, 2vw, 16px);
+        font-weight: bold;
+        color: #333;
+        order: 1; /* Ensures it stays with the calendar */
+    }
+    
+    /* Cell styling for mortality card */
+    .mortality-cell {
+        width: clamp(50px, 10vw, 80px);
+        height: clamp(50px, 10vw, 80px);
+        position: relative;
+        overflow: visible;
+    }
+    
+    .tooltip {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+    }
+    
+    .tooltip .tooltiptext {
+        visibility: hidden;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px 8px;
+        border-radius: 4px;
+        position: absolute;
+        z-index: 2000;
+        left: 50%;
+        bottom: 100%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.2s, bottom 0.2s;
+        pointer-events: none;
+        max-width: 200px;
+        font-size: clamp(10px, 1.6vw, 12px);
+    }
+    
+    .tooltip:hover .tooltiptext {
+        visibility: visible;
+        opacity: 1;
+        bottom: 110%;
+    }
+    
+    /* Cell Content Layout */
+    .cell-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .cell-content span {
+        font-size: clamp(10px, 1.8vw, 14px);
+    }
+    
+    .cell-content span.top-left {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+    }
+    
+    .cell-content span.center {
+        position: relative;
+        font-weight: bold;
+    }
+    
+    .cell-content span.bottom-right {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+    }
+    
+    /* Media Queries for Responsive Design */
+    @media (max-width: 1024px) {
+        .content-layout {
+            gap: 15px;
+        }
+        
+        /* Force ammonia section to bottom as soon as width is reduced below 1024px */
+        .calendar-container {
+            flex: 1 0 100%;
+            order: 1;
+        }
+        
+        .custom-info-box {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            order: 3;
+        }
+    }
+    
+    @media (max-width: 650px) {
+        body {
+            padding: 10px;
+        }
+        
+        .farm-info-box {
+            padding: 10px;
+        }
+        
+        .header-box {
+            grid-template-columns: 1fr;
+        }
+        
+        #mortality_table {
+            font-size: 12px;
+        }
+        
+        #mortality_table th, 
+        #mortality_table td {
+            padding: 8px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        body {
+            padding: 5px;
+        }
+        
+        .farm-info-box,
+        .custom-info-box {
+            padding: 8px;
+            border-width: 1px;
+        }
+        
+        .farm-totals-box {
+            width: 90%;
+            max-width: none;
+        }
+        
+        h2 {
+            margin-bottom: 15px;
+        }
+    }
+    
+        /* Save Button Container */
+    .save-button-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 15px;
+      width: 100%;
+    }
+    
+    /* Save Button Style */
+    .save-button {
+      background-color: #d32f2f;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .save-button:hover {
+      background-color: #b71c1c;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+    
+    .save-button:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* For making the button responsive */
+    @media (max-width: 768px) {
+      .save-button {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .save-button-container {
+        justify-content: center;
+      }
+    }
+    
+    /* If you want to change the layout to have the totals and button side by side */
+    @media (min-width: 768px) {
+      .bottom-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+      }
+      
+      .farm-totals-box {
+        margin-right: 20px;
+        margin-bottom: 0;
+      }
+      
+      .save-button-container {
+        margin-top: 0;
+        width: auto;
+        padding-top:20px;
+      }
+    }
+    
+    /* Calendar Header - Creates the horizontal layout */
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    
+    /* Adjust farm totals box for new position */
+    .farm-totals-box {
+        margin-top: 0;
+        padding: 10px;
+        background: #fff;
+        border: 2px solid #d32f2f;
+        border-radius: 8px;
+        width: clamp(200px, 30%, 250px);
+        text-align: center;
+        font-size: clamp(14px, 2vw, 16px);
+        font-weight: bold;
+        color: #333;
+    }
+    
+    /* Media query adjustment for mobile */
+    @media (max-width: 650px) {
+        .calendar-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .farm-totals-box {
+            margin-top: 10px;
+            width: 100%;
+            max-width: none;
+        }
+    }
+    
+        /* Notes Box */
+    .notes-info-box {
+        width: 250px;
+        padding: 10px;
+        background-color: #ffffff;
+        border: 2px solid #d32f2f;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: left;
+        flex: 0 1 auto;
+        margin-top: 20px; /* Space between ammonia box and notes box */
+        order: 3; /* Will always be placed after ammonia box */
+    }
+    
+    .notes-content {
+        padding: 10px;
+        background-color: #fff;
+        border: 1px solid #eee;
+        border-radius: 5px;
+        min-height: 80px;
+        max-height: 200px;
+        overflow-y: auto; /* Add scrollbar if content is too long */
+        word-wrap: break-word; /* Ensures text wraps properly */
+        line-height: 1.4;
+        font-size: clamp(12px, 1.8vw, 14px);
+        height:200px;
+    }
+    
+    /* Hide the original notes field when printing */
+    @media print {
+        .hide-on-print {
+            display: none;
+        }
+    }
+    
+    /* Adjust layout for medium screens */
+    @media (max-width: 1024px) {
+        .notes-info-box {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto 0;
+            order: 4;
+        }
+    }
+    
+    /* Adjust for small screens */
+    @media (max-width: 480px) {
+        .notes-info-box {
+            padding: 8px;
+            border-width: 1px;
+        }
+        
+        .notes-content {
+            min-height: 60px;
+            padding: 8px;
+        }
+    }
+    
+    /* Content Layout - Flex container for calendar and side column */
+    .content-layout {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 20px;
+        width: 100%;
+    }
+    
+    /* Calendar Container */
+    .calendar-container {
+        flex: 1;
+        min-width: 0; /* Allow shrinking below content size */
+    }
+    
+    .side-column {
+        width: 280px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        flex-shrink: 0;
+        position: relative;
+        padding-top: 110px; /* Add padding to vertically align with mortality table's 3rd row */
+        margin-top:-25px;
+        height:900px;
+    }
+    
+    /* Notes Box - Modified to appear first (top) */
+    .notes-info-box {
+        width: 100%;
+        padding: 15px;
+        background-color: #ffffff;
+        border: 2px solid #d32f2f;
+        margin-top:-100px; /* Remove top margin since we're using gap */
+        order: 1; /* Set to appear first in flex container */
+        height:400px;
+    }
+    
+    /* Ammonia Box - Modified to appear second (bottom) */
+    .custom-info-box {
+        width: 100%;
+        padding: 15px;
+    
+        border-radius: 10px;
+        order: 2; /* Keep as second element */
+        flex-grow: 1; /* Allow it to expand to fill available space */
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Media Queries for Responsive Design */
+    @media (max-width: 1024px) {
+        .notes-info-box {
+            order: 3; /* Change order for responsive layout */
+        }
+        
+        .custom-info-box {
+            order: 4; /* Change order for responsive layout */
+        }
+    }
+    
+    .bottom-container{
+        visibility: hidden;
+    }
+    
+    .hide-notes-duplicate {
+        display: none;
+    }
+    
+    </style>
+</body>
+</html>

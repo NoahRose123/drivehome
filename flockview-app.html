@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlockView - Farm Management Dashboard</title>
+    <link rel="stylesheet" href="flockview-app-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="app-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">Flock<span class="logo-accent">View</span></span>
+            </div>
+            <div class="nav-menu">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#flocks" class="nav-link" data-section="flocks">
+                    <i class="fas fa-egg"></i>
+                    <span>Flocks</span>
+                </a>
+                <a href="#barns" class="nav-link" data-section="barns">
+                    <i class="fas fa-home"></i>
+                    <span>Barns</span>
+                </a>
+                <a href="#records" class="nav-link" data-section="records">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Records</span>
+                </a>
+                <a href="#reports" class="nav-link" data-section="reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Reports</span>
+                </a>
+            </div>
+            <div class="nav-user">
+                <div class="user-info">
+                    <span class="user-name">John Smith</span>
+                    <span class="farm-name">Smith Family Farm</span>
+                </div>
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="app-section active">
+            <div class="section-header">
+                <h1>Farm Dashboard</h1>
+                <p>Overview of your farm operations</p>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-egg"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Active Flocks</h3>
+                        <p class="stat-number">3</p>
+                        <span class="stat-change positive">+1 from last month</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Total Barns</h3>
+                        <p class="stat-number">4</p>
+                        <span class="stat-change">All operational</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-thermometer-half"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Avg. Temperature</h3>
+                        <p class="stat-number">22°C</p>
+                        <span class="stat-change positive">Optimal range</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Humidity</h3>
+                        <p class="stat-number">65%</p>
+                        <span class="stat-change">Within range</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Flocks Overview -->
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2>Current Flocks</h2>
+                        <button class="btn btn-primary btn-sm" onclick="addNewFlock()">
+                            <i class="fas fa-plus"></i> Add Flock
+                        </button>
+                    </div>
+                    <div class="flock-list">
+                        <div class="flock-item">
+                            <div class="flock-info">
+                                <h4>Flock #2024-001</h4>
+                                <p>Barn A • 5,000 birds • Day 28</p>
+                                <div class="flock-status active">Active</div>
+                            </div>
+                            <div class="flock-actions">
+                                <button class="btn btn-outline btn-sm" onclick="viewFlock('2024-001')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="editFlock('2024-001')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flock-item">
+                            <div class="flock-info">
+                                <h4>Flock #2024-002</h4>
+                                <p>Barn B • 4,800 birds • Day 15</p>
+                                <div class="flock-status active">Active</div>
+                            </div>
+                            <div class="flock-actions">
+                                <button class="btn btn-outline btn-sm" onclick="viewFlock('2024-002')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="editFlock('2024-002')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flock-item">
+                            <div class="flock-info">
+                                <h4>Flock #2024-003</h4>
+                                <p>Barn C • 5,200 birds • Day 3</p>
+                                <div class="flock-status active">Active</div>
+                            </div>
+                            <div class="flock-actions">
+                                <button class="btn btn-outline btn-sm" onclick="viewFlock('2024-003')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-outline btn-sm" onclick="editFlock('2024-003')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2>Today's Tasks</h2>
+                        <button class="btn btn-primary btn-sm" onclick="addTask()">
+                            <i class="fas fa-plus"></i> Add Task
+                        </button>
+                    </div>
+                    <div class="task-list">
+                        <div class="task-item">
+                            <div class="task-checkbox">
+                                <input type="checkbox" id="task1">
+                                <label for="task1"></label>
+                            </div>
+                            <div class="task-content">
+                                <h4>Check temperature in Barn A</h4>
+                                <p>Morning temperature reading</p>
+                            </div>
+                            <div class="task-time">8:00 AM</div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-checkbox">
+                                <input type="checkbox" id="task2">
+                                <label for="task2"></label>
+                            </div>
+                            <div class="task-content">
+                                <h4>Feed inventory check</h4>
+                                <p>Verify feed levels in all barns</p>
+                            </div>
+                            <div class="task-time">9:00 AM</div>
+                        </div>
+                        <div class="task-item">
+                            <div class="task-checkbox">
+                                <input type="checkbox" id="task3">
+                                <label for="task3"></label>
+                            </div>
+                            <div class="task-content">
+                                <h4>Water system inspection</h4>
+                                <p>Check water flow and quality</p>
+                            </div>
+                            <div class="task-time">10:00 AM</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Flocks Section -->
+        <section id="flocks" class="app-section">
+            <div class="section-header">
+                <h1>Flock Management</h1>
+                <p>Manage your chicken flocks and track their progress</p>
+            </div>
+
+            <div class="flock-management">
+                <div class="flock-filters">
+                    <div class="filter-group">
+                        <label>Status:</label>
+                        <select id="status-filter">
+                            <option value="all">All Flocks</option>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                            <option value="planned">Planned</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Barn:</label>
+                        <select id="barn-filter">
+                            <option value="all">All Barns</option>
+                            <option value="barn-a">Barn A</option>
+                            <option value="barn-b">Barn B</option>
+                            <option value="barn-c">Barn C</option>
+                            <option value="barn-d">Barn D</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="addNewFlock()">
+                        <i class="fas fa-plus"></i> New Flock
+                    </button>
+                </div>
+
+                <div class="flock-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Flock ID</th>
+                                <th>Barn</th>
+                                <th>Start Date</th>
+                                <th>Age (Days)</th>
+                                <th>Birds</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2024-001</td>
+                                <td>Barn A</td>
+                                <td>Jan 15, 2024</td>
+                                <td>28</td>
+                                <td>5,000</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-outline" onclick="viewFlock('2024-001')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline" onclick="editFlock('2024-001')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline" onclick="printFlockReport('2024-001')">
+                                            <i class="fas fa-print"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-002</td>
+                                <td>Barn B</td>
+                                <td>Jan 28, 2024</td>
+                                <td>15</td>
+                                <td>4,800</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-outline" onclick="viewFlock('2024-002')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline" onclick="editFlock('2024-002')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline" onclick="printFlockReport('2024-002')">
+                                            <i class="fas fa-print"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2024-003</td>
+                                <td>Barn C</td>
+                                <td>Feb 10, 2024</td>
+                                <td>3</td>
+                                <td>5,200</td>
+                                <td><span class="status-badge active">Active</span></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-outline" onclick="viewFlock('2024-003')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline" onclick="editFlock('2024-003')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline" onclick="printFlockReport('2024-003')">
+                                            <i class="fas fa-print"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Barns Section -->
+        <section id="barns" class="app-section">
+            <div class="section-header">
+                <h1>Barn Management</h1>
+                <p>Monitor environmental conditions and barn status</p>
+            </div>
+
+            <div class="barn-grid">
+                <div class="barn-card">
+                    <div class="barn-header">
+                        <h3>Barn A</h3>
+                        <span class="barn-status active">Operational</span>
+                    </div>
+                    <div class="barn-info">
+                        <div class="info-item">
+                            <span class="label">Current Flock:</span>
+                            <span class="value">2024-001 (Day 28)</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Capacity:</span>
+                            <span class="value">5,000 birds</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Temperature:</span>
+                            <span class="value">22.5°C</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Humidity:</span>
+                            <span class="value">65%</span>
+                        </div>
+                    </div>
+                    <div class="barn-actions">
+                        <button class="btn btn-primary" onclick="viewBarnDetails('barn-a')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        <button class="btn btn-outline" onclick="recordEnvironmentalData('barn-a')">
+                            <i class="fas fa-plus"></i> Record Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="barn-card">
+                    <div class="barn-header">
+                        <h3>Barn B</h3>
+                        <span class="barn-status active">Operational</span>
+                    </div>
+                    <div class="barn-info">
+                        <div class="info-item">
+                            <span class="label">Current Flock:</span>
+                            <span class="value">2024-002 (Day 15)</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Capacity:</span>
+                            <span class="value">5,000 birds</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Temperature:</span>
+                            <span class="value">23.1°C</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Humidity:</span>
+                            <span class="value">68%</span>
+                        </div>
+                    </div>
+                    <div class="barn-actions">
+                        <button class="btn btn-primary" onclick="viewBarnDetails('barn-b')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        <button class="btn btn-outline" onclick="recordEnvironmentalData('barn-b')">
+                            <i class="fas fa-plus"></i> Record Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="barn-card">
+                    <div class="barn-header">
+                        <h3>Barn C</h3>
+                        <span class="barn-status active">Operational</span>
+                    </div>
+                    <div class="barn-info">
+                        <div class="info-item">
+                            <span class="label">Current Flock:</span>
+                            <span class="value">2024-003 (Day 3)</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Capacity:</span>
+                            <span class="value">5,000 birds</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Temperature:</span>
+                            <span class="value">24.2°C</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Humidity:</span>
+                            <span class="value">70%</span>
+                        </div>
+                    </div>
+                    <div class="barn-actions">
+                        <button class="btn btn-primary" onclick="viewBarnDetails('barn-c')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        <button class="btn btn-outline" onclick="recordEnvironmentalData('barn-c')">
+                            <i class="fas fa-plus"></i> Record Data
+                        </button>
+                    </div>
+                </div>
+
+                <div class="barn-card">
+                    <div class="barn-header">
+                        <h3>Barn D</h3>
+                        <span class="barn-status inactive">Empty</span>
+                    </div>
+                    <div class="barn-info">
+                        <div class="info-item">
+                            <span class="label">Current Flock:</span>
+                            <span class="value">None</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Capacity:</span>
+                            <span class="value">5,000 birds</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Temperature:</span>
+                            <span class="value">18.5°C</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Humidity:</span>
+                            <span class="value">55%</span>
+                        </div>
+                    </div>
+                    <div class="barn-actions">
+                        <button class="btn btn-primary" onclick="viewBarnDetails('barn-d')">
+                            <i class="fas fa-eye"></i> View Details
+                        </button>
+                        <button class="btn btn-outline" onclick="startNewFlock('barn-d')">
+                            <i class="fas fa-plus"></i> Start Flock
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Records Section -->
+        <section id="records" class="app-section">
+            <div class="section-header">
+                <h1>Farm Records</h1>
+                <p>Manage daily records and compliance documentation</p>
+            </div>
+
+            <div class="records-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-tab="mortality">Mortality Log</button>
+                    <button class="tab-btn" data-tab="flock-log">Flock Log</button>
+                    <button class="tab-btn" data-tab="visitor">Visitor Log</button>
+                    <button class="tab-btn" data-tab="environmental">Environmental Data</button>
+                    <button class="tab-btn" data-tab="feed">Feed Records</button>
+                    <button class="tab-btn" data-tab="medication">Medication Log</button>
+                </div>
+
+                <!-- Mortality Log Tab -->
+                <div class="tab-content active" id="mortality">
+                    <div class="record-header">
+                        <h3>Mortality Log</h3>
+                        <button class="btn btn-primary" onclick="addMortalityRecord()">
+                            <i class="fas fa-plus"></i> Add Record
+                        </button>
+                    </div>
+                    <div class="record-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Flock ID</th>
+                                    <th>Barn</th>
+                                    <th>Birds Found</th>
+                                    <th>Reason</th>
+                                    <th>Recorded By</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Feb 12, 2024</td>
+                                    <td>2024-001</td>
+                                    <td>Barn A</td>
+                                    <td>3</td>
+                                    <td>Natural causes</td>
+                                    <td>John Smith</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline" onclick="editRecord('mortality', 1)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Feb 11, 2024</td>
+                                    <td>2024-002</td>
+                                    <td>Barn B</td>
+                                    <td>2</td>
+                                    <td>Natural causes</td>
+                                    <td>John Smith</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline" onclick="editRecord('mortality', 2)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Flock Log Tab -->
+                <div class="tab-content" id="flock-log">
+                    <div class="record-header">
+                        <h3>Daily Flock Log</h3>
+                        <button class="btn btn-primary" onclick="addFlockLogEntry()">
+                            <i class="fas fa-plus"></i> Add Entry
+                        </button>
+                    </div>
+                    <div class="record-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Flock ID</th>
+                                    <th>Barn</th>
+                                    <th>Feed Consumption</th>
+                                    <th>Water Consumption</th>
+                                    <th>Egg Production</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Feb 12, 2024</td>
+                                    <td>2024-001</td>
+                                    <td>Barn A</td>
+                                    <td>450 kg</td>
+                                    <td>900 L</td>
+                                    <td>4,850</td>
+                                    <td>Normal behavior</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline" onclick="editRecord('flock-log', 1)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Visitor Log Tab -->
+                <div class="tab-content" id="visitor">
+                    <div class="record-header">
+                        <h3>Visitor Log</h3>
+                        <button class="btn btn-primary" onclick="addVisitorRecord()">
+                            <i class="fas fa-plus"></i> Add Visitor
+                        </button>
+                    </div>
+                    <div class="record-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Visitor Name</th>
+                                    <th>Company</th>
+                                    <th>Purpose</th>
+                                    <th>Time In</th>
+                                    <th>Time Out</th>
+                                    <th>Barns Visited</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Feb 12, 2024</td>
+                                    <td>Dr. Sarah Johnson</td>
+                                    <td>Ontario Poultry Vet</td>
+                                    <td>Health inspection</td>
+                                    <td>10:00 AM</td>
+                                    <td>11:30 AM</td>
+                                    <td>Barn A, B</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline" onclick="editRecord('visitor', 1)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Environmental Data Tab -->
+                <div class="tab-content" id="environmental">
+                    <div class="record-header">
+                        <h3>Environmental Monitoring</h3>
+                        <button class="btn btn-primary" onclick="addEnvironmentalRecord()">
+                            <i class="fas fa-plus"></i> Add Reading
+                        </button>
+                    </div>
+                    <div class="record-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Barn</th>
+                                    <th>Temperature</th>
+                                    <th>Humidity</th>
+                                    <th>Air Quality</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Feb 12, 2024 8:00 AM</td>
+                                    <td>Barn A</td>
+                                    <td>22.5°C</td>
+                                    <td>65%</td>
+                                    <td>Good</td>
+                                    <td>Normal conditions</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline" onclick="editRecord('environmental', 1)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Feed Records Tab -->
+                <div class="tab-content" id="feed">
+                    <div class="record-header">
+                        <h3>Feed Management</h3>
+                        <button class="btn btn-primary" onclick="addFeedRecord()">
+                            <i class="fas fa-plus"></i> Add Record
+                        </button>
+                    </div>
+                    <div class="record-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Flock ID</th>
+                                    <th>Feed Type</th>
+                                    <th>Quantity</th>
+                                    <th>Supplier</th>
+                                    <th>Lot Number</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Feb 12, 2024</td>
+                                    <td>2024-001</td>
+                                    <td>Layer Feed</td>
+                                    <td>500 kg</td>
+                                    <td>Ontario Feed Co.</td>
+                                    <td>LF-2024-001</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline" onclick="editRecord('feed', 1)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Medication Log Tab -->
+                <div class="tab-content" id="medication">
+                    <div class="record-header">
+                        <h3>Medication & Treatment Log</h3>
+                        <button class="btn btn-primary" onclick="addMedicationRecord()">
+                            <i class="fas fa-plus"></i> Add Record
+                        </button>
+                    </div>
+                    <div class="record-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Flock ID</th>
+                                    <th>Treatment</th>
+                                    <th>Dosage</th>
+                                    <th>Method</th>
+                                    <th>Reason</th>
+                                    <th>Vet Approval</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Feb 10, 2024</td>
+                                    <td>2024-002</td>
+                                    <td>Vitamin Supplement</td>
+                                    <td>As directed</td>
+                                    <td>Water</td>
+                                    <td>Preventive</td>
+                                    <td>Dr. Johnson</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline" onclick="editRecord('medication', 1)">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="reports" class="app-section">
+            <div class="section-header">
+                <h1>Reports & Analytics</h1>
+                <p>Generate reports and analyze farm performance</p>
+            </div>
+
+            <div class="reports-grid">
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3>Flock Performance Report</h3>
+                        <button class="btn btn-primary" onclick="generateFlockReport()">
+                            <i class="fas fa-download"></i> Generate
+                        </button>
+                    </div>
+                    <p>Comprehensive report on flock performance, mortality rates, and production metrics.</p>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3>Environmental Report</h3>
+                        <button class="btn btn-primary" onclick="generateEnvironmentalReport()">
+                            <i class="fas fa-download"></i> Generate
+                        </button>
+                    </div>
+                    <p>Temperature, humidity, and air quality data over time.</p>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3>Feed Consumption Report</h3>
+                        <button class="btn btn-primary" onclick="generateFeedReport()">
+                            <i class="fas fa-download"></i> Generate
+                        </button>
+                    </div>
+                    <p>Feed usage patterns and cost analysis.</p>
+                </div>
+
+                <div class="report-card">
+                    <div class="report-header">
+                        <h3>Compliance Report</h3>
+                        <button class="btn btn-primary" onclick="generateComplianceReport()">
+                            <i class="fas fa-download"></i> Generate
+                        </button>
+                    </div>
+                    <p>Regulatory compliance documentation for Ontario farming standards.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Record</h3>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content" id="modal-content">
+                <!-- Modal content will be dynamically loaded -->
+            </div>
+        </div>
+    </div>
+
+    <script src="flockview-app-script.js"></script>
+</body>
+</html> 
