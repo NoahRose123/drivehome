@@ -2,8 +2,6 @@
 <html lang="en">
 
 <head>
-
-    <head>
         <link rel="icon" type="image/png" href="/icon.png?v=2">
         <link rel="apple-touch-icon" href="/icon.png?v=2">
         <link rel="icon" type="image/png" sizes="192x192" href="/iconcropped.png">
@@ -13,15 +11,15 @@
 
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Farm Management Hub</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>VAS Barn 1 - Visitor Log</title>
 
         <!-- Barn Software Styles -->
         <link rel="stylesheet" href="../barnsoftwares-css/barn-software-styles.css">
         <link rel="stylesheet" href="../barnsoftwares-css/vistorlog.css">
         <script src="../barnsoftwares-css/barn-header.js"></script>
+        
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <script type="module">
             import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
             import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, getDoc, query, where, onSnapshot }
@@ -80,14 +78,15 @@
             window.loadVisitors = async function () {
                 console.log("📥 Loading Visitor Logs...");
                 const visitorLogs = document.getElementById("visitorLogs");
-                visitorLogs.innerHTML = "";
+                visitorLogs.innerHTML = `<tr><td colspan='5' style="text-align: center; padding: 20px; color: #666;">🔄 Loading visitor logs...</td></tr>`;
 
                 try {
                     const q = collection(db, "visitor_logs");
                     const querySnapshot = await getDocs(q);
 
                     if (querySnapshot.empty) {
-                        visitorLogs.innerHTML = `<tr><td colspan='5'>No visitors found.</td></tr>`;
+                        console.log("📝 No visitors found in database");
+                        visitorLogs.innerHTML = `<tr><td colspan='5' style="text-align: center; padding: 20px; color: #666;">📝 No visitor logs found.<br><br>Add your first visitor above!</td></tr>`;
                         return;
                     }
 
@@ -118,9 +117,14 @@
 
                         row.lastElementChild.addEventListener("click", async () => {
                             if (confirm(`Are you sure you want to delete ${visitorName}?`)) {
-                                await deleteDoc(doc(db, "visitor_logs", visitor.id));
-                                alert(`✅ ${visitorName} has been deleted.`);
-                                loadVisitors();
+                                try {
+                                    await deleteDoc(doc(db, "visitor_logs", visitor.id));
+                                    alert(`✅ ${visitorName} has been deleted.`);
+                                    loadVisitors();
+                                } catch (error) {
+                                    console.error("❌ Error deleting visitor:", error);
+                                    alert(`❌ Error deleting ${visitorName}: ${error.message}\n\nPlease try again.`);
+                                }
                             }
                         });
 
@@ -130,7 +134,7 @@
                     console.log("✅ Visitors successfully loaded and sorted!");
                 } catch (error) {
                     console.error("🔥 Error Fetching Visitors", error);
-                    visitorLogs.innerHTML = `<tr><td colspan='5'>Error Fetching Visitors</td></tr>`;
+                    visitorLogs.innerHTML = `<tr><td colspan='5' style="color: red; text-align: center; padding: 20px; font-weight: bold;">❌ Error loading visitor data<br><br>Please check your internet connection and refresh the page.<br><br>Error: ${error.message}</td></tr>`;
                 }
             };
 
@@ -338,37 +342,77 @@
 
 
             window.onload = function () {
-                fetchFarmInfo();
-                loadVisitors();
+                console.log("🚀 Page loaded, starting initialization...");
+                
+                // Check if table elements exist
+                const tableContainer = document.querySelector('.table-container');
+                const visitorLogsTable = document.getElementById('visitorLogs');
+                
+                console.log("📋 Table container found:", tableContainer ? "✅ YES" : "❌ NO");
+                console.log("📋 Visitor logs tbody found:", visitorLogsTable ? "✅ YES" : "❌ NO");
+                
+                if (!tableContainer) {
+                    console.error("❌ CRITICAL: .table-container not found!");
+                    alert("❌ ERROR: Table container not found. Check HTML structure.");
+                    return;
+                }
+                
+                if (!visitorLogsTable) {
+                    console.error("❌ CRITICAL: #visitorLogs tbody not found!");
+                    alert("❌ ERROR: Visitor logs table body not found. Check HTML structure.");
+                    return;
+                }
+                
+                console.log("🔄 Starting Firebase initialization...");
+                
+                // Check if Firebase is loaded
+                if (typeof window.db === 'undefined') {
+                    console.error("❌ CRITICAL: Firebase not initialized!");
+                    alert("❌ ERROR: Firebase not loaded. Check internet connection.");
+                    return;
+                }
+                
+                console.log("✅ Firebase initialized successfully");
+                
+                try {
+                    fetchFarmInfo();
+                    loadVisitors();
+                } catch (error) {
+                    console.error("❌ Error during initialization:", error);
+                    alert(`❌ Initialization Error: ${error.message}`);
+                }
             };
         </script>
     </head>
-    <!DOCTYPE html>
-    <html lang="en">
-
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>VAS Barn 1 - Visitor Log</title>
-
-    </head>
 
 <body>
-    <h1>VAS Barn 1 - Visitor Log</h1>
+    <div class="visitor-log-form">
+        <h1>VAS Barn 1 - Visitor Log</h1>
 
-    <!-- Farm Information Section -->
-    <div class="info-section">
-        <h2>Farm Name: <span id="farmName">Loading...</span></h2>
-        <h2>Barn: <span id="barnNumber">Loading...</span></h2>
-        <h2>Farm Number: <span id="farmNumber">Loading...</span></h2>
-        <h2>Quota Period: <span id="quotaPeriod">Loading...</span></h2>
-    </div>
+        <!-- Farm Information Section -->
+        <div class="info-section">
+            <h2>Farm Name: <span id="farmName">Loading...</span></h2>
+            <h2>Barn: <span id="barnNumber">Loading...</span></h2>
+            <h2>Farm Number: <span id="farmNumber">Loading...</span></h2>
+            <h2>Quota Period: <span id="quotaPeriod">Loading...</span></h2>
+        </div>
 
-    <!-- Form Section -->
-    <div class="form-section">
-        <input type="date" id="visitorDate">
-        <input type="text" id="visitorName" placeholder="Visitor Name">
-        <textarea id="reason" placeholder="Reason for Visit"></textarea>
+        <!-- Form Section -->
+        <div class="form-section">
+        <div class="form-group">
+            <label for="visitorDate">Date:</label>
+            <input type="date" id="visitorDate">
+        </div>
+        
+        <div class="form-group">
+            <label for="visitorName">Visitor Name:</label>
+            <input type="text" id="visitorName" placeholder="Enter visitor name">
+        </div>
+        
+        <div class="form-group">
+            <label for="reason">Reason for Visit:</label>
+            <textarea id="reason" placeholder="Enter reason for visit"></textarea>
+        </div>
 
         <div class="radio-section">
             <label>Contact with poultry in the last 24 hours?</label>
@@ -386,13 +430,13 @@
 
         <div class="button-group">
             <button onclick="addVisitor()">Add Visitor</button>
-            <button onclick="downloadLogs()">Download Logs as PDF</button>
-            <button onclick="resetForm()">Reset Form</button>
+            <button onclick="downloadLogs()">Download PDF</button>
         </div>
     </div>
 
     <!-- Table Section -->
     <div class="table-container">
+        <h2>Visitor Records</h2>
         <table>
             <!-- Replace the existing table header section with this: -->
             <!-- Replace the table header section with this: -->
@@ -413,6 +457,23 @@
     <script>
         // Set today's date as default
         document.getElementById('visitorDate').value = new Date().toISOString().split('T')[0];
+        
+        // Emergency fallback - show table structure if nothing else works
+        setTimeout(() => {
+            const visitorLogsTable = document.getElementById('visitorLogs');
+            if (visitorLogsTable && visitorLogsTable.innerHTML.trim() === '') {
+                console.warn("⚠️ FALLBACK: Table is empty after 3 seconds, showing test data");
+                visitorLogsTable.innerHTML = `
+                    <tr style="background: #fff3cd; color: #856404;">
+                        <td colspan='5' style="text-align: center; padding: 20px; font-weight: bold;">
+                            ⚠️ TABLE STRUCTURE TEST ⚠️<br><br>
+                            If you see this message, the table HTML is working but data loading failed.<br>
+                            Check browser console for errors.
+                        </td>
+                    </tr>
+                `;
+            }
+        }, 3000);
     </script>
 </body>
 

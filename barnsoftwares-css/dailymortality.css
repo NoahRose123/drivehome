@@ -1,315 +1,319 @@
-/* Daily Mortality Page Specific Styles */
+/* Daily Mortality Page Specific Styles - Professional Multi-Million Dollar App */
 
 /* Import base styles */
-@import url('barn-software-styles.css');
+@import url('../barnsoftwares-css/barn-software-styles.css');
 
-/* Page Title */
-#floor-title {
-    text-align: center;
-    color: var(--gray-800);
-    font-size: 24px;
-    font-weight: 600;
-    margin: 20px 0;
-    padding: 15px;
-    background: var(--white);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+/* Farm-specific theme variables */
+:root {
+    --farm-theme-primary: var(--farm-vassilakos);
+    --farm-theme-gradient: linear-gradient(135deg, var(--farm-vassilakos) 0%, var(--primary-dark) 100%);
 }
 
-/* Form Layout */
-.container {
+/* Professional Form Styles */
+.daily-mortality-form {
+    background: var(--white);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Center the floor title with reduced bottom spacing */
+#floor-title {
+    text-align: center;
+    margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+/* Floor Toggle Container - Match Mortality Records Exactly */
+.floor-toggle-container {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    margin-top: calc(var(--spacing-xl) * 2);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-md);
+    width: 100%;
     max-width: 600px;
-    margin: 20px auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.floor-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: var(--font-size-base);
+}
+
+.floor-toggle {
+    position: relative;
+    display: inline-block;
+    width: 120px;
+    height: 40px;
+}
+
+.floor-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.floor-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--gray-300);
+    transition: var(--transition-normal);
+    border-radius: 40px;
+}
+
+.floor-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 32px;
+    width: 32px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: var(--transition-normal);
+    border-radius: 50%;
+}
+
+.floor-toggle input:checked + .floor-toggle-slider {
+    background-color: var(--farm-theme-primary);
+}
+
+.floor-toggle input:checked + .floor-toggle-slider:before {
+    transform: translateX(80px);
+}
+
+/* Daily mortality form specific improvements */
+.container {
+    margin-top: var(--spacing-xs);
 }
 
 .container label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: var(--spacing-xs);
+    margin-top: var(--spacing-sm);
     font-weight: 600;
     color: var(--gray-700);
+    font-size: var(--font-size-base);
 }
 
-.container input {
+.container input[type="date"],
+.container input[type="number"] {
     width: 100%;
-    max-width: 300px;
-    margin-bottom: 20px;
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-base);
+    transition: var(--transition-normal);
 }
 
-.container button {
-    background-color: var(--primary-color);
-    color: var(--white);
-    padding: 15px 30px;
-    font-size: 16px;
+.container input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.daily-mortality-form h2 {
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-2xl);
     font-weight: 600;
-    margin-top: 20px;
+    border-bottom: 2px solid var(--farm-theme-primary);
+    padding-bottom: var(--spacing-sm);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.form-row.full-width {
+    grid-template-columns: 1fr;
+}
+
+.mortality-summary {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin: var(--spacing-lg) 0;
+    border: 2px solid var(--farm-theme-primary);
+    box-shadow: var(--shadow-md);
+}
+
+.mortality-summary h3 {
+    color: var(--farm-theme-primary);
+    margin-bottom: var(--spacing-md);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+}
+
+/* Professional Table Styles */
+.mortality-table {
     width: 100%;
-    max-width: 300px;
+    border-collapse: collapse;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    margin: var(--spacing-lg) 0;
 }
 
-.container button:hover {
-    background-color: #0056b3;
-    transform: translateY(-2px);
+.mortality-table th {
+    background: var(--farm-theme-gradient);
+    color: var(--white);
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: left;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    border-bottom: 2px solid var(--gray-300);
 }
 
-/* Floor Toggle Enhancements */
-.floor-toggle-container {
-    background: linear-gradient(135deg, var(--white) 0%, var(--gray-100) 100%);
-    border: 2px solid var(--gray-200);
-    margin: 20px auto;
-    max-width: 400px;
+.mortality-table td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--gray-200);
+    font-size: var(--font-size-sm);
 }
 
-.floor-label {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--gray-800);
+.mortality-table tr:hover {
+    background-color: var(--gray-50);
+    transform: scale(1.01);
 }
 
-/* Side Button Panel Enhancements */
-.button-panel {
-    position: fixed;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    z-index: 100;
-}
-
-.side-button {
-    width: 70px;
-    height: 70px;
+/* Professional Button Styles */
+.btn-export-mortality {
+    background: var(--farm-theme-gradient);
+    color: var(--white);
     border: none;
-    border-radius: 50%;
-    font-size: 14px;
-    font-weight: 700;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
+    transition: var(--transition-normal);
+    font-size: var(--font-size-sm);
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    text-align: center;
-    line-height: 1.2;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    position: relative;
-    overflow: hidden;
+    gap: var(--spacing-xs);
 }
 
-.side-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    transition: left 0.5s;
-}
-
-.side-button:hover::before {
-    left: 100%;
-}
-
-.side-button.plus-cull {
-    background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
-    color: var(--white);
-}
-
-.side-button.minus-cull {
-    background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
-    color: var(--white);
-}
-
-.side-button.plus-mort {
-    background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%);
-    color: var(--gray-800);
-}
-
-.side-button.minus-mort {
-    background: linear-gradient(135deg, var(--secondary-color) 0%, #4b5563 100%);
-    color: var(--white);
-}
-
-.side-button:hover {
-    transform: scale(1.1) translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-
-/* Ammonia Input Box Enhancements */
-.ammonia-box {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border: 3px solid var(--warning-color);
-    border-radius: var(--border-radius);
-    padding: 25px;
-    margin: 25px 0;
-    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2);
-    position: relative;
-    overflow: hidden;
-}
-
-.ammonia-box::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--warning-color), #d97706, var(--warning-color));
-    animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-    0% {
-        transform: translateX(-100%);
-    }
-
-    100% {
-        transform: translateX(100%);
-    }
-}
-
-.ammonia-box h3 {
-    color: var(--gray-800);
-    margin-bottom: 20px;
-    font-size: 18px;
-    font-weight: 700;
-    text-align: center;
-}
-
-.ammonia-box label {
-    font-weight: 600;
-    color: var(--gray-700);
-    margin-bottom: 10px;
-}
-
-.ammonia-box input {
-    width: 100%;
-    max-width: 200px;
-    border: 2px solid var(--warning-color);
-    background-color: var(--white);
-}
-
-/* Input Focus Effects */
-.container input:focus,
-.ammonia-box input:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+.btn-export-mortality:hover {
     transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
-/* Responsive Design for Daily Mortality */
+.btn-print-mortality {
+    background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
+    color: var(--white);
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    font-size: var(--font-size-sm);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.btn-print-mortality:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Status Indicator */
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: var(--spacing-xs);
+}
+
+.status-indicator.success {
+    background: var(--success-green);
+}
+
+.status-indicator.warning {
+    background: var(--warning-orange);
+}
+
+.status-indicator.error {
+    background: var(--danger-red);
+}
+
+/* Responsive Design - Professional */
 @media (max-width: 768px) {
-    .container {
-        margin: 10px;
-        padding: 15px;
+    .daily-mortality-form {
+        padding: var(--spacing-md);
     }
 
-    #floor-title {
-        font-size: 20px;
-        margin: 10px 0;
-        padding: 10px;
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
     }
 
-    .button-panel {
-        right: 10px;
-        gap: 10px;
-    }
-
-    .side-button {
-        width: 60px;
-        height: 60px;
-        font-size: 12px;
-    }
-
-    .floor-toggle-container {
-        margin: 10px;
-        padding: 10px;
-    }
-
-    .ammonia-box {
-        padding: 20px;
-        margin: 20px 0;
+    .mortality-summary {
+        padding: var(--spacing-md);
     }
 }
 
 @media (max-width: 480px) {
-    .container {
-        margin: 5px;
-        padding: 10px;
+    .daily-mortality-form {
+        padding: var(--spacing-sm);
     }
 
-    #floor-title {
-        font-size: 18px;
-        padding: 8px;
+    .daily-mortality-form h2 {
+        font-size: var(--font-size-xl);
     }
 
-    .button-panel {
-        right: 5px;
+    .mortality-summary {
+        padding: var(--spacing-sm);
     }
 
-    .side-button {
-        width: 50px;
-        height: 50px;
-        font-size: 10px;
+    .mortality-table {
+        font-size: var(--font-size-xs);
     }
 
-    .ammonia-box {
-        padding: 15px;
-        margin: 15px 0;
-    }
-
-    .ammonia-box h3 {
-        font-size: 16px;
+    .mortality-table th,
+    .mortality-table td {
+        padding: var(--spacing-xs);
     }
 }
 
-/* Loading States */
-.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.loading::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    margin: -10px 0 0 -10px;
-    border: 2px solid var(--primary-color);
-    border-top: 2px solid transparent;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
+/* Print Styles */
+@media print {
+    .modern-header,
+    .button-panel,
+    .mobile-nav-menu {
+        display: none !important;
     }
 
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* Success Animation */
-.success-animation {
-    animation: successPulse 0.6s ease-in-out;
-}
-
-@keyframes successPulse {
-    0% {
-        transform: scale(1);
+    .daily-mortality-form {
+        box-shadow: none;
+        border: 1px solid #ccc;
     }
 
-    50% {
-        transform: scale(1.05);
-    }
-
-    100% {
-        transform: scale(1);
+    .mortality-summary {
+        box-shadow: none;
+        border: 1px solid #ccc;
     }
 }

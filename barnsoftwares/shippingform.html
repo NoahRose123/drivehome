@@ -2,8 +2,6 @@
 <html lang="en">
 
 <head>
-
-    <head>
         <link rel="icon" type="image/png" href="/icon.png?v=2">
         <link rel="apple-touch-icon" href="/icon.png?v=2">
         <link rel="icon" type="image/png" sizes="192x192" href="/iconcropped.png">
@@ -12,22 +10,24 @@
         <meta name="theme-color" content="#1a365d">
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Farm Management Hub</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Shipping Flock Log</title>
 
         <!-- Barn Software Styles -->
         <link rel="stylesheet" href="../barnsoftwares-css/barn-software-styles.css">
         <link rel="stylesheet" href="../barnsoftwares-css/shippingform.css">
         <script src="../barnsoftwares-css/barn-header.js"></script>
+        
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     </head>
 
 <body>
-    <h1 id="main-title" style="text-align: center; margin-bottom: 20px;">Vassilakos - Barn 1</h1>
-    <div class="container" id="form-container">
-        <h2 id="log-title">Flock Log - Shipping Info</h2>
+
+
+    <div class="shipping-form">
+        <div class="container" id="form-container">
         <table>
             <tr>
                 <td>Date and Time of Catch</td>
@@ -158,8 +158,6 @@
         </table>
 
         <button id="duplicate-log">Add Shipping Info</button>
-        <button id="save-pdf">Print as PDF</button>
-        <button id="save-to-firestore">Save Changes</button>
     </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
@@ -314,10 +312,36 @@
                 let removeButton = document.createElement("button");
                 removeButton.textContent = "Remove Form";
                 removeButton.classList.add("remove-form");
-                removeButton.style.display = "block";
-                removeButton.style.margin = "10px auto";
+                
+                // Find any button with text "Add Shipping Info" (more robust than ID)
+                const allButtons = logElement.querySelectorAll('button');
+                let addShippingButton = null;
+                
+                for (let button of allButtons) {
+                    if (button.textContent.trim() === "Add Shipping Info") {
+                        addShippingButton = button;
+                        break;
+                    }
+                }
+                
+                if (addShippingButton) {
+                    // Position the remove button independently with specific styling
+                    removeButton.style.cssText = `
+                        position: relative;
+                        margin-left: -350px;
+                        margin-top: 10px;
+                        display: inline-block;
+                    `;
+                    
+                    // Insert the remove button right after the Add Shipping Info button
+                    addShippingButton.parentElement.insertBefore(removeButton, addShippingButton.nextSibling);
+                } else {
+                    // Fallback: append to logElement if no add button found
+                    logElement.appendChild(removeButton);
+                }
+                
                 removeButton.onclick = async function () {
-                    // find this log’s index before removal
+                    // find this log's index before removal
                     const all = Array.from(document.querySelectorAll(".container"));
                     const idx = all.indexOf(logElement) + 1;    // 1-based
                     // delete the corresponding field in Firestore (log2, log3, …)
@@ -326,7 +350,6 @@
                     logElement.remove();
                     updateLogNumbers();
                 };
-                logElement.appendChild(removeButton);
             }
 
             function updateLogNumbers() {
@@ -2405,6 +2428,7 @@
         // Attach the calculateRowWeight function to the global window object so inline calls work.
         window.calculateRowWeight = calculateRowWeight;
     </script>
+    </div>
 
 
 

@@ -1,0 +1,2759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flock Mortality & Daily Records</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .chart-container { 
+            max-width: 95%; 
+            margin: 0 auto; 
+            background-color: white; 
+            padding: 20px; 
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        h1 { 
+            text-align: center; 
+            font-size: 28px; 
+            margin-bottom: 25px; 
+            color: #2c3e50;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tables-wrapper { 
+            display: block; 
+            max-width: 100%; 
+            margin: 0 auto; 
+        }
+        
+        .floor-section { 
+            width: 100%; 
+            margin-bottom: 40px; 
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        
+        .floor-header { 
+            background: linear-gradient(135deg, #2e7d32 0%, #388e3c 100%);
+            color: white; 
+            padding: 12px 15px; 
+            text-align: center; 
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 0;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .floor-header:hover {
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .floor-header::after {
+            content: '▼';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+        
+        .floor-header.collapsed::after {
+            transform: translateY(-50%) rotate(-90deg);
+        }
+        
+        .floor-content {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        
+        .floor-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 0; 
+            table-layout: auto;
+            font-size: 11px;
+        }
+        
+        th { 
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #6c757d; 
+            padding: 1px 1px; 
+            text-align: center; 
+            font-size: 11px !important; 
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            white-space: nowrap;
+            line-height: 1.1;
+            min-width: 0;
+            max-width: none;
+            overflow: hidden;
+        }
+        
+        .sub-header { 
+            background: linear-gradient(135deg, #f1f3f4 0%, #e8eaed 100%);
+            font-weight: 500;
+            font-size: 11px !important;
+            line-height: 1.1;
+            color: #495057;
+        }
+        
+        td { 
+            border: 1px solid #6c757d; 
+            padding: 1px 1px; 
+            text-align: center; 
+            min-height: 14px; 
+            background-color: white; 
+            font-size: 11px; 
+            color: #2c3e50;
+            font-weight: 600;
+            vertical-align: middle; 
+            word-wrap: break-word; 
+            overflow-wrap: break-word; 
+            hyphens: auto; 
+            max-width: 0; 
+            transition: background-color 0.2s ease;
+        }
+        
+        tr:hover td {
+            background-color: #f8f9fa;
+        }
+        
+        .alarm-cell { 
+            min-height: 60px !important; 
+            height: auto !important; 
+            padding: 6px !important; 
+            vertical-align: top !important; 
+            width: 300px !important; 
+            min-width: 300px !important;
+            max-width: 300px !important; 
+            text-align: left !important; 
+            white-space: pre-line !important; 
+            word-wrap: break-word !important; 
+            line-height: 1.3 !important; 
+            font-size: 11px !important;
+            background-color: #f8f9fa !important; 
+            color: #2c3e50 !important;
+            border: 1px solid #6c757d !important;
+            border-left: 6px solid #007bff !important;
+            box-shadow: inset 3px 0 6px rgba(0,123,255,0.15) !important;
+            overflow: hidden !important;
+            position: relative !important;
+            font-weight: 700 !important;
+        }
+        
+        .alarm-entry {
+            margin-bottom: 5px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            line-height: 1.3;
+            word-wrap: break-word;
+            font-weight: 700;
+            border-left: 3px solid;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            position: relative;
+            height: 35px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+            color: #2c3e50;
+        }
+        
+        .alarm-entry:hover {
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            transform: translateY(-1px);
+        }
+        
+        .alarm-entry:hover .alarm-arrow {
+            background: rgba(255,255,255,1);
+            color: #333;
+        }
+        
+        .alarm-entry.expanded {
+            height: auto;
+            padding: 20px 25px;
+        }
+        
+        /* Removed ::after pseudo-element since we're using custom arrow */
+        
+        .alarm-entry .alarm-preview {
+            display: block;
+            height: 25px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+            width: 100%;
+            word-wrap: break-word;
+            word-break: break-word;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        
+        .alarm-entry.expanded .alarm-preview {
+            height: auto;
+            margin-bottom: 12px;
+            white-space: normal;
+            text-overflow: clip;
+        }
+        
+        .alarm-entry .alarm-full {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            width: 100%;
+            word-wrap: break-word;
+            word-break: break-word;
+            line-height: 1.6;
+        }
+        
+        .alarm-entry.expanded .alarm-full {
+            display: block;
+            opacity: 1;
+        }
+        
+        .age-cell { 
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            font-weight: 700; 
+            width: 30px !important; 
+            max-width: 30px !important; 
+            min-width: 30px !important;
+            color: #1565c0;
+            font-size: 11px;
+            border: 1px solid #6c757d !important;
+        }
+        
+        .date-cell { 
+            width: 60px !important; 
+            max-width: 60px !important; 
+            min-width: 60px !important; 
+            font-size: 11px;
+            background-color: #f8f9fa;
+            font-weight: 700;
+            color: #2c3e50;
+            padding: 2px 3px !important;
+            letter-spacing: 0.5px;
+            border: 1px solid #6c757d !important;
+        }
+        
+        .small-cell { 
+            width: 30px !important; 
+            max-width: 30px !important; 
+            min-width: 30px !important;
+            font-weight: 700;
+            font-size: 11px;
+            color: #2c3e50;
+            border: 1px solid #6c757d !important;
+        }
+        
+        .temp-cell { 
+            width: 30px !important; 
+            max-width: 30px !important; 
+            min-width: 30px !important; 
+            font-size: 11px;
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #6c757d !important;
+            font-weight: 700;
+        }
+        
+        .humidity-cell { 
+            width: 30px !important; 
+            max-width: 30px !important; 
+            min-width: 30px !important; 
+            font-size: 11px;
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #6c757d !important;
+            font-weight: 700;
+        }
+        
+        .ammonia-cell { 
+            width: 30px !important; 
+            max-width: 30px !important; 
+            min-width: 30px !important; 
+            font-size: 11px;
+            background-color: #fff8e1;
+            color: #f57c00;
+            border: 1px solid #6c757d !important;
+            font-weight: 700;
+        }
+        
+        .water-cell { 
+            width: 45px !important; 
+            max-width: 45px !important; 
+            min-width: 45px !important; 
+            font-size: 11px;
+            background-color: #e3f2fd;
+            color: #1565c0;
+            border: 1px solid #6c757d !important;
+            font-weight: 700;
+        }
+        
+        .farm-info { 
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #dee2e6; 
+            padding: 25px; 
+            margin-bottom: 30px; 
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .farm-info-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+        
+        .info-item { 
+            display: flex; 
+            align-items: center;
+            padding: 8px 0;
+        }
+        
+        .info-label { 
+            font-weight: 600; 
+            margin-right: 8px; 
+            color: #495057;
+            min-width: 120px;
+        }
+        
+        .info-value { 
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .floor-info { 
+            margin-top: 20px; 
+            padding: 15px; 
+            background: white; 
+            border: 1px solid #dee2e6; 
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .floor-title { 
+            font-weight: 700; 
+            color: #2e7d32; 
+            margin-bottom: 12px; 
+            font-size: 18px;
+            border-bottom: 2px solid #4caf50;
+            padding-bottom: 8px;
+        }
+        
+        .floor-details { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 12px; 
+        }
+        
+        .loading { 
+            text-align: center; 
+            padding: 20px; 
+            color: #666;
+            font-size: 18px;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .notes { 
+            margin-top: 30px; 
+            font-size: 14px; 
+            color: #6c757d;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .notes ol { 
+            margin: 10px 0; 
+            padding-left: 25px; 
+        }
+        
+        .notes li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        
+        /* Edit mode styles */
+        .edit-controls {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border-radius: 10px;
+            border: 2px solid #2196f3;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.1);
+        }
+        
+        .edit-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            transform: translateZ(0);
+        }
+        
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+        }
+        
+        .edit-btn.save-btn {
+            background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+        
+        .edit-btn.save-btn:hover {
+            box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+        }
+        
+        .edit-btn.cancel-btn {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+        }
+        
+        .edit-btn.cancel-btn:hover {
+            box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+        }
+        
+        .clear-btn {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 6px rgba(255, 152, 0, 0.4);
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            z-index: 10;
+            display: none;
+            transform: translateZ(0);
+        }
+        
+        .clear-btn:hover {
+            background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
+            transform: scale(1.1) translateZ(0);
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.5);
+        }
+        
+        .clear-btn:hover {
+            transform: scale(1.15) translateZ(0);
+            box-shadow: 0 5px 12px rgba(255, 152, 0, 0.5);
+        }
+        
+        .edit-mode .clear-btn {
+            display: block;
+        }
+        
+        .edit-mode td {
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateZ(0);
+            padding: 3px 2px !important;
+            min-height: 18px;
+            vertical-align: middle;
+            border: 1px solid #6c757d !important;
+        }
+        
+        .edit-mode input {
+            width: 100%;
+            padding: 4px 6px;
+            border: 2px solid #2196f3;
+            border-radius: 4px;
+            font-size: 11px;
+            text-align: center;
+            background: white;
+            color: #2c3e50;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-sizing: border-box;
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+        }
+        
+        .edit-mode input:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15), 0 2px 4px rgba(33, 150, 243, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .edit-mode input:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15), 0 2px 4px rgba(33, 150, 243, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .edit-mode .alarm-cell {
+            padding: 3px !important;
+            min-height: 40px;
+            vertical-align: top;
+            border: 1px solid #6c757d !important;
+        }
+        
+        .edit-mode .alarm-cell textarea {
+            width: 100%;
+            min-height: 45px;
+            padding: 5px;
+            border: 2px solid #2196f3;
+            border-radius: 4px;
+            font-size: 11px;
+            resize: vertical;
+            background: white;
+            color: #2c3e50;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-sizing: border-box;
+            font-family: inherit;
+            box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+        }
+        
+        /* Enhanced alarm editing system */
+        .edit-mode .alarm-cell .alarm-entries-container {
+            width: 100%;
+            min-height: 60px;
+            border: 2px solid #2196f3;
+            border-radius: 6px;
+            background: white;
+            padding: 8px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-mode .alarm-cell .alarm-entries-container:focus-within {
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15), 0 2px 4px rgba(33, 150, 243, 0.1);
+        }
+        
+        .edit-mode .alarm-cell .alarm-entry-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+            padding: 6px 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+        }
+        
+        .edit-mode .alarm-cell .alarm-entry-item:hover {
+            background: #e9ecef;
+            border-color: #dee2e6;
+        }
+        
+        .edit-mode .alarm-cell .alarm-entry-number {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
+        }
+        
+        .edit-mode .alarm-cell .alarm-entry-input {
+            flex: 1;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 6px 8px;
+            font-size: 12px;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+        
+        .edit-mode .alarm-cell .alarm-entry-input:focus {
+            outline: none;
+            border-color: #2196f3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+        }
+        
+        .edit-mode .alarm-cell .alarm-entry-input:focus {
+            outline: none;
+            border-color: #2196f3;
+            box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+        }
+        
+        .edit-mode .alarm-cell .alarm-entry-delete {
+            background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(255, 71, 87, 0.3);
+        }
+        
+        .edit-mode .alarm-cell .alarm-entry-delete:hover {
+            background: linear-gradient(135deg, #ff3742 0%, #ff2e3a 100%);
+            transform: scale(1.1);
+            box-shadow: 0 3px 6px rgba(255, 71, 87, 0.4);
+        }
+        
+                .edit-mode .alarm-cell .add-alarm-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+        }
+        
+        .edit-mode .alarm-cell .add-alarm-btn:hover {
+            background: #45a049;
+        }
+        
+        .edit-mode .alarm-cell textarea:focus {
+            outline: none;
+            border-color: #1976d2;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.15), 0 2px 4px rgba(33, 150, 243, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .edit-mode .age-cell,
+        .edit-mode .date-cell {
+            background: #f8f9fa !important;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .edit-mode .age-cell input,
+        .edit-mode .date-cell input {
+            background: #f8f9fa;
+            border-color: #dee2e6;
+        }
+        
+        /* Prevent unwanted focus/hover effects when not in edit mode */
+        td:not(.edit-mode td) {
+            pointer-events: auto;
+        }
+        
+        /* Ensure no unwanted scrolling when not in edit mode */
+        td:not(.edit-mode td) input,
+        td:not(.edit-mode td) textarea {
+            pointer-events: none;
+        }
+        
+        /* Ensure table layout remains consistent in edit mode */
+        .edit-mode table {
+            table-layout: auto;
+        }
+        
+        /* Prevent automatic scrolling when inputs are focused */
+        .edit-mode input:focus,
+        .edit-mode textarea:focus {
+            scroll-behavior: auto !important;
+        }
+        
+        /* Prevent any automatic scrolling in edit mode */
+        .edit-mode {
+            scroll-behavior: auto !important;
+        }
+        
+        .edit-mode th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 1px solid #6c757d;
+            padding: 1px 1px;
+            text-align: center;
+            font-size: 11px !important;
+            font-weight: 600;
+            color: #2c3e50;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            white-space: nowrap;
+            line-height: 1.1;
+        }
+        
+        /* Table column sizing - ensure consistent sizing across all tables */
+        .tables-wrapper table th:nth-child(1), 
+        .tables-wrapper table td:nth-child(1) { 
+            width: 30px !important; 
+            min-width: 30px !important;
+            max-width: 30px !important;
+        } /* Age */
+        
+        .tables-wrapper table th:nth-child(2), 
+        .tables-wrapper table td:nth-child(2) { 
+            width: 60px !important; 
+            min-width: 60px !important;
+            max-width: 60px !important;
+        } /* Date */
+        
+        .tables-wrapper table th:nth-child(3), 
+        .tables-wrapper table td:nth-child(3) { 
+            width: 30px !important; 
+            min-width: 30px !important;
+            max-width: 30px !important;
+        } /* Mortality */
+        
+        .tables-wrapper table th:nth-child(4), 
+        .tables-wrapper table td:nth-child(4) { 
+            width: 30px !important; 
+            min-width: 30px !important;
+            max-width: 30px !important;
+        } /* Culls */
+        
+        .tables-wrapper table th:nth-child(5), 
+        .tables-wrapper table td:nth-child(5) { 
+            width: 30px !important; 
+            min-width: 30px !important;
+            max-width: 30px !important;
+        } /* Temp Min */
+        
+        .tables-wrapper table th:nth-child(6), 
+        .tables-wrapper table td:nth-child(6) { 
+            width: 30px !important; 
+            min-width: 30px !important;
+            max-width: 30px !important;
+        } /* Temp Max */
+        
+        .tables-wrapper table th:nth-child(7), 
+        .tables-wrapper table td:nth-child(7) { 
+            width: 30px !important; 
+            min-width: 30px !important;
+            max-width: 30px !important;
+        } /* Humidity Min */
+        
+        .tables-wrapper table th:nth-child(8), 
+        .tables-wrapper table td:nth-child(8) { 
+            width: 30px !important; 
+            min-width: 30px !important;
+            max-width: 30px !important;
+        } /* Humidity Max */
+        
+        .tables-wrapper table th:nth-child(9), 
+        .tables-wrapper table td:nth-child(9) { 
+            width: 30px !important; 
+            min-width: 30px !important;
+            max-width: 30px !important;
+        } /* Ammonia Min */
+        
+        .tables-wrapper table th:nth-child(10), 
+        .tables-wrapper table td:nth-child(10) { 
+            width: 30px !important; 
+            min-width: 30px !important;
+            max-width: 30px !important;
+        } /* Ammonia Max */
+        
+        .tables-wrapper table th:nth-child(11), 
+        .tables-wrapper table td:nth-child(11) { 
+            width: 45px !important; 
+            min-width: 45px !important;
+            max-width: 45px !important;
+        } /* Water */
+        
+        .tables-wrapper table th:nth-child(12), 
+        .tables-wrapper table td:nth-child(12) { 
+            width: 300px !important; 
+            min-width: 300px !important;
+            max-width: 300px !important;
+        } /* Alarms */
+        
+        /* Ensure alarm column header is properly sized and styled */
+        .tables-wrapper table th.alarm-cell {
+            width: 300px !important;
+            min-width: 300px !important;
+            max-width: 300px !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+            border: 1px solid #6c757d !important;
+            padding: 1px 1px !important;
+            text-align: center !important;
+            font-size: 11px !important;
+            font-weight: 600 !important;
+            color: #2c3e50 !important;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 100 !important;
+            white-space: nowrap !important;
+            line-height: 1.1 !important;
+            vertical-align: middle !important;
+            word-wrap: normal !important;
+            word-break: keep-all !important;
+        }
+
+        /* Responsive design */
+        @media (max-width: 1200px) {
+            .chart-container {
+                padding: 15px;
+                margin: 5px;
+                max-width: 98%;
+            }
+            
+            .tables-wrapper {
+                max-width: 100%;
+                overflow-x: auto;
+            }
+            
+            table {
+                font-size: 11px;
+                min-width: 800px;
+            }
+            
+            th, td {
+                padding: 1px 1px;
+            }
+            
+            .alarm-cell {
+                width: 250px !important;
+                min-width: 250px !important;
+                padding: 5px !important;
+            }
+            
+            .tables-wrapper table th.alarm-cell {
+                width: 250px !important;
+                min-width: 250px !important;
+                max-width: 250px !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .farm-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .floor-details {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 11px;
+                min-width: 600px;
+            }
+            
+            .alarm-cell {
+                width: 200px !important;
+                min-width: 200px !important;
+                padding: 4px !important;
+                font-size: 11px !important;
+            }
+            
+            .tables-wrapper table th.alarm-cell {
+                width: 200px !important;
+                min-width: 200px !important;
+                max-width: 200px !important;
+                padding: 1px 1px !important;
+                font-size: 11px !important;
+            }
+            
+            th, td {
+                padding: 1px 1px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <h1>Flock Mortality & Daily Records</h1>
+        
+        <div class="farm-info">
+            <div class="farm-info-grid">
+                <div class="info-item">
+                    <span class="info-label">Farm Name:</span>
+                    <span class="info-value" id="farm-name">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Farm #:</span>
+                    <span class="info-value" id="farm-number">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Barn #:</span>
+                    <span class="info-value" id="barn-number">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Quota Period:</span>
+                    <span class="info-value" id="quota-period">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Date Started:</span>
+                    <span class="info-value" id="date-started">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Hatchery:</span>
+                    <span class="info-value" id="hatchery">Loading...</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Hatch ID#:</span>
+                    <span class="info-value" id="hatch-id">Loading...</span>
+                </div>
+            </div>
+              
+            <div class="floor-info">
+                <div class="floor-title">Bottom Floor</div>
+                <div class="floor-details">
+                    <div class="info-item">
+                        <span class="info-label">Number of Birds Placed:</span>
+                        <span class="info-value" id="bottom-birds">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Sex:</span>
+                        <span class="info-value" id="bottom-sex">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Notes:</span>
+                        <span class="info-value" id="bottom-notes">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="floor-info">
+                <div class="floor-title">Top Floor</div>
+                <div class="floor-details">
+                    <div class="info-item">
+                        <span class="info-label">Number of Birds Placed:</span>
+                        <span class="info-value" id="top-birds">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Sex:</span>
+                        <span class="info-value" id="top-sex">Loading...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Notes:</span>
+                        <span class="info-value" id="top-notes">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+                          <div id="loading" class="loading">Loading data...</div>
+         
+         <!-- Edit Controls -->
+         <div class="edit-controls">
+             <button class="edit-btn" id="editBtn" onclick="toggleEditMode()" title="Click to enter edit mode">📝 Edit Form</button>
+             <button class="edit-btn save-btn" id="saveBtn" onclick="saveAllChanges()" style="display: none;" title="Save changes (Ctrl+S)">💾 Save Changes</button>
+             <button class="edit-btn cancel-btn" id="cancelBtn" onclick="cancelEditMode()" style="display: none;" title="Cancel changes (Esc)">❌ Cancel</button>
+             <div style="margin-top: 10px; font-size: 12px; opacity: 0.8;">
+                 💡 Tip: Use Ctrl+S to save and Esc to cancel when in edit mode
+             </div>
+         </div>
+         
+         <div class="tables-wrapper">
+                                     <!-- Floor 1 -->
+            <div class="floor-section">
+                <div class="floor-header" onclick="toggleFloor(1)">Floor #: 1</div>
+                <div class="floor-content" id="floor1-content">
+                    <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="3" class="age-cell">Age</th>
+                            <th rowspan="3" class="date-cell">Date</th>
+                            <th rowspan="3" class="small-cell">Mortality</th>
+                            <th rowspan="3" class="small-cell">Culls</th>
+                            <th colspan="8">Flocks with a Grow-Out Density between 31-38 kg/m²</th>
+                        </tr>
+                        <tr>
+                            <th colspan="2" class="sub-header">Temperature</th>
+                            <th colspan="2" class="sub-header">Humidity %</th>
+                            <th colspan="2" class="sub-header">Ammonia PPM</th>
+                            <th rowspan="2" class="water-cell">Water Meter<br>Reading</th>
+                            <th rowspan="2" class="alarm-cell">Record any Alarms¹</th>
+                        </tr>
+                        <tr>
+                            <th class="sub-header temp-cell">Min</th>
+                            <th class="sub-header temp-cell">Max</th>
+                            <th class="sub-header humidity-cell">Min</th>
+                            <th class="sub-header humidity-cell">Max</th>
+                            <th class="sub-header ammonia-cell">Min</th>
+                            <th class="sub-header ammonia-cell">Max</th>
+                        </tr>
+                    </thead>
+                    <tbody id="floor1-tbody">
+                        <!-- Floor 1 rows will be generated dynamically -->
+                    </tbody>
+                </table>
+                </div>
+            </div>
+            
+            <!-- Floor 2 -->
+            <div class="floor-section">
+                <div class="floor-header" onclick="toggleFloor(2)">Floor #: 2</div>
+                <div class="floor-content" id="floor2-content">
+                    <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="3" class="age-cell">Age</th>
+                            <th rowspan="3" class="date-cell">Date</th>
+                            <th rowspan="3" class="small-cell">Mortality</th>
+                            <th rowspan="3" class="small-cell">Culls</th>
+                            <th colspan="8">Flocks with a Grow-Out Density between 31-38 kg/m²</th>
+                        </tr>
+                        <tr>
+                            <th colspan="2" class="sub-header">Temperature</th>
+                            <th colspan="2" class="sub-header">Humidity %</th>
+                            <th colspan="2" class="sub-header">Ammonia PPM</th>
+                            <th rowspan="2" class="water-cell">Water Meter<br>Reading</th>
+                            <th rowspan="2" class="alarm-cell">Record any Alarms¹</th>
+                        </tr>
+                        <tr>
+                            <th class="sub-header temp-cell">Min</th>
+                            <th class="sub-header temp-cell">Max</th>
+                            <th class="sub-header humidity-cell">Min</th>
+                            <th class="sub-header humidity-cell">Max</th>
+                            <th class="sub-header ammonia-cell">Min</th>
+                            <th class="sub-header ammonia-cell">Max</th>
+                        </tr>
+                    </thead>
+                    <tbody id="floor2-tbody">
+                        <!-- Floor 2 rows will be generated dynamically -->
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="notes">
+            <ol>
+                <li>Record all Corrective Actions in the Deviation Chart.</li>
+                <li>Day 1 represents the first 24 hr period after placement.</li>
+            </ol>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; padding-top: 30px; border-top: 2px solid #e9ecef;">
+            <a href="test-page-1.html" style="
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                color: white; 
+                padding: 15px 30px; 
+                border: none; 
+                border-radius: 8px; 
+                cursor: pointer; 
+                font-size: 16px; 
+                font-weight: 600;
+                text-decoration: none; 
+                display: inline-block;
+                box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+                transition: all 0.3s ease;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(76, 175, 80, 0.4)'" 
+               onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(76, 175, 80, 0.3)'">
+                ← Back to Environment Form
+            </a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import {
+            getFirestore, collection, doc, onSnapshot, query, getDocs, addDoc
+        } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB20OmcQemfIXm4712im9mqiBnpeVt8sJQ",
+            authDomain: "chicken-project-2.firebaseapp.com",
+            projectId: "chicken-project-2",
+            storageBucket: "chicken-project-2.firebasestorage.app",
+            messagingSenderId: "596273529964",
+            appId: "1:596273529964:web:bd51e2646d5ed48afa4449",
+            measurementId: "G-9YLPHR08DB"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+                 let startCropDate = null;
+         let environmentDataFloor1 = {};
+         let environmentDataFloor2 = {};
+         let farmData = {};
+         let mortalityData = {};
+         let isEditMode = false;
+         let originalData = {};
+
+        // Global function for toggling floor visibility
+        window.toggleFloor = function(floorNumber) {
+            const header = document.querySelector(`#floor${floorNumber}-content`).previousElementSibling;
+            const content = document.getElementById(`floor${floorNumber}-content`);
+            
+            header.classList.toggle('collapsed');
+            content.classList.toggle('collapsed');
+            
+            // Add some visual feedback
+            if (content.classList.contains('collapsed')) {
+                header.style.background = 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)';
+            } else {
+                header.style.background = 'linear-gradient(135deg, #2e7d32 0%, #388e3c 100%)';
+            }
+        };
+
+        // Global function for toggling all floors
+        window.toggleAllFloors = function(action) {
+            const floors = [1, 2];
+            
+            floors.forEach(floorNumber => {
+                const header = document.querySelector(`#floor${floorNumber}-content`).previousElementSibling;
+                const content = document.getElementById(`floor${floorNumber}-content`);
+                
+                if (action === 'collapse') {
+                    header.classList.add('collapsed');
+                    content.classList.add('collapsed');
+                    header.style.background = 'linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%)';
+                } else {
+                    header.classList.remove('collapsed');
+                    content.classList.remove('collapsed');
+                    header.style.background = 'linear-gradient(135deg, #2e7d32 0%, #388e3c 100%)';
+                }
+            });
+        };
+
+                                                                   function createAlarmEntries(alarmCell, alarms) {
+             if (alarms && alarms.length > 0) {
+                 alarmCell.innerHTML = '';
+                 
+                 alarms.forEach((alarm, index) => {
+                     const alarmEntry = document.createElement('div');
+                     alarmEntry.className = 'alarm-entry';
+                     alarmEntry.style.cssText = `
+                         background-color: ${index % 2 === 0 ? '#fff8e1' : '#e3f2fd'};
+                         color: ${index % 2 === 0 ? '#8d6e63' : '#1565c0'};
+                         border-left-color: ${index % 2 === 0 ? '#ff9800' : '#2196f3'};
+                         max-width: 100%;
+                         overflow: hidden;
+                     `;
+                     
+                     if (alarms.length > 1) {
+                         const numberSpan = document.createElement('span');
+                         numberSpan.style.cssText = `
+                             background: ${index % 2 === 0 ? '#ff9800' : '#2196f3'};
+                             color: white;
+                             padding: 3px 8px;
+                             border-radius: 12px;
+                             font-size: 10px;
+                             font-weight: bold;
+                             margin-right: 10px;
+                             display: inline-block;
+                             min-width: 18px;
+                             text-align: center;
+                             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                             position: absolute;
+                             top: -6px;
+                             left: -6px;
+                             z-index: 10;
+                         `;
+                         numberSpan.textContent = index + 1;
+                         alarmEntry.appendChild(numberSpan);
+                     }
+                     
+                     // Check if alarm is long enough to need collapsing (more than 60 characters)
+                     const needsCollapsing = alarm.length > 60;
+                     
+                     // Create preview text (first 60 characters)
+                     const previewText = needsCollapsing ? alarm.substring(0, 60) + '...' : alarm;
+                     const previewSpan = document.createElement('span');
+                     previewSpan.className = 'alarm-preview';
+                     previewSpan.textContent = previewText;
+                     previewSpan.style.cssText = `
+                         display: block;
+                         margin-left: ${alarms.length > 1 ? '15px' : '0'};
+                         padding-top: ${alarms.length > 1 ? '3px' : '0'};
+                         max-width: calc(100% - 30px);
+                         overflow: hidden;
+                     `;
+                     alarmEntry.appendChild(previewSpan);
+                     
+                     // Create full text (hidden by default, only if needs collapsing)
+                     if (needsCollapsing) {
+                         const fullSpan = document.createElement('span');
+                         fullSpan.className = 'alarm-full';
+                         fullSpan.textContent = alarm;
+                         fullSpan.style.cssText = `
+                             display: none;
+                             margin-left: ${alarms.length > 1 ? '15px' : '0'};
+                             padding-top: ${alarms.length > 1 ? '3px' : '0'};
+                             max-width: calc(100% - 30px);
+                             overflow: hidden;
+                         `;
+                         alarmEntry.appendChild(fullSpan);
+                     }
+                     
+                     // Add custom arrow indicator only if alarm needs collapsing
+                     if (needsCollapsing) {
+                         const arrow = document.createElement('span');
+                         arrow.className = 'alarm-arrow';
+                         arrow.style.cssText = `
+                             position: absolute;
+                             right: 12px;
+                             top: 50%;
+                             transform: translateY(-50%);
+                             font-size: 12px;
+                             color: #666;
+                             transition: transform 0.3s ease;
+                             background: rgba(255,255,255,0.9);
+                             padding: 2px 4px;
+                             border-radius: 3px;
+                             pointer-events: none;
+                             z-index: 5;
+                         `;
+                         arrow.textContent = '▶';
+                         alarmEntry.appendChild(arrow);
+                         
+                         // Add click event to toggle expansion
+                         alarmEntry.addEventListener('click', function(e) {
+                             e.stopPropagation(); // Prevent event bubbling
+                             this.classList.toggle('expanded');
+                             
+                             // Update the arrow direction
+                             const arrow = this.querySelector('.alarm-arrow');
+                             if (arrow) {
+                                 arrow.style.transform = this.classList.contains('expanded') ? 
+                                     'translateY(-50%) rotate(90deg)' : 'translateY(-50%) rotate(0deg)';
+                             }
+                             
+                             // Update the preview text to show full text when expanded
+                             const previewSpan = this.querySelector('.alarm-preview');
+                             if (previewSpan) {
+                                 if (this.classList.contains('expanded')) {
+                                     previewSpan.textContent = alarm; // Show full text without ellipsis
+                                 } else {
+                                     previewSpan.textContent = alarm.substring(0, 60) + '...'; // Show truncated text with ellipsis
+                                 }
+                             }
+                         });
+                     } else {
+                         // For short alarms, keep the same height but remove cursor
+                         alarmEntry.style.cursor = 'default';
+                         alarmEntry.style.padding = '15px 20px';
+                     }
+                     
+                     alarmCell.appendChild(alarmEntry);
+                 });
+             } else {
+                 // Leave alarm cell empty instead of showing "No alarms recorded"
+                 alarmCell.innerHTML = '';
+             }
+         }
+
+        function generateTableRows() {
+            // Generate Floor 1 rows (days 1-56)
+            const floor1Tbody = document.getElementById('floor1-tbody');
+            floor1Tbody.innerHTML = '';
+            
+            for (let day = 1; day <= 56; day++) {
+                const row = floor1Tbody.insertRow();
+                row.id = `floor1-day-${day}`;
+                
+                // Create 12 cells for the row
+                for (let i = 0; i < 12; i++) {
+                    const cell = row.insertCell();
+                    if (i === 0) {
+                        cell.className = 'age-cell';
+                        cell.textContent = day;
+                    }
+                }
+            }
+            
+            // Generate Floor 2 rows (days 1-56)
+            const floor2Tbody = document.getElementById('floor2-tbody');
+            floor2Tbody.innerHTML = '';
+            
+            for (let day = 1; day <= 56; day++) {
+                const row = floor2Tbody.insertRow();
+                row.id = `floor2-day-${day}`;
+                
+                // Create 12 cells for the row
+                for (let i = 0; i < 12; i++) {
+                    const cell = row.insertCell();
+                    if (i === 0) {
+                        cell.className = 'age-cell';
+                        cell.textContent = day;
+                    }
+                }
+            }
+        }
+
+        function fetchStartDate() {
+            const docRef = doc(db, "startnewcrop", "vas-b1-snc");
+            
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    
+                    farmData = {
+                        farmName: data.farm_name || '',
+                        farmNumber: data.farm_number || '',
+                        barnNumber: data.barn_number || '',
+                        quotaPeriod: data.quota_period || '',
+                        hatchery: data.Hatchery || '',
+                        hatchId: data['Hatch ID#'] || '',
+                        bottomFloor: {
+                            birdsPlaced: data.bottom_floor?.birds_placed || '',
+                            sex: data.bottom_floor?.sex || '',
+                            notes: data.bottom_floor?.notes || ''
+                        },
+                        topFloor: {
+                            birdsPlaced: data.top_floor?.birds_placed || '',
+                            sex: data.top_floor?.sex || '',
+                            notes: data.top_floor?.notes || ''
+                        }
+                    };
+                    
+                    if (data.date_started) {
+                        const firestoreTimestamp = data.date_started.seconds * 1000;
+                        startCropDate = new Date(firestoreTimestamp);
+                        startCropDate.setUTCHours(0, 0, 0, 0);
+                        farmData.dateStarted = startCropDate.toISOString().split('T')[0];
+                        
+                        console.log(`📅 Crop Start Date: ${startCropDate.toISOString().split('T')[0]}`);
+                        
+                        updateFarmInfoDisplay();
+                        populateAllDates();
+                        fetchEnvironmentReadings();
+                        
+                        setTimeout(() => {
+                            fetchMortalityData();
+                        }, 100);
+                    }
+                } else {
+                    console.warn("⚠️ No Start Date Found in Firestore");
+                    document.getElementById('loading').innerHTML = "⚠️ No crop start date found";
+                }
+            });
+        }
+
+        function updateFarmInfoDisplay() {
+            document.getElementById('farm-name').textContent = farmData.farmName;
+            document.getElementById('farm-number').textContent = farmData.farmNumber;
+            document.getElementById('barn-number').textContent = farmData.barnNumber;
+            document.getElementById('quota-period').textContent = farmData.quotaPeriod;
+            document.getElementById('date-started').textContent = farmData.dateStarted;
+            document.getElementById('hatchery').textContent = farmData.hatchery;
+            document.getElementById('hatch-id').textContent = farmData.hatchId;
+            
+            document.getElementById('bottom-birds').textContent = farmData.bottomFloor.birdsPlaced;
+            document.getElementById('bottom-sex').textContent = farmData.bottomFloor.sex;
+            document.getElementById('bottom-notes').textContent = farmData.bottomFloor.notes;
+            
+            document.getElementById('top-birds').textContent = farmData.topFloor.birdsPlaced;
+            document.getElementById('top-sex').textContent = farmData.topFloor.sex;
+            document.getElementById('top-notes').textContent = farmData.topFloor.notes;
+            
+            populateAllDates();
+        }
+
+        function populateAllDates() {
+            if (!startCropDate) {
+                console.log("⚠️ Cannot populate dates: startCropDate not available");
+                return;
+            }
+            
+            console.log("📅 Populating all dates for 56 days starting from:", startCropDate.toISOString().split('T')[0]);
+            
+            // Populate Floor 1 dates (days 1-56)
+            for (let day = 1; day <= 56; day++) {
+                const row = document.getElementById(`floor1-day-${day}`);
+                if (row) {
+                    const dateForDay = new Date(startCropDate);
+                    dateForDay.setDate(startCropDate.getDate() + day - 1);
+                    const dateString = dateForDay.toISOString().split('T')[0];
+                    row.cells[1].textContent = dateString;
+                    console.log(`📅 Floor 1 Day ${day}: ${dateString}`);
+                }
+            }
+            
+            // Populate Floor 2 dates (days 1-56)
+            for (let day = 1; day <= 56; day++) {
+                const row = document.getElementById(`floor2-day-${day}`);
+                if (row) {
+                    const dateForDay = new Date(startCropDate);
+                    dateForDay.setDate(startCropDate.getDate() + day - 1);
+                    const dateString = dateForDay.toISOString().split('T')[0];
+                    row.cells[1].textContent = dateString;
+                    console.log(`📅 Floor 2 Day ${day}: ${dateString}`);
+                }
+            }
+            
+            console.log("✅ All dates populated for both floors");
+        }
+
+        async function fetchEnvironmentReadings() {
+            try {
+                console.log(`🔍 Fetching environment readings from floor-specific collections...`);
+                console.log(`📅 Start crop date: ${startCropDate.toISOString().split('T')[0]}`);
+                
+                // Fetch from floor-specific collections
+                const floor1Query = query(collection(db, "vas-b1-f1-ER"));
+                const floor1Snapshot = await getDocs(floor1Query);
+                
+                const floor2Query = query(collection(db, "vas-b1-f2-ER"));
+                const floor2Snapshot = await getDocs(floor2Query);
+                
+                console.log(`📄 Found ${floor1Snapshot.size} documents in Floor 1 collection (vas-b1-f1-ER)`);
+                console.log(`📄 Found ${floor2Snapshot.size} documents in Floor 2 collection (vas-b1-f2-ER)`);
+                
+                environmentDataFloor1 = {};
+                environmentDataFloor2 = {};
+                
+                floor1Snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.date && startCropDate) {
+                        const readingDate = new Date(data.date + 'T00:00:00.000Z');
+                        const daysDiff = Math.floor((readingDate - startCropDate) / (1000 * 60 * 60 * 24));
+                        const dayNumber = daysDiff + 1;
+                        
+                        console.log(`📊 Processing Floor 1 reading: ${data.date} → Day ${dayNumber}`);
+                        
+                        if (dayNumber >= 1 && dayNumber <= 56) {
+                            environmentDataFloor1[dayNumber] = {
+                                date: data.date,
+                                tempMin: data.minTemp || '',
+                                tempMax: data.maxTemp || '',
+                                tempUnit: data.tempUnit || 'F',
+                                humidityMin: data.humidityMin || '',
+                                humidityMax: data.humidityMax || '',
+                                ammoniaMin: data.ammoniaMin || '',
+                                ammoniaMax: data.ammoniaMax || '',
+                                waterReading: data.waterReading || '',
+                                waterUnit: data.waterUnit || 'Gal',
+                                alarms: data.alarms || []
+                            };
+                            
+                            console.log(`✅ Mapped Floor 1 Day ${dayNumber}: ${data.date}`, environmentDataFloor1[dayNumber]);
+                        }
+                    }
+                });
+                
+                floor2Snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    if (data.date && startCropDate) {
+                        const readingDate = new Date(data.date + 'T00:00:00.000Z');
+                        const daysDiff = Math.floor((readingDate - startCropDate) / (1000 * 60 * 60 * 24));
+                        const dayNumber = daysDiff + 1;
+                        
+                        console.log(`📊 Processing Floor 2 reading: ${data.date} → Day ${dayNumber}`);
+                        
+                        if (dayNumber >= 1 && dayNumber <= 56) {
+                            environmentDataFloor2[dayNumber] = {
+                                date: data.date,
+                                tempMin: data.minTemp || '',
+                                tempMax: data.maxTemp || '',
+                                tempUnit: data.tempUnit || 'F',
+                                humidityMin: data.humidityMin || '',
+                                humidityMax: data.humidityMax || '',
+                                ammoniaMin: data.ammoniaMin || '',
+                                ammoniaMax: data.ammoniaMax || '',
+                                waterReading: data.waterReading || '',
+                                waterUnit: data.waterUnit || 'Gal',
+                                alarms: data.alarms || []
+                            };
+                            
+                            console.log(`✅ Mapped Floor 2 Day ${dayNumber}: ${data.date}`, environmentDataFloor2[dayNumber]);
+                        }
+                    }
+                });
+                
+                console.log("📊 Floor 1 Environment data loaded:", environmentDataFloor1);
+                console.log("📊 Floor 2 Environment data loaded:", environmentDataFloor2);
+                populateChart();
+                
+                if (Object.keys(mortalityData).length > 0) {
+                    console.log("🔄 Re-populating mortality data after environment data load...");
+                    populateMortalityData();
+                }
+                
+                document.getElementById('loading').style.display = 'none';
+                
+            } catch (error) {
+                console.error("❌ Error fetching environment readings:", error);
+                document.getElementById('loading').innerHTML = "❌ Error loading data";
+            }
+        }
+
+        async function fetchMortalityData() {
+            try {
+                console.log(`🔍 Fetching mortality data from 'vas-b1-f1-MC' and 'vas-b1-f2-MC' collections...`);
+                console.log(`📅 Current startCropDate: ${startCropDate ? startCropDate.toISOString().split('T')[0] : 'NOT SET'}`);
+                
+                const floor1Query = query(collection(db, "vas-b1-f1-MC"));
+                const floor1Snapshot = await getDocs(floor1Query);
+                
+                const floor2Query = query(collection(db, "vas-b1-f2-MC"));
+                const floor2Snapshot = await getDocs(floor2Query);
+                
+                console.log(`📄 Found ${floor1Snapshot.size} documents in Floor 1 collection (vas-b1-f1-MC)`);
+                console.log(`📄 Found ${floor2Snapshot.size} documents in Floor 2 collection (vas-b1-f2-MC)`);
+                
+                mortalityData = {};
+                
+                floor1Snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    console.log(`🔍 Processing Floor 1 document:`, data);
+                    if (data.date && startCropDate) {
+                        const readingDate = new Date(data.date + 'T00:00:00.000Z');
+                        const daysDiff = Math.floor((readingDate - startCropDate) / (1000 * 60 * 60 * 24));
+                        const dayNumber = daysDiff + 1;
+                        
+                        console.log(`📅 Floor 1 date: ${data.date}, calculated day: ${dayNumber}`);
+                        
+                        if (dayNumber >= 1 && dayNumber <= 56) {
+                            mortalityData[`floor1-${dayNumber}`] = {
+                                culls: data.culls || 0,
+                                mortality: data.mortality || 0,
+                                totalDeadBirds: data.totalDeadBirds || 0,
+                                floor: 'floor1',
+                                day: dayNumber
+                            };
+                            console.log(`✅ Floor 1 Day ${dayNumber}: Culls=${data.culls}, Mortality=${data.mortality}`);
+                        } else {
+                            console.log(`⚠️ Floor 1 day ${dayNumber} is outside range 1-56`);
+                        }
+                    } else {
+                        console.log(`⚠️ Floor 1 document missing date or startCropDate: date=${data.date}, startCropDate=${startCropDate}`);
+                    }
+                });
+                
+                floor2Snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    console.log(`🔍 Processing Floor 2 document:`, data);
+                    if (data.date && startCropDate) {
+                        const readingDate = new Date(data.date + 'T00:00:00.000Z');
+                        const daysDiff = Math.floor((readingDate - startCropDate) / (1000 * 60 * 60 * 24));
+                        const dayNumber = daysDiff + 1;
+                        
+                        console.log(`📅 Floor 2 date: ${data.date}, calculated day: ${dayNumber}`);
+                        
+                        if (dayNumber >= 1 && dayNumber <= 56) {
+                            mortalityData[`floor2-${dayNumber}`] = {
+                                culls: data.culls || 0,
+                                mortality: data.mortality || 0,
+                                totalDeadBirds: data.totalDeadBirds || 0,
+                                floor: 'floor2',
+                                day: dayNumber
+                            };
+                            console.log(`✅ Floor 2 Day ${dayNumber}: Culls=${data.culls}, Mortality=${data.mortality}`);
+                        } else {
+                            console.log(`⚠️ Floor 2 day ${dayNumber} is outside range 1-56`);
+                        }
+                    } else {
+                        console.log(`⚠️ Floor 2 document missing date or startCropDate: date=${data.date}, startCropDate=${startCropDate}`);
+                    }
+                });
+                
+                console.log("📊 Mortality data loaded:", mortalityData);
+                
+                populateMortalityData();
+                
+                if (startCropDate) {
+                    populateAllDates();
+                }
+                
+            } catch (error) {
+                console.error("❌ Error fetching mortality data:", error);
+            }
+        }
+
+        function populateMortalityData() {
+            console.log("🔍 Starting populateMortalityData()...");
+            console.log("📊 Current mortalityData:", mortalityData);
+            
+            // Populate Floor 1 mortality data (days 1-56)
+            for (let day = 1; day <= 56; day++) {
+                const row = document.getElementById(`floor1-day-${day}`);
+                const floor1Data = mortalityData[`floor1-${day}`];
+                
+                if (row && floor1Data) {
+                    row.cells[2].textContent = floor1Data.mortality;
+                    row.cells[3].textContent = floor1Data.culls;
+                    console.log(`✅ Populated Floor 1 Day ${day}: Mortality=${floor1Data.mortality}, Culls=${floor1Data.culls}`);
+                } else if (row && !floor1Data) {
+                    console.log(`ℹ️ Floor 1 Day ${day}: No mortality data available`);
+                } else if (!row) {
+                    console.log(`❌ Floor 1 Day ${day}: Row element not found`);
+                }
+            }
+            
+            // Populate Floor 2 mortality data (days 1-56)
+            for (let day = 1; day <= 56; day++) {
+                const row = document.getElementById(`floor2-day-${day}`);
+                const floor2Data = mortalityData[`floor2-${day}`];
+                
+                if (row && floor2Data) {
+                    row.cells[2].textContent = floor2Data.mortality;
+                    row.cells[3].textContent = floor2Data.culls;
+                    console.log(`✅ Populated Floor 2 Day ${day}: Mortality=${floor2Data.mortality}, Culls=${floor2Data.culls}`);
+                } else if (row && !floor2Data) {
+                    console.log(`ℹ️ Floor 2 Day ${day}: No mortality data available`);
+                } else if (!row) {
+                    console.log(`❌ Floor 2 Day ${day}: Row element not found`);
+                }
+            }
+            
+            console.log("🏁 Finished populateMortalityData()");
+        }
+
+        function populateChart() {
+            console.log("🔍 Starting populateChart()...");
+            console.log("📊 environmentDataFloor1:", environmentDataFloor1);
+            console.log("📊 environmentDataFloor2:", environmentDataFloor2);
+            
+            // Populate Floor 1 environment data (days 1-56)
+            for (let day = 1; day <= 56; day++) {
+                const row = document.getElementById(`floor1-day-${day}`);
+                if (row && environmentDataFloor1[day]) {
+                    const data = environmentDataFloor1[day];
+                    if (!row.cells[1].textContent) {
+                        row.cells[1].textContent = data.date;
+                    }
+                    
+                    row.cells[4].className = 'temp-cell';
+                    row.cells[5].className = 'temp-cell';
+                    row.cells[6].className = 'humidity-cell';
+                    row.cells[7].className = 'humidity-cell';
+                    row.cells[8].className = 'ammonia-cell';
+                    row.cells[9].className = 'ammonia-cell';
+                    row.cells[10].className = 'water-cell';
+                    
+                    const tempMinText = data.tempMin ? `${data.tempMin}°${data.tempUnit}` : '';
+                    const tempMaxText = data.tempMax ? `${data.tempMax}°${data.tempUnit}` : '';
+                    row.cells[4].textContent = tempMinText;
+                    row.cells[5].textContent = tempMaxText;
+                    if (tempMinText.length > 6) row.cells[4].title = tempMinText;
+                    if (tempMaxText.length > 6) row.cells[5].title = tempMaxText;
+                    
+                    const humidityMinText = data.humidityMin !== '' ? `${data.humidityMin}%` : '';
+                    const humidityMaxText = data.humidityMax !== '' ? `${data.humidityMax}%` : '';
+                    row.cells[6].textContent = humidityMinText;
+                    row.cells[7].textContent = humidityMaxText;
+                    if (humidityMinText.length > 6) row.cells[6].title = humidityMinText;
+                    if (humidityMaxText.length > 6) row.cells[7].title = humidityMaxText;
+                    
+                    const ammoniaMinText = data.ammoniaMin !== '' ? `${data.ammoniaMin} PPM` : '';
+                    const ammoniaMaxText = data.ammoniaMax !== '' ? `${data.ammoniaMax} PPM` : '';
+                    row.cells[8].textContent = ammoniaMinText.length > 8 ? `${data.ammoniaMin}p` : ammoniaMinText;
+                    row.cells[9].textContent = ammoniaMaxText.length > 8 ? `${data.ammoniaMax}p` : ammoniaMaxText;
+                    if (ammoniaMinText.length > 8) row.cells[8].title = ammoniaMinText;
+                    if (ammoniaMaxText.length > 8) row.cells[9].title = ammoniaMaxText;
+                    
+                    const waterText = data.waterReading ? `${data.waterReading} ${data.waterUnit}` : '';
+                    row.cells[10].textContent = waterText;
+                    row.cells[10].title = waterText;
+                    
+                    const alarmCell = row.cells[11];
+                    alarmCell.classList.add('alarm-cell');
+                    
+                    createAlarmEntries(alarmCell, data.alarms);
+                }
+            }
+            
+            // Populate Floor 2 environment data (days 1-56)
+            for (let day = 1; day <= 56; day++) {
+                const row = document.getElementById(`floor2-day-${day}`);
+                if (row && environmentDataFloor2[day]) {
+                    const data = environmentDataFloor2[day];
+                    if (!row.cells[1].textContent) {
+                        row.cells[1].textContent = data.date;
+                    }
+                    
+                    row.cells[4].className = 'temp-cell';
+                    row.cells[5].className = 'temp-cell';
+                    row.cells[6].className = 'humidity-cell';
+                    row.cells[7].className = 'humidity-cell';
+                    row.cells[8].className = 'ammonia-cell';
+                    row.cells[9].className = 'ammonia-cell';
+                    row.cells[10].className = 'water-cell';
+                    
+                    const tempMinText = data.tempMin ? `${data.tempMin}°${data.tempUnit}` : '';
+                    const tempMaxText = data.tempMax ? `${data.tempMax}°${data.tempUnit}` : '';
+                    row.cells[4].textContent = tempMinText;
+                    row.cells[5].textContent = tempMaxText;
+                    if (tempMinText.length > 6) row.cells[4].title = tempMinText;
+                    if (tempMaxText.length > 6) row.cells[5].title = tempMaxText;
+                    
+                    const humidityMinText = data.humidityMin !== '' ? `${data.humidityMin}%` : '';
+                    const humidityMaxText = data.humidityMax !== '' ? `${data.humidityMax}%` : '';
+                    row.cells[6].textContent = humidityMinText;
+                    row.cells[7].textContent = humidityMaxText;
+                    if (humidityMinText.length > 6) row.cells[6].title = humidityMinText;
+                    if (humidityMaxText.length > 6) row.cells[7].title = humidityMaxText;
+                    
+                    const ammoniaMinText = data.ammoniaMin !== '' ? `${data.ammoniaMin} PPM` : '';
+                    const ammoniaMaxText = data.ammoniaMax !== '' ? `${data.ammoniaMax} PPM` : '';
+                    row.cells[8].textContent = ammoniaMinText.length > 8 ? `${data.ammoniaMin}p` : ammoniaMinText;
+                    row.cells[9].textContent = ammoniaMaxText.length > 8 ? `${data.ammoniaMax}p` : ammoniaMaxText;
+                    if (ammoniaMinText.length > 8) row.cells[8].title = ammoniaMinText;
+                    if (ammoniaMaxText.length > 8) row.cells[9].title = ammoniaMaxText;
+                    
+                    const waterText = data.waterReading ? `${data.waterReading} ${data.waterUnit}` : '';
+                    row.cells[10].textContent = waterText;
+                    row.cells[10].title = waterText;
+                    
+                    const alarmCell = row.cells[11];
+                    alarmCell.classList.add('alarm-cell');
+                    
+                    createAlarmEntries(alarmCell, data.alarms);
+                }
+            }
+        }
+
+                 // Edit mode functions
+         window.toggleEditMode = function() {
+             isEditMode = !isEditMode;
+             const editBtn = document.getElementById('editBtn');
+             const saveBtn = document.getElementById('saveBtn');
+             const cancelBtn = document.getElementById('cancelBtn');
+             const tablesWrapper = document.querySelector('.tables-wrapper');
+             
+             if (isEditMode) {
+                 // Smooth transition to edit mode
+                 editBtn.style.display = 'none';
+                 saveBtn.style.display = 'inline-block';
+                 cancelBtn.style.display = 'inline-block';
+                 
+                 // Add edit mode class with transition
+                 setTimeout(() => {
+                     tablesWrapper.classList.add('edit-mode');
+                     enableEditing();
+                     backupOriginalData();
+                     // Ensure no scrolling occurs when entering edit mode
+                     window.scrollTo(0, window.scrollY);
+                 }, 100);
+             } else {
+                 // Smooth transition out of edit mode
+                 tablesWrapper.classList.remove('edit-mode');
+                 
+                 setTimeout(() => {
+                     editBtn.style.display = 'inline-block';
+                     saveBtn.style.display = 'none';
+                     cancelBtn.style.display = 'none';
+                     disableEditing();
+                 }, 300);
+             }
+         };
+         
+         window.cancelEditMode = function() {
+             isEditMode = false;
+             const editBtn = document.getElementById('editBtn');
+             const saveBtn = document.getElementById('saveBtn');
+             const cancelBtn = document.getElementById('cancelBtn');
+             const tablesWrapper = document.querySelector('.tables-wrapper');
+             
+             // Smooth transition out of edit mode
+             tablesWrapper.classList.remove('edit-mode');
+             
+             setTimeout(() => {
+                 editBtn.style.display = 'inline-block';
+                 saveBtn.style.display = 'none';
+                 cancelBtn.style.display = 'none';
+                 disableEditing();
+                 restoreOriginalData();
+                 
+                 // Repopulate charts to show original data
+                 setTimeout(() => {
+                     populateChart();
+                     populateMortalityData();
+                 }, 100);
+             }, 300);
+         };
+         
+         window.saveAllChanges = async function() {
+             try {
+                 const saveBtn = document.getElementById('saveBtn');
+                 const cancelBtn = document.getElementById('cancelBtn');
+                 
+                 saveBtn.textContent = '💾 Saving...';
+                 saveBtn.disabled = true;
+                 cancelBtn.disabled = true;
+                 
+                 // Show loading state
+                 const loadingDiv = document.getElementById('loading');
+                 if (loadingDiv) {
+                     loadingDiv.textContent = 'Saving changes to database...';
+                     loadingDiv.style.display = 'block';
+                 }
+                 
+                 // Save all data to ensure everything is persisted
+                 await saveEnvironmentData();
+                 await saveMortalityData();
+                 
+                 // Show success message
+                 if (loadingDiv) {
+                     loadingDiv.textContent = '✅ Changes saved successfully!';
+                     loadingDiv.style.color = '#4CAF50';
+                     setTimeout(() => {
+                         loadingDiv.style.display = 'none';
+                         loadingDiv.style.color = '#666';
+                     }, 2000);
+                 }
+                 
+                 // Exit edit mode after successful save
+                 setTimeout(() => {
+                     // Force exit edit mode and restore normal display
+                     isEditMode = false;
+                     const editBtn = document.getElementById('editBtn');
+                     const saveBtn = document.getElementById('saveBtn');
+                     const cancelBtn = document.getElementById('cancelBtn');
+                     const tablesWrapper = document.querySelector('.tables-wrapper');
+                     
+                     // Remove edit mode class
+                     tablesWrapper.classList.remove('edit-mode');
+                     
+                     // Show/hide buttons
+                     editBtn.style.display = 'inline-block';
+                     saveBtn.style.display = 'none';
+                     cancelBtn.style.display = 'none';
+                     
+                     // Disable editing and restore original display
+                     disableEditing();
+                     
+                     // Repopulate charts to show saved data
+                     setTimeout(() => {
+                         populateChart();
+                         populateMortalityData();
+                     }, 100);
+                     
+                 }, 500);
+                 
+             } catch (error) {
+                 console.error('Error saving changes:', error);
+                 
+                 // Show error message
+                 const loadingDiv = document.getElementById('loading');
+                 if (loadingDiv) {
+                     loadingDiv.textContent = '❌ Error saving changes. Please try again.';
+                     loadingDiv.style.color = '#f44336';
+                     setTimeout(() => {
+                         loadingDiv.style.display = 'none';
+                         loadingDiv.style.color = '#666';
+                     }, 3000);
+                 }
+             } finally {
+                 const saveBtn = document.getElementById('saveBtn');
+                 const cancelBtn = document.getElementById('cancelBtn');
+                 
+                 saveBtn.textContent = '💾 Save Changes';
+                 saveBtn.disabled = false;
+                 cancelBtn.disabled = false;
+             }
+         };
+         
+         function backupOriginalData() {
+             originalData = {
+                 environmentDataFloor1: JSON.parse(JSON.stringify(environmentDataFloor1)),
+                 environmentDataFloor2: JSON.parse(JSON.stringify(environmentDataFloor2)),
+                 mortalityData: JSON.parse(JSON.stringify(mortalityData))
+             };
+         }
+         
+         function restoreOriginalData() {
+             environmentDataFloor1 = JSON.parse(JSON.stringify(originalData.environmentDataFloor1));
+             environmentDataFloor2 = JSON.parse(JSON.stringify(originalData.environmentDataFloor2));
+             mortalityData = JSON.parse(JSON.stringify(originalData.mortalityData));
+             
+             // Repopulate the charts to reflect the restored data
+             setTimeout(() => {
+                 populateChart();
+                 populateMortalityData();
+             }, 100);
+         }
+         
+         function enableEditing() {
+             // Add clear buttons only to alarm cells (rightmost column)
+             const allCells = document.querySelectorAll('td');
+             allCells.forEach(cell => {
+                 const cellIndex = cell.cellIndex;
+                 
+                 // Skip age and date cells - make them non-editable
+                 if (cellIndex === 0 || cellIndex === 1) {
+                     // Add visual indication that these cells are read-only
+                     cell.style.backgroundColor = '#f8f9fa';
+                     cell.style.color = '#6c757d';
+                     cell.style.fontWeight = '600';
+                     return;
+                 }
+                 
+                 // Only add clear buttons to alarm column (index 11)
+                 if (cellIndex === 11) {
+                     // Remove any existing clear button first
+                     const existingBtn = cell.querySelector('.clear-btn');
+                     if (existingBtn) {
+                         existingBtn.remove();
+                     }
+                     
+                     // Create new clear button
+                     const clearBtn = document.createElement('button');
+                     clearBtn.className = 'clear-btn';
+                     clearBtn.textContent = '×';
+                     clearBtn.title = 'Clear entire row';
+                     clearBtn.onclick = function(e) {
+                         e.stopPropagation();
+                         clearCell(cell);
+                     };
+                     cell.appendChild(clearBtn);
+                 }
+                 
+                 // Make cells editable but don't auto-focus
+                 makeCellEditable(cell, false);
+             });
+         }
+         
+         function disableEditing() {
+             // Remove clear buttons
+             const clearBtns = document.querySelectorAll('.clear-btn');
+             clearBtns.forEach(btn => btn.remove());
+             
+             // Remove ALL alarm-related elements from the entire document
+             const allAlarmContainers = document.querySelectorAll('.alarm-entries-container');
+             const allAlarmButtons = document.querySelectorAll('.add-alarm-btn');
+             const allAlarmInputs = document.querySelectorAll('.alarm-entry-input');
+             const allAlarmItems = document.querySelectorAll('.alarm-entry-item');
+             
+             allAlarmContainers.forEach(container => container.remove());
+             allAlarmButtons.forEach(btn => btn.remove());
+             allAlarmInputs.forEach(input => input.remove());
+             allAlarmItems.forEach(item => item.remove());
+             
+             // Remove all alarm-related elements and restore original display
+             const alarmCells = document.querySelectorAll('.alarm-cell');
+             alarmCells.forEach(cell => {
+                 // Clear the cell completely
+                 cell.innerHTML = '';
+                 
+                 // Recreate the original alarm display (empty)
+                 createAlarmEntries(cell, []);
+             });
+             
+             // Remove input fields and restore text for non-alarm cells
+             const inputs = document.querySelectorAll('.edit-mode input, .edit-mode textarea');
+             inputs.forEach(input => {
+                 const cell = input.parentElement;
+                 const value = input.value || '';
+                 const cellIndex = cell.cellIndex;
+                 
+                 // Skip alarm cells as they're already handled above
+                 if (cell.classList.contains('alarm-cell')) return;
+                 
+                 // Remove focus to prevent unwanted scrolling
+                 input.blur();
+                 
+                 // Clear the cell content
+                 cell.innerHTML = '';
+                 
+                 // Format the text properly based on cell type
+                 if (cellIndex === 4 || cellIndex === 5) { // Temperature cells
+                     cell.textContent = value ? `${value}°F` : '';
+                 } else if (cellIndex === 6 || cellIndex === 7) { // Humidity cells
+                     cell.textContent = value ? `${value}%` : '';
+                 } else if (cellIndex === 8 || cellIndex === 9) { // Ammonia cells
+                     cell.textContent = value ? `${value} PPM` : '';
+                 } else if (cellIndex === 10) { // Water cell
+                     cell.textContent = value ? `${value} Gal` : '';
+                 } else {
+                     // For other cells (mortality, culls), just add the text
+                     cell.textContent = value;
+                 }
+                 
+                 cell.classList.remove('editing');
+             });
+             
+             // Also remove any remaining input fields that might not have the edit-mode class
+             const remainingInputs = document.querySelectorAll('td input, td textarea');
+             remainingInputs.forEach(input => {
+                 const cell = input.parentElement;
+                 const value = input.value || '';
+                 const cellIndex = cell.cellIndex;
+                 
+                 // Skip alarm cells as they're already handled above
+                 if (cell.classList.contains('alarm-cell')) return;
+                 
+                 input.blur();
+                 cell.innerHTML = '';
+                 
+                 if (cellIndex === 4 || cellIndex === 5) {
+                     cell.textContent = value ? `${value}°F` : '';
+                 } else if (cellIndex === 6 || cellIndex === 7) {
+                     cell.textContent = value ? `${value}%` : '';
+                 } else if (cellIndex === 8 || cellIndex === 9) {
+                     cell.textContent = value ? `${value} PPM` : '';
+                 } else if (cellIndex === 10) {
+                     cell.textContent = value ? `${value} Gal` : '';
+                 } else {
+                     cell.textContent = value;
+                 }
+                 
+                 cell.classList.remove('editing');
+             });
+             
+             // Restore original styling for age and date cells
+             const allCells = document.querySelectorAll('td');
+             allCells.forEach(cell => {
+                 const cellIndex = cell.cellIndex;
+                 if (cellIndex === 0 || cellIndex === 1) {
+                     cell.style.backgroundColor = '';
+                     cell.style.color = '';
+                     cell.style.fontWeight = '';
+                 }
+             });
+             
+             // Remove any remaining focus to prevent unwanted scrolling
+             if (document.activeElement) {
+                 document.activeElement.blur();
+             }
+             
+             // Ensure no scrolling occurs when exiting edit mode
+             window.scrollTo(0, window.scrollY);
+             
+             // Final cleanup - remove any remaining alarm buttons from anywhere in the document
+             setTimeout(() => {
+                 const remainingAlarmButtons = document.querySelectorAll('.add-alarm-btn');
+                 remainingAlarmButtons.forEach(btn => btn.remove());
+                 
+                 const remainingAlarmContainers = document.querySelectorAll('.alarm-entries-container');
+                 remainingAlarmContainers.forEach(container => container.remove());
+             }, 100);
+         }
+         
+         function createAlarmEntryItem(index, value, floor, day, cellIndex) {
+             const entryItem = document.createElement('div');
+             entryItem.className = 'alarm-entry-item';
+             
+             // Number badge
+             const numberDiv = document.createElement('div');
+             numberDiv.className = 'alarm-entry-number';
+             numberDiv.textContent = index + 1;
+             
+             // Input field
+             const input = document.createElement('input');
+             input.type = 'text';
+             input.className = 'alarm-entry-input';
+             input.value = value;
+             input.placeholder = 'Enter alarm description...';
+             input.addEventListener('input', function() {
+                 updateAlarmData(floor, day, cellIndex, index, this.value);
+             });
+             
+             // Delete button
+             const deleteBtn = document.createElement('button');
+             deleteBtn.className = 'alarm-entry-delete';
+             deleteBtn.textContent = '×';
+             deleteBtn.onclick = function() {
+                 deleteAlarmEntry(floor, day, cellIndex, index);
+                 entryItem.remove();
+                 
+                 // Renumber remaining entries
+                 const container = entryItem.parentElement;
+                 const remainingEntries = container.querySelectorAll('.alarm-entry-item');
+                 remainingEntries.forEach((entry, newIndex) => {
+                     const numberDiv = entry.querySelector('.alarm-entry-number');
+                     if (numberDiv) {
+                         numberDiv.textContent = newIndex + 1;
+                     }
+                 });
+             };
+             
+             entryItem.appendChild(numberDiv);
+             entryItem.appendChild(input);
+             entryItem.appendChild(deleteBtn);
+             
+             return entryItem;
+         }
+         
+         function makeCellEditable(cell, autoFocus = false) {
+             const cellIndex = cell.cellIndex;
+             const row = cell.parentElement;
+             const rowId = row.id;
+             const floor = rowId.includes('floor1') ? 1 : 2;
+             const day = parseInt(rowId.split('-').pop());
+             
+             // Skip age and date columns
+             if (cellIndex === 0 || cellIndex === 1) return;
+             
+             let currentValue = '';
+             
+             // Get current value based on cell type
+             if (cellIndex === 11) { // Alarm column
+                 // Extract text from alarm entries
+                 const alarmEntries = cell.querySelectorAll('.alarm-entry');
+                 if (alarmEntries.length > 0) {
+                     currentValue = Array.from(alarmEntries).map(entry => {
+                         const preview = entry.querySelector('.alarm-preview');
+                         return preview ? preview.textContent.replace('...', '') : '';
+                     }).join('\n');
+                 }
+             } else {
+                 currentValue = cell.textContent.trim();
+             }
+             
+             if (cellIndex === 11 && isEditMode) { // Alarm column - only in edit mode
+                 // Create enhanced alarm editing interface
+                 const alarmContainer = document.createElement('div');
+                 alarmContainer.className = 'alarm-entries-container';
+                 
+                 // Get existing alarms from the cell
+                 const existingAlarms = [];
+                 const alarmEntries = cell.querySelectorAll('.alarm-entry');
+                 if (alarmEntries.length > 0) {
+                     alarmEntries.forEach(entry => {
+                         const preview = entry.querySelector('.alarm-preview');
+                         if (preview) {
+                             const text = preview.textContent.replace('...', '');
+                             if (text.trim()) {
+                                 existingAlarms.push(text.trim());
+                             }
+                         }
+                     });
+                 }
+                 
+                 // If no existing alarms, use the current value
+                 if (existingAlarms.length === 0 && currentValue.trim()) {
+                     existingAlarms.push(currentValue.trim());
+                 }
+                 
+                 // Create alarm entries
+                 const entriesContainer = document.createElement('div');
+                 entriesContainer.className = 'alarm-entries-list';
+                 
+                 // Only show existing alarms if there are any
+                 if (existingAlarms.length > 0) {
+                     existingAlarms.forEach((alarm, index) => {
+                         const entryItem = createAlarmEntryItem(index, alarm, floor, day, cellIndex);
+                         entriesContainer.appendChild(entryItem);
+                     });
+                 }
+                 
+                 // Add "Add Alarm" button only if there are existing alarms or if this is the first time
+                 if (existingAlarms.length > 0) {
+                     const addBtn = document.createElement('button');
+                     addBtn.className = 'add-alarm-btn';
+                     addBtn.textContent = '+ Add Alarm';
+                     addBtn.onclick = function() {
+                         const newIndex = entriesContainer.children.length;
+                         const newEntry = createAlarmEntryItem(newIndex, '', floor, day, cellIndex);
+                         entriesContainer.appendChild(newEntry);
+                         
+                         // Focus on the new input
+                         setTimeout(() => {
+                             const newInput = newEntry.querySelector('.alarm-entry-input');
+                             if (newInput) {
+                                 newInput.focus();
+                             }
+                         }, 100);
+                     };
+                     
+                     alarmContainer.appendChild(entriesContainer);
+                     alarmContainer.appendChild(addBtn);
+                 } else {
+                     // For empty alarm cells, show a simple "Add Alarm" button
+                     const addBtn = document.createElement('button');
+                     addBtn.className = 'add-alarm-btn';
+                     addBtn.textContent = '+ Add Alarm';
+                     addBtn.style.cssText = `
+                         background: #4CAF50;
+                         color: white;
+                         border: none;
+                         border-radius: 4px;
+                         padding: 4px 8px;
+                         font-size: 10px;
+                         cursor: pointer;
+                         margin-top: 4px;
+                         transition: background-color 0.2s ease;
+                         display: inline-block;
+                         float: left;
+                     `;
+                     addBtn.onmouseover = function() {
+                         this.style.background = '#45a049';
+                     };
+                     addBtn.onmouseout = function() {
+                         this.style.background = '#4CAF50';
+                     };
+                     addBtn.onclick = function() {
+                         // Replace the button with the full alarm interface
+                         alarmContainer.innerHTML = '';
+                         alarmContainer.appendChild(entriesContainer);
+                         
+                         const newEntry = createAlarmEntryItem(0, '', floor, day, cellIndex);
+                         entriesContainer.appendChild(newEntry);
+                         
+                         // Add the "Add Alarm" button for additional entries
+                         const addMoreBtn = document.createElement('button');
+                         addMoreBtn.className = 'add-alarm-btn';
+                         addMoreBtn.textContent = '+ Add Alarm';
+                         addMoreBtn.style.cssText = `
+                             background: #4CAF50;
+                             color: white;
+                             border: none;
+                             border-radius: 4px;
+                             padding: 4px 8px;
+                             font-size: 10px;
+                             cursor: pointer;
+                             margin-top: 4px;
+                             transition: background-color 0.2s ease;
+                             display: inline-block;
+                             float: left;
+                         `;
+                         addMoreBtn.onmouseover = function() {
+                             this.style.background = '#45a049';
+                         };
+                         addMoreBtn.onmouseout = function() {
+                             this.style.background = '#4CAF50';
+                         };
+                         addMoreBtn.onclick = function() {
+                             const newIndex = entriesContainer.children.length;
+                             const newEntry = createAlarmEntryItem(newIndex, '', floor, day, cellIndex);
+                             entriesContainer.appendChild(newEntry);
+                             
+                             setTimeout(() => {
+                                 const newInput = newEntry.querySelector('.alarm-entry-input');
+                                 if (newInput) {
+                                     newInput.focus();
+                                 }
+                             }, 100);
+                         };
+                         
+                         alarmContainer.appendChild(addMoreBtn);
+                         
+                         // Focus on the new input
+                         setTimeout(() => {
+                             const newInput = newEntry.querySelector('.alarm-entry-input');
+                             if (newInput) {
+                                 newInput.focus();
+                             }
+                         }, 100);
+                     };
+                     
+                     alarmContainer.appendChild(addBtn);
+                 }
+                 
+                 // Preserve the clear button (only for alarm cells)
+                 const clearBtn = cell.querySelector('.clear-btn');
+                 cell.innerHTML = '';
+                 if (clearBtn) {
+                     cell.appendChild(clearBtn);
+                 }
+                 cell.appendChild(alarmContainer);
+                 cell.classList.add('editing');
+                 
+                 // Only focus if autoFocus is true
+                 if (autoFocus) {
+                     setTimeout(() => {
+                         const firstInput = alarmContainer.querySelector('.alarm-entry-input');
+                         if (firstInput) {
+                             firstInput.focus();
+                         }
+                     }, 100);
+                 }
+             } else {
+                 // Create input for other columns
+                 const input = document.createElement('input');
+                 input.type = 'text';
+                 input.value = currentValue;
+                 input.placeholder = 'Enter value...';
+                 
+                 // No clear button for non-alarm cells
+                 cell.innerHTML = '';
+                 cell.appendChild(input);
+                 cell.classList.add('editing');
+                 
+                 input.addEventListener('input', function() {
+                     updateData(floor, day, cellIndex, this.value);
+                 });
+                 
+                 // Only focus if autoFocus is true
+                 if (autoFocus) {
+                     setTimeout(() => {
+                         input.focus();
+                     }, 100);
+                 }
+             }
+         }
+         
+         function clearCell(cell) {
+             // Get the row that contains this cell
+             const row = cell.parentElement;
+             const rowId = row.id;
+             const floor = rowId.includes('floor1') ? 1 : 2;
+             const day = parseInt(rowId.split('-').pop());
+             
+             // Clear all cells in the row (except age and date columns)
+             const cells = row.querySelectorAll('td');
+             cells.forEach((cell, index) => {
+                 if (index === 0 || index === 1) return; // Skip age and date cells
+                 
+                 if (isEditMode) {
+                     if (index === 11) { // Alarm cell
+                         // Reset alarm cell to initial state with just the "+ Add Alarm" button
+                         cell.innerHTML = '';
+                         
+                         const alarmContainer = document.createElement('div');
+                         alarmContainer.className = 'alarm-entries-container';
+                         
+                         const entriesContainer = document.createElement('div');
+                         entriesContainer.className = 'alarm-entries-list';
+                         
+                         const addBtn = document.createElement('button');
+                         addBtn.className = 'add-alarm-btn';
+                         addBtn.textContent = '+ Add Alarm';
+                         addBtn.style.cssText = `
+                             background: #4CAF50;
+                             color: white;
+                             border: none;
+                             border-radius: 4px;
+                             padding: 4px 8px;
+                             font-size: 10px;
+                             cursor: pointer;
+                             margin-top: 4px;
+                             transition: background-color 0.2s ease;
+                             display: inline-block;
+                             float: left;
+                         `;
+                         addBtn.onmouseover = function() {
+                             this.style.background = '#45a049';
+                         };
+                         addBtn.onmouseout = function() {
+                             this.style.background = '#4CAF50';
+                         };
+                         addBtn.onclick = function() {
+                             // Replace the button with the full alarm interface
+                             alarmContainer.innerHTML = '';
+                             alarmContainer.appendChild(entriesContainer);
+                             
+                             const newEntry = createAlarmEntryItem(0, '', floor, day, index);
+                             entriesContainer.appendChild(newEntry);
+                             
+                             // Add the "Add Alarm" button for additional entries
+                             const addMoreBtn = document.createElement('button');
+                             addMoreBtn.className = 'add-alarm-btn';
+                             addMoreBtn.textContent = '+ Add Alarm';
+                             addMoreBtn.style.cssText = `
+                                 background: #4CAF50;
+                                 color: white;
+                                 border: none;
+                                 border-radius: 4px;
+                                 padding: 4px 8px;
+                                 font-size: 10px;
+                                 cursor: pointer;
+                                 margin-top: 4px;
+                                 transition: background-color 0.2s ease;
+                                 display: inline-block;
+                                 float: left;
+                             `;
+                             addMoreBtn.onmouseover = function() {
+                                 this.style.background = '#45a049';
+                             };
+                             addMoreBtn.onmouseout = function() {
+                                 this.style.background = '#4CAF50';
+                             };
+                             addMoreBtn.onclick = function() {
+                                 const newIndex = entriesContainer.children.length;
+                                 const newEntry = createAlarmEntryItem(newIndex, '', floor, day, index);
+                                 entriesContainer.appendChild(newEntry);
+                                 
+                                 setTimeout(() => {
+                                     const newInput = newEntry.querySelector('.alarm-entry-input');
+                                     if (newInput) {
+                                         newInput.focus();
+                                     }
+                                 }, 100);
+                             };
+                             
+                             alarmContainer.appendChild(addMoreBtn);
+                             
+                             // Focus on the new input
+                             setTimeout(() => {
+                                 const newInput = newEntry.querySelector('.alarm-entry-input');
+                                 if (newInput) {
+                                     newInput.focus();
+                                 }
+                             }, 100);
+                         };
+                         
+                         alarmContainer.appendChild(addBtn);
+                         cell.appendChild(alarmContainer);
+                         
+                         // Update data to clear alarms
+                         updateData(floor, day, index, []);
+                     } else {
+                         const input = cell.querySelector('input, textarea');
+                         if (input) {
+                             input.value = '';
+                             updateData(floor, day, index, '');
+                         }
+                     }
+                 } else {
+                     cell.textContent = '';
+                     updateData(floor, day, index, '');
+                 }
+             });
+             
+             // Provide visual feedback for the entire row
+             row.style.backgroundColor = '#ffebee';
+             setTimeout(() => {
+                 row.style.backgroundColor = '';
+             }, 300);
+         }
+         
+         function updateAlarmData(floor, day, cellIndex, alarmIndex, value) {
+             // Get all alarm inputs from the current cell
+             const cell = document.querySelector(`#floor${floor}-day-${day}`).cells[cellIndex];
+             const alarmInputs = cell.querySelectorAll('.alarm-entry-input');
+             
+             // Collect all alarm values
+             const alarms = [];
+             alarmInputs.forEach(input => {
+                 if (input.value.trim()) {
+                     alarms.push(input.value.trim());
+                 }
+             });
+             
+             // Update the data
+             updateData(floor, day, cellIndex, alarms);
+         }
+         
+         function deleteAlarmEntry(floor, day, cellIndex, alarmIndex) {
+             // Get all alarm inputs from the current cell
+             const cell = document.querySelector(`#floor${floor}-day-${day}`).cells[cellIndex];
+             const alarmInputs = cell.querySelectorAll('.alarm-entry-input');
+             
+             // Collect all alarm values except the deleted one
+             const alarms = [];
+             alarmInputs.forEach((input, index) => {
+                 if (index !== alarmIndex && input.value.trim()) {
+                     alarms.push(input.value.trim());
+                 }
+             });
+             
+             // Update the data
+             updateData(floor, day, cellIndex, alarms);
+         }
+         
+         function updateData(floor, day, cellIndex, value) {
+             if (floor === 1) {
+                 if (!environmentDataFloor1[day]) {
+                     environmentDataFloor1[day] = {
+                         date: getDateForDay(day),
+                         tempMin: '', tempMax: '', tempUnit: 'F',
+                         humidityMin: '', humidityMax: '',
+                         ammoniaMin: '', ammoniaMax: '',
+                         waterReading: '', waterUnit: 'Gal',
+                         alarms: []
+                     };
+                 }
+                 
+                 switch(cellIndex) {
+                     case 2: // Mortality
+                         if (!mortalityData[`floor1-${day}`]) {
+                             mortalityData[`floor1-${day}`] = { mortality: 0, culls: 0, floor: 'floor1', day: day };
+                         }
+                         mortalityData[`floor1-${day}`].mortality = parseInt(value) || 0;
+                         break;
+                     case 3: // Culls
+                         if (!mortalityData[`floor1-${day}`]) {
+                             mortalityData[`floor1-${day}`] = { mortality: 0, culls: 0, floor: 'floor1', day: day };
+                         }
+                         mortalityData[`floor1-${day}`].culls = parseInt(value) || 0;
+                         break;
+                     case 4: 
+                         // Extract numeric value from temperature input (remove °F if present)
+                         const tempMinValue = value.replace(/°[FC]/i, '').trim();
+                         environmentDataFloor1[day].tempMin = tempMinValue;
+                         console.log(`🌡️ Floor 1 Day ${day} Temp Min updated: "${value}" → "${tempMinValue}"`);
+                         break;
+                     case 5: 
+                         // Extract numeric value from temperature input (remove °F if present)
+                         const tempMaxValue = value.replace(/°[FC]/i, '').trim();
+                         environmentDataFloor1[day].tempMax = tempMaxValue;
+                         console.log(`🌡️ Floor 1 Day ${day} Temp Max updated: "${value}" → "${tempMaxValue}"`);
+                         break;
+                     case 6: 
+                         // Extract numeric value from humidity input (remove % if present)
+                         const humidityMinValue = value.replace(/%/g, '').trim();
+                         environmentDataFloor1[day].humidityMin = humidityMinValue;
+                         break;
+                     case 7: 
+                         // Extract numeric value from humidity input (remove % if present)
+                         const humidityMaxValue = value.replace(/%/g, '').trim();
+                         environmentDataFloor1[day].humidityMax = humidityMaxValue;
+                         break;
+                     case 8: 
+                         // Extract numeric value from ammonia input (remove PPM if present)
+                         const ammoniaMinValue = value.replace(/PPM/gi, '').trim();
+                         environmentDataFloor1[day].ammoniaMin = ammoniaMinValue;
+                         break;
+                     case 9: 
+                         // Extract numeric value from ammonia input (remove PPM if present)
+                         const ammoniaMaxValue = value.replace(/PPM/gi, '').trim();
+                         environmentDataFloor1[day].ammoniaMax = ammoniaMaxValue;
+                         break;
+                     case 10: 
+                         // Extract numeric value from water input (remove unit if present)
+                         const waterValue = value.replace(/\s*(Gal|L|ml)/gi, '').trim();
+                         environmentDataFloor1[day].waterReading = waterValue;
+                         break;
+                     case 11: 
+                         // Handle alarms - value can be a string or array
+                         if (Array.isArray(value)) {
+                             environmentDataFloor1[day].alarms = value.filter(alarm => alarm.trim() !== '');
+                         } else {
+                             environmentDataFloor1[day].alarms = value ? [value] : [];
+                         }
+                         break;
+                 }
+             } else if (floor === 2) {
+                 if (!environmentDataFloor2[day]) {
+                     environmentDataFloor2[day] = {
+                         date: getDateForDay(day),
+                         tempMin: '', tempMax: '', tempUnit: 'F',
+                         humidityMin: '', humidityMax: '',
+                         ammoniaMin: '', ammoniaMax: '',
+                         waterReading: '', waterUnit: 'Gal',
+                         alarms: []
+                     };
+                 }
+                 
+                 switch(cellIndex) {
+                     case 2: // Mortality
+                         if (!mortalityData[`floor2-${day}`]) {
+                             mortalityData[`floor2-${day}`] = { mortality: 0, culls: 0, floor: 'floor2', day: day };
+                         }
+                         mortalityData[`floor2-${day}`].mortality = parseInt(value) || 0;
+                         break;
+                     case 3: // Culls
+                         if (!mortalityData[`floor2-${day}`]) {
+                             mortalityData[`floor2-${day}`] = { mortality: 0, culls: 0, floor: 'floor2', day: day };
+                         }
+                         mortalityData[`floor2-${day}`].culls = parseInt(value) || 0;
+                         break;
+                     case 4: 
+                         // Extract numeric value from temperature input (remove °F if present)
+                         const tempMinValue2 = value.replace(/°[FC]/i, '').trim();
+                         environmentDataFloor2[day].tempMin = tempMinValue2;
+                         console.log(`🌡️ Floor 2 Day ${day} Temp Min updated: "${value}" → "${tempMinValue2}"`);
+                         break;
+                     case 5: 
+                         // Extract numeric value from temperature input (remove °F if present)
+                         const tempMaxValue2 = value.replace(/°[FC]/i, '').trim();
+                         environmentDataFloor2[day].tempMax = tempMaxValue2;
+                         console.log(`🌡️ Floor 2 Day ${day} Temp Max updated: "${value}" → "${tempMaxValue2}"`);
+                         break;
+                     case 6: 
+                         // Extract numeric value from humidity input (remove % if present)
+                         const humidityMinValue2 = value.replace(/%/g, '').trim();
+                         environmentDataFloor2[day].humidityMin = humidityMinValue2;
+                         break;
+                     case 7: 
+                         // Extract numeric value from humidity input (remove % if present)
+                         const humidityMaxValue2 = value.replace(/%/g, '').trim();
+                         environmentDataFloor2[day].humidityMax = humidityMaxValue2;
+                         break;
+                     case 8: 
+                         // Extract numeric value from ammonia input (remove PPM if present)
+                         const ammoniaMinValue2 = value.replace(/PPM/gi, '').trim();
+                         environmentDataFloor2[day].ammoniaMin = ammoniaMinValue2;
+                         break;
+                     case 9: 
+                         // Extract numeric value from ammonia input (remove PPM if present)
+                         const ammoniaMaxValue2 = value.replace(/PPM/gi, '').trim();
+                         environmentDataFloor2[day].ammoniaMax = ammoniaMaxValue2;
+                         break;
+                     case 10: 
+                         // Extract numeric value from water input (remove unit if present)
+                         const waterValue2 = value.replace(/\s*(Gal|L|ml)/gi, '').trim();
+                         environmentDataFloor2[day].waterReading = waterValue2;
+                         break;
+                     case 11: 
+                         // Handle alarms - value can be a string or array
+                         if (Array.isArray(value)) {
+                             environmentDataFloor2[day].alarms = value.filter(alarm => alarm.trim() !== '');
+                         } else {
+                             environmentDataFloor2[day].alarms = value ? [value] : [];
+                         }
+                         break;
+                 }
+             }
+         }
+         
+         function getDateForDay(day) {
+             if (!startCropDate) return '';
+             const dateForDay = new Date(startCropDate);
+             dateForDay.setDate(startCropDate.getDate() + day - 1);
+             return dateForDay.toISOString().split('T')[0];
+         }
+         
+         async function saveEnvironmentData() {
+             const promises = [];
+             
+             // Save Floor 1 environment data
+             Object.keys(environmentDataFloor1).forEach(day => {
+                 const data = environmentDataFloor1[day];
+                 // Check if there's any meaningful data to save
+                 const hasData = data && (
+                     (data.tempMin && String(data.tempMin).trim() !== '') ||
+                     (data.tempMax && String(data.tempMax).trim() !== '') ||
+                     (data.humidityMin && String(data.humidityMin).trim() !== '') ||
+                     (data.humidityMax && String(data.humidityMax).trim() !== '') ||
+                     (data.ammoniaMin && String(data.ammoniaMin).trim() !== '') ||
+                     (data.ammoniaMax && String(data.ammoniaMax).trim() !== '') ||
+                     (data.waterReading && String(data.waterReading).trim() !== '') ||
+                     (data.alarms && data.alarms.length > 0)
+                 );
+                 
+                 if (hasData) {
+                     // Add day and floor information to the data
+                     const dataToSave = {
+                         date: data.date,
+                         minTemp: data.tempMin || '',
+                         maxTemp: data.tempMax || '',
+                         tempUnit: data.tempUnit || 'F',
+                         humidityMin: data.humidityMin || '',
+                         humidityMax: data.humidityMax || '',
+                         ammoniaMin: data.ammoniaMin || '',
+                         ammoniaMax: data.ammoniaMax || '',
+                         waterReading: data.waterReading || '',
+                         waterUnit: data.waterUnit || 'Gal',
+                         alarms: data.alarms || [],
+                         day: parseInt(day),
+                         floor: 'floor1'
+                     };
+                     console.log(`💾 Saving Floor 1 Day ${day} data:`, dataToSave);
+                     promises.push(addDoc(collection(db, "vas-b1-f1-ER"), dataToSave));
+                 }
+             });
+             
+             // Save Floor 2 environment data
+             Object.keys(environmentDataFloor2).forEach(day => {
+                 const data = environmentDataFloor2[day];
+                 // Check if there's any meaningful data to save
+                 const hasData = data && (
+                     (data.tempMin && String(data.tempMin).trim() !== '') ||
+                     (data.tempMax && String(data.tempMax).trim() !== '') ||
+                     (data.humidityMin && String(data.humidityMin).trim() !== '') ||
+                     (data.humidityMax && String(data.humidityMax).trim() !== '') ||
+                     (data.ammoniaMin && String(data.ammoniaMin).trim() !== '') ||
+                     (data.ammoniaMax && String(data.ammoniaMax).trim() !== '') ||
+                     (data.waterReading && String(data.waterReading).trim() !== '') ||
+                     (data.alarms && data.alarms.length > 0)
+                 );
+                 
+                 if (hasData) {
+                     // Add day and floor information to the data
+                     const dataToSave = {
+                         date: data.date,
+                         minTemp: data.tempMin || '',
+                         maxTemp: data.tempMax || '',
+                         tempUnit: data.tempUnit || 'F',
+                         humidityMin: data.humidityMin || '',
+                         humidityMax: data.humidityMax || '',
+                         ammoniaMin: data.ammoniaMin || '',
+                         ammoniaMax: data.ammoniaMax || '',
+                         waterReading: data.waterReading || '',
+                         waterUnit: data.waterUnit || 'Gal',
+                         alarms: data.alarms || [],
+                         day: parseInt(day),
+                         floor: 'floor2'
+                     };
+                     console.log(`💾 Saving Floor 2 Day ${day} data:`, dataToSave);
+                     promises.push(addDoc(collection(db, "vas-b1-f2-ER"), dataToSave));
+                 }
+             });
+             
+             await Promise.all(promises);
+         }
+         
+         async function saveMortalityData() {
+             const promises = [];
+             
+             Object.keys(mortalityData).forEach(key => {
+                 const data = mortalityData[key];
+                 if (data && (data.mortality > 0 || data.culls > 0)) {
+                     const collectionName = data.floor === 'floor1' ? 'vas-b1-f1-MC' : 'vas-b1-f2-MC';
+                     promises.push(addDoc(collection(db, collectionName), {
+                         date: getDateForDay(data.day),
+                         mortality: data.mortality,
+                         culls: data.culls,
+                         totalDeadBirds: data.mortality + data.culls,
+                         floor: data.floor,
+                         day: data.day
+                     }));
+                 }
+             });
+             
+             await Promise.all(promises);
+         }
+
+         window.onload = function () {
+             console.log("🚀 Flock Mortality Chart loaded");
+             generateTableRows();
+             fetchStartDate();
+             
+             // Add keyboard shortcuts
+             document.addEventListener('keydown', function(e) {
+                 if (e.ctrlKey && e.key === 's') {
+                     e.preventDefault();
+                     if (isEditMode) {
+                         saveAllChanges();
+                     }
+                 }
+                 if (e.key === 'Escape' && isEditMode) {
+                     cancelEditMode();
+                 }
+             });
+         };
+    </script>
+</body>
+</html>

@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="icon" type="image/png" href="/icon.png?v=2">
+    <link rel="apple-touch-icon" href="/icon.png?v=2">
+    <link rel="icon" type="image/png" sizes="192x192" href="/iconcropped.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/iconcropped.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#1a365d">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Environment Tracker</title>
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        h2 {
+            color: #2e7d32;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-bottom: 3px solid #4caf50;
+            padding-bottom: 15px;
+        }
+        
+        /* Floor Toggle Container */
+        .floor-toggle-container {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 20px auto 30px auto;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .floor-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        
+        .floor-toggle {
+            position: relative;
+            display: inline-block;
+            width: 120px;
+            height: 40px;
+        }
+        
+        .floor-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .floor-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e9ecef;
+            transition: all 0.3s ease;
+            border-radius: 40px;
+        }
+        
+        .floor-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 32px;
+            width: 32px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: all 0.3s ease;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .floor-toggle input:checked + .floor-toggle-slider {
+            background-color: #4caf50;
+        }
+        
+        .floor-toggle input:checked + .floor-toggle-slider:before {
+            transform: translateX(80px);
+        }
+        
+        #floor-title {
+            text-align: center;
+            margin: 20px 0 10px 0;
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            max-width: 200px;
+        }
+        
+        .alarm-input-group {
+            max-width: 100%;
+            grid-column: 1 / -1;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        label.required::after {
+            content: ' *';
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            margin: 5px 0;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+            font-weight: 500;
+            color: #2c3e50;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        button:hover {
+            background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+        }
+        
+        .unit-select {
+            margin-left: 10px;
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c3e50;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .unit-select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        
+        .alarm-container {
+            width: 100%;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .alarm-entries {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .alarm-entry {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .alarm-entry:hover {
+            border-color: #4CAF50;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        
+        .alarm-number {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3);
+        }
+        
+        .alarm-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #2c3e50;
+            background: transparent;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .alarm-input:focus {
+            background: #f8f9fa;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .alarm-delete {
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(255, 68, 68, 0.3);
+        }
+        
+        .alarm-delete:hover {
+            background: linear-gradient(135deg, #cc0000 0%, #aa0000 100%);
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(255, 68, 68, 0.4);
+        }
+        
+        .alarm-table input {
+            width: 100%;
+            box-sizing: border-box;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #2c3e50;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .alarm-table input:focus {
+            border-color: #4CAF50;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .delete-btn {
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            color: white;
+            border: none;
+            padding: 0px;
+            cursor: pointer;
+            border-radius: 50%;
+            font-size: 10px;
+            min-width: 16px;
+            height: 16px;
+            line-height: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(255, 68, 68, 0.3);
+        }
+        
+        .delete-btn:hover {
+            background: linear-gradient(135deg, #cc0000 0%, #aa0000 100%);
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(255, 68, 68, 0.4);
+        }
+        
+        .add-entry-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+        }
+        
+        .add-entry-btn:hover {
+            background: linear-gradient(135deg, #45a049 0%, #388e3c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
+        }
+        
+        .section-title {
+            color: #2e7d32;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 25px 0 15px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4caf50;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .input-group {
+                max-width: 100%;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import {
+            getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, deleteDoc
+        } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB20OmcQemfIXm4712im9mqiBnpeVt8sJQ",
+            authDomain: "chicken-project-2.firebaseapp.com",
+            projectId: "chicken-project-2",
+            storageBucket: "chicken-project-2.firebasestorage.app",
+            messagingSenderId: "596273529964",
+            appId: "1:596273529964:web:bd51e2646d5ed48afa4449",
+            measurementId: "G-9YLPHR08DB"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let alarmEntries = [];
+        let currentFloor = 1; // Track current active floor
+
+        function clearForm() {
+            document.getElementById('max-temp').value = '';
+            document.getElementById('min-temp').value = '';
+            document.getElementById('humidity-min').value = '';
+            document.getElementById('humidity-max').value = '';
+            document.getElementById('ammonia-min').value = '';
+            document.getElementById('ammonia-max').value = '';
+            document.getElementById('water-reading').value = '';
+            alarmEntries = [];
+            updateAlarmTable();
+            updateAlarmPreview();
+        }
+
+        window.addAlarmEntry = function() {
+            alarmEntries.push('');
+            updateAlarmTable();
+            updateAlarmPreview();
+        };
+
+        window.deleteAlarmEntry = function(index) {
+            alarmEntries.splice(index, 1);
+            updateAlarmTable();
+            updateAlarmPreview();
+        };
+
+        window.updateAlarmEntry = function(index, value) {
+            alarmEntries[index] = value;
+            updateAlarmPreview();
+        };
+
+        function updateAlarmTable() {
+            const container = document.getElementById('alarm-table-body');
+            container.innerHTML = '';
+            
+            alarmEntries.forEach((entry, index) => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'alarm-entry';
+                
+                const numberDiv = document.createElement('div');
+                numberDiv.className = 'alarm-number';
+                numberDiv.style.background = index % 2 === 0 ? '#f44336' : '#ff9800';
+                numberDiv.textContent = index + 1;
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'alarm-input';
+                input.value = entry;
+                input.placeholder = 'Enter alarm description (e.g., "High temperature alert", "Ventilation issue")';
+                input.onchange = function() { updateAlarmEntry(index, this.value); };
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'alarm-delete';
+                deleteBtn.textContent = '×';
+                deleteBtn.onclick = function() { deleteAlarmEntry(index); };
+                
+                entryDiv.appendChild(numberDiv);
+                entryDiv.appendChild(input);
+                entryDiv.appendChild(deleteBtn);
+                container.appendChild(entryDiv);
+            });
+        }
+        
+        function updateAlarmPreview() {
+            const previewDiv = document.getElementById('alarm-preview');
+            const previewContent = document.getElementById('alarm-preview-content');
+            const validAlarms = alarmEntries.filter(alarm => alarm.trim() !== '');
+            
+            if (validAlarms.length === 0) {
+                previewDiv.style.display = 'none';
+                return;
+            }
+            
+            previewDiv.style.display = 'block';
+            previewContent.innerHTML = '';
+            
+            // Enhanced preview - matches chart exactly
+            previewContent.innerHTML = ''; // Clear content
+            
+            validAlarms.forEach((alarm, index) => {
+                const alarmEntry = document.createElement('div');
+                alarmEntry.style.cssText = `
+                    margin-bottom: ${index === validAlarms.length - 1 ? '0' : '6px'};
+                    padding: 6px 8px;
+                    background-color: ${index % 2 === 0 ? '#fff3cd' : '#d1ecf1'};
+                    border-radius: 4px;
+                    font-size: 10px;
+                    line-height: 1.4;
+                    word-wrap: break-word;
+                    color: ${index % 2 === 0 ? '#856404' : '#0c5460'};
+                    font-weight: 500;
+                `;
+                
+                if (validAlarms.length > 1) {
+                    // Add number for multiple alarms
+                    const numberSpan = document.createElement('span');
+                    numberSpan.style.cssText = `
+                        background: ${index % 2 === 0 ? '#ffc107' : '#17a2b8'};
+                        color: white;
+                        padding: 2px 6px;
+                        border-radius: 50%;
+                        font-size: 8px;
+                        font-weight: bold;
+                        margin-right: 6px;
+                        display: inline-block;
+                        min-width: 16px;
+                        text-align: center;
+                    `;
+                    numberSpan.textContent = index + 1;
+                    alarmEntry.appendChild(numberSpan);
+                }
+                
+                const textSpan = document.createElement('span');
+                textSpan.textContent = alarm;
+                alarmEntry.appendChild(textSpan);
+                
+                previewContent.appendChild(alarmEntry);
+            });
+        }
+        
+        window.clearAllAlarms = function() {
+            alarmEntries = [];
+            updateAlarmTable();
+            updateAlarmPreview();
+        };
+
+        // Floor switching function
+        function switchFloor(floor) {
+            currentFloor = floor;
+            const floorToggle = document.getElementById('floor_toggle');
+            const floorTitle = document.getElementById('floor-title');
+            
+            if (floor === 1) {
+                floorToggle.checked = false;
+                floorTitle.textContent = '🌡️ Environment Readings Tracker - Floor 1';
+            } else {
+                floorToggle.checked = true;
+                floorTitle.textContent = '🌡️ Environment Readings Tracker - Floor 2';
+            }
+            
+            console.log(`🔄 Switched to Floor ${floor}`);
+        }
+        
+        // Floor toggle event handler
+        function switchFloorToggle() {
+            const floorToggle = document.getElementById('floor_toggle');
+            if (floorToggle.checked) {
+                switchFloor(2);
+            } else {
+                switchFloor(1);
+            }
+        }
+
+        window.saveData = async function() {
+            // Validate all required fields
+            const date = document.getElementById('date').value;
+            const maxTemp = document.getElementById('max-temp').value;
+            const minTemp = document.getElementById('min-temp').value;
+            const humidityMin = document.getElementById('humidity-min').value;
+            const humidityMax = document.getElementById('humidity-max').value;
+            const ammoniaMin = document.getElementById('ammonia-min').value;
+            const ammoniaMax = document.getElementById('ammonia-max').value;
+            const waterReading = document.getElementById('water-reading').value;
+            
+            // Check if all required fields are filled
+            if (!date) {
+                alert('❌ Please select a date');
+                document.getElementById('date').focus();
+                return;
+            }
+            
+            if (!maxTemp || !minTemp) {
+                alert('❌ Please fill in both Max and Min Temperature');
+                if (!maxTemp) document.getElementById('max-temp').focus();
+                else document.getElementById('min-temp').focus();
+                return;
+            }
+            
+            if (!humidityMin || !humidityMax) {
+                alert('❌ Please fill in both Min and Max Humidity');
+                if (!humidityMin) document.getElementById('humidity-min').focus();
+                else document.getElementById('humidity-max').focus();
+                return;
+            }
+            
+            if (!ammoniaMin || !ammoniaMax) {
+                alert('❌ Please fill in both Min and Max Ammonia');
+                if (!ammoniaMin) document.getElementById('ammonia-min').focus();
+                else document.getElementById('ammonia-max').focus();
+                return;
+            }
+            
+            if (!waterReading) {
+                alert('❌ Please fill in Water Meter Reading');
+                document.getElementById('water-reading').focus();
+                return;
+            }
+            
+            const tempUnit = document.getElementById('temp-unit').value;
+            const waterUnit = document.getElementById('water-unit').value;
+            
+            const data = {
+                maxTemp: parseFloat(maxTemp),
+                minTemp: parseFloat(minTemp),
+                tempUnit: tempUnit,
+                humidityMin: parseFloat(humidityMin),
+                humidityMax: parseFloat(humidityMax),
+                ammoniaMin: parseFloat(ammoniaMin),
+                ammoniaMax: parseFloat(ammoniaMax),
+                waterReading: parseFloat(waterReading),
+                waterUnit: waterUnit,
+                alarms: alarmEntries.filter(alarm => alarm.trim() !== ''),
+                timestamp: serverTimestamp(),
+                date: date
+            };
+
+            try {
+                // Determine which collection to use based on current floor
+                const collectionName = currentFloor === 1 ? "vas-b1-f1-ER" : "vas-b1-f2-ER";
+                
+                // Check if data for this date already exists in the current floor's collection
+                const existingQuery = query(collection(db, collectionName), where("date", "==", date));
+                const existingSnapshot = await getDocs(existingQuery);
+                
+                if (!existingSnapshot.empty) {
+                    // Show warning popup
+                    const confirmOverwrite = confirm(
+                        `⚠️ WARNING: Data for ${date} already exists in Floor ${currentFloor}!\n\n` +
+                        `Are you sure you want to replace the existing data?\n` +
+                        `The older version will be permanently deleted.\n\n` +
+                        `Click OK to proceed with replacement.\n` +
+                        `Click Cancel to keep the existing data.`
+                    );
+                    
+                    if (confirmOverwrite) {
+                        // Delete existing documents for this date from the current floor's collection
+                        const deletePromises = existingSnapshot.docs.map(doc => deleteDoc(doc.ref));
+                        await Promise.all(deletePromises);
+                        console.log(`🗑️ Deleted ${existingSnapshot.size} existing document(s) for ${date} in Floor ${currentFloor}`);
+                    } else {
+                        console.log('❌ User cancelled overwrite operation');
+                        return;
+                    }
+                }
+                
+                // Add new document to the current floor's collection
+                await addDoc(collection(db, collectionName), data);
+                console.log(`✅ Data saved to Floor ${currentFloor} collection (${collectionName}) for ${date}`);
+                
+                alert(`✅ Data saved successfully to Floor ${currentFloor}!`);
+                clearForm();
+            } catch (error) {
+                console.error("❌ Error saving data:", error);
+                if (error.code === 'permission-denied') {
+                    alert("❌ Permission denied. Please check Firebase security rules.");
+                } else {
+                    alert("❌ Failed to save data. Check the console for details.");
+                }
+            }
+        };
+
+        window.onload = function () {
+            console.log("🚀 Farm Environment Tracker loaded");
+            
+            // Set up floor toggle event listener
+            document.getElementById('floor_toggle').addEventListener('change', switchFloorToggle);
+            
+            // Set initial floor to 1 (Bottom Floor)
+            switchFloor(1);
+            
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+        };
+    </script>
+</head>
+
+<body>
+    <!-- Floor Toggle Navigation -->
+    <div class="floor-toggle-container" id="floor-toggle">
+        <span class="floor-label">Bottom Floor</span>
+        <label class="floor-toggle">
+            <input type="checkbox" id="floor_toggle" unchecked>
+            <span class="floor-toggle-slider"></span>
+        </label>
+        <span class="floor-label">Top Floor</span>
+    </div>
+    <h2 id="floor-title">🌡️ Environment Readings Tracker - Floor 1</h2>
+    
+    <div class="container">
+        
+        <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 15px; border-radius: 8px; margin-bottom: 25px; border: 1px solid #2196f3;">
+            <p style="margin: 0; color: #1565c0; font-weight: 600; font-size: 14px;">
+                📋 <strong>Required Fields:</strong> All fields marked with <span style="color: #e74c3c; font-weight: bold;">*</span> must be filled out before saving.
+            </p>
+        </div>
+        
+        <div class="form-grid">
+            <div class="input-group">
+                <label class="required">📅 Date</label>
+                <input type="date" id="date" required>
+            </div>
+            
+            <div class="input-group">
+                <label class="required">🌡️ Max Temperature</label>
+                <div style="display: flex; align-items: center;">
+                    <input type="number" id="max-temp" step="0.1" placeholder="Enter max temperature" required>
+                    <select id="temp-unit" class="unit-select">
+                        <option value="F">°F</option>
+                        <option value="C">°C</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label class="required">🌡️ Min Temperature</label>
+                <input type="number" id="min-temp" step="0.1" placeholder="Enter min temperature" required>
+            </div>
+
+            <div class="input-group">
+                <label class="required">💧 Humidity Min (%)</label>
+                <input type="number" id="humidity-min" min="0" max="100" placeholder="Enter min humidity" required>
+            </div>
+
+            <div class="input-group">
+                <label class="required">💧 Humidity Max (%)</label>
+                <input type="number" id="humidity-max" min="0" max="100" placeholder="Enter max humidity" required>
+            </div>
+
+            <div class="input-group">
+                <label class="required">⚠️ Ammonia Min (PPM)</label>
+                <input type="number" id="ammonia-min" step="0.1" placeholder="Enter min ammonia" required>
+            </div>
+
+            <div class="input-group">
+                <label class="required">⚠️ Ammonia Max (PPM)</label>
+                <input type="number" id="ammonia-max" step="0.1" placeholder="Enter max ammonia" required>
+            </div>
+
+            <div class="input-group">
+                <label class="required">🚰 Water Meter Reading</label>
+                <div style="display: flex; align-items: center;">
+                    <input type="number" id="water-reading" step="0.1" placeholder="Enter water reading" required>
+                    <select id="water-unit" class="unit-select">
+                        <option value="gallons">Gallons</option>
+                        <option value="liters">Liters</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group alarm-input-group">
+            <label>🚨 Record Any Alarms</label>
+            <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ffc107;">
+                <small style="color: #856404; font-weight: 500;">💡 Tip: Add multiple alarm entries. Each will be numbered and color-coded in the chart for easy identification.</small>
+            </div>
+            
+            <div class="alarm-container">
+                <div id="alarm-table-body" class="alarm-entries">
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 15px;">
+                <button class="add-entry-btn" onclick="addAlarmEntry()">➕ Add Alarm</button>
+                <button class="add-entry-btn" onclick="clearAllAlarms()" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);">🗑️ Clear All</button>
+            </div>
+            
+            <!-- Alarm Preview -->
+            <div id="alarm-preview" style="margin-top: 15px; display: none;">
+                <label style="font-size: 14px; color: #2c3e50; font-weight: 600;">👁️ Preview (how it will appear in chart):</label>
+                <div id="alarm-preview-content" style="border: 2px solid #e9ecef; padding: 12px; border-radius: 8px; background: white; min-height: 80px; margin-top: 8px;">
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 30px;">
+            <button onclick="saveData()" style="flex: 1; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);">💾 SAVE DATA</button>
+            <a href="test-page-2.html" style="flex: 1; background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); color: white; padding: 14px 28px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3); text-transform: uppercase; letter-spacing: 0.5px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(33, 150, 243, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(33, 150, 243, 0.3)'">📊 View Chart</a>
+        </div>
+    </div>
+</body>
+</html>

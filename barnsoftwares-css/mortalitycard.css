@@ -1,56 +1,88 @@
-/* Mortality Card Page Specific Styles */
+/* Mortality Card Page Specific Styles - Professional Multi-Million Dollar App */
 
 /* Import base styles */
-@import url('barn-software-styles.css');
+@import url('../barnsoftwares-css/barn-software-styles.css');
+
+/* Farm-specific theme variables */
+:root {
+    --farm-theme-primary: var(--farm-vassilakos);
+    --farm-theme-gradient: linear-gradient(135deg, var(--farm-vassilakos) 0%, var(--primary-dark) 100%);
+}
+
+
+
+/* Main Layout - Expanded for wider table */
+.main-layout {
+    padding: var(--spacing-lg);
+    margin-top: 80px;
+    max-width: 1800px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-x: auto;
+}
 
 /* Mortality Card Container */
 .mortality-card-container {
-    max-width: 1200px;
-    margin: 20px auto;
     background: var(--white);
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
     overflow: hidden;
 }
 
 .mortality-card-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+    background: var(--farm-theme-gradient);
     color: var(--white);
-    padding: 25px;
+    padding: var(--spacing-xl);
     text-align: center;
+    position: relative;
+    overflow: hidden;
 }
 
-.mortality-card-header h2 {
-    margin: 0;
-    font-size: 28px;
-    font-weight: 600;
+.mortality-card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+}
+
+.mortality-card-header h1 {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    margin: 0 0 var(--spacing-md) 0;
+    position: relative;
+    z-index: 1;
 }
 
 .mortality-card-header p {
-    margin: 10px 0 0 0;
-    opacity: 0.9;
-    font-size: 16px;
+    font-size: var(--font-size-lg);
+    margin: 0;
+    opacity: 0.95;
+    position: relative;
+    z-index: 1;
 }
 
-.mortality-card-content {
-    padding: 30px;
-}
-
-/* Mortality Summary Cards */
+/* Mortality Summary */
 .mortality-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background: var(--gray-50);
 }
 
 .summary-card {
-    background: linear-gradient(135deg, var(--white) 0%, var(--gray-50) 100%);
-    border: 2px solid var(--gray-200);
-    border-radius: var(--border-radius);
-    padding: 20px;
+    background: var(--white);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
     text-align: center;
-    transition: var(--transition);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    transition: all var(--transition-normal);
     position: relative;
     overflow: hidden;
 }
@@ -62,392 +94,699 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--primary-color), var(--success-color));
+    background: var(--farm-theme-gradient);
 }
 
 .summary-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .summary-card h3 {
-    color: var(--gray-700);
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.summary-card .value {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 5px;
-}
-
-.summary-card .unit {
-    font-size: 14px;
+    font-size: var(--font-size-sm);
     color: var(--gray-600);
+    margin: 0 0 var(--spacing-xs) 0;
     font-weight: 500;
 }
 
-/* Mortality Records Table */
+.summary-card .number {
+    font-size: var(--font-size-2xl);
+    font-weight: 700;
+    color: var(--gray-900);
+    display: block;
+}
+
+.summary-card .label {
+    font-size: var(--font-size-xs);
+    color: var(--gray-500);
+    margin-top: var(--spacing-xs);
+}
+
+/* Mortality Records Container */
 .mortality-records-container {
-    margin-top: 30px;
+    padding: var(--spacing-lg);
 }
 
 .mortality-records-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid var(--gray-200);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--gray-200);
 }
 
-.mortality-records-header h3 {
-    color: var(--gray-800);
-    font-size: 20px;
+.mortality-records-header h2 {
+    font-size: var(--font-size-xl);
     font-weight: 600;
+    color: var(--gray-900);
     margin: 0;
 }
 
+/* Mortality Table */
 .mortality-table {
     width: 100%;
     border-collapse: collapse;
     background: var(--white);
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: var(--box-shadow);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
 }
 
 .mortality-table th {
-    background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-700) 100%);
+    background: var(--farm-theme-gradient);
     color: var(--white);
-    padding: 15px 12px;
-    text-align: left;
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: center;
     font-weight: 600;
-    font-size: 14px;
-    border: none;
+    font-size: var(--font-size-sm);
 }
 
 .mortality-table td {
-    padding: 12px;
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: center;
     border-bottom: 1px solid var(--gray-200);
-    vertical-align: middle;
-}
-
-.mortality-table tr:nth-child(even) {
-    background-color: var(--gray-50);
+    font-size: var(--font-size-sm);
 }
 
 .mortality-table tr:hover {
-    background-color: var(--gray-100);
+    background: var(--gray-50);
 }
 
-/* Mortality Trend Chart */
+/* Mortality Trend Container */
 .mortality-trend-container {
-    background: var(--gray-50);
-    border: 1px solid var(--gray-200);
-    border-radius: var(--border-radius);
-    padding: 25px;
-    margin: 30px 0;
-}
-
-.trend-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.trend-header h3 {
-    color: var(--gray-800);
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0;
-}
-
-.trend-chart {
+    margin-top: var(--spacing-lg);
+    padding: var(--spacing-lg);
     background: var(--white);
-    border-radius: var(--border-radius);
-    padding: 20px;
-    min-height: 300px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
     border: 1px solid var(--gray-200);
 }
 
-.trend-chart-placeholder {
-    color: var(--gray-600);
-    font-size: 16px;
-    text-align: center;
+.mortality-trend-container h3 {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0 0 var(--spacing-md) 0;
 }
 
-/* Filter and Search */
+/* Mortality Filters */
 .mortality-filters {
-    background: var(--gray-50);
-    padding: 20px;
-    border-radius: var(--border-radius);
-    margin-bottom: 20px;
-    border: 1px solid var(--gray-200);
-}
-
-.filter-row {
     display: flex;
-    gap: 15px;
-    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
     flex-wrap: wrap;
 }
 
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    min-width: 150px;
-}
-
-.filter-group label {
-    font-weight: 600;
-    color: var(--gray-700);
-    font-size: 14px;
-    margin-bottom: 5px;
-}
-
-.filter-group input,
-.filter-group select {
-    padding: 8px 12px;
+.mortality-filters select,
+.mortality-filters input {
+    padding: var(--spacing-sm) var(--spacing-md);
     border: 1px solid var(--gray-300);
-    border-radius: var(--border-radius);
-    font-size: 14px;
-    background-color: var(--white);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    background: var(--white);
+    color: var(--gray-800);
 }
 
-.filter-group input:focus,
-.filter-group select:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
-}
-
-/* Action Buttons */
+/* Mortality Actions */
 .mortality-actions {
     display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin-top: 30px;
-    padding-top: 25px;
-    border-top: 2px solid var(--gray-200);
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+    justify-content: flex-end;
+}
+
+.btn-export-mortality,
+.btn-print-mortality {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
 }
 
 .btn-export-mortality {
-    background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+    background: var(--success-green);
     color: var(--white);
-    border: none;
-    padding: 12px 24px;
-    border-radius: var(--border-radius);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .btn-export-mortality:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+    background: #059669;
+    transform: translateY(-1px);
 }
 
 .btn-print-mortality {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
+    background: var(--primary-blue);
     color: var(--white);
-    border: none;
-    padding: 12px 24px;
-    border-radius: var(--border-radius);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .btn-print-mortality:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    background: var(--primary-dark);
+    transform: translateY(-1px);
 }
 
 /* Status Indicators */
 .status-indicator {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    margin-right: 8px;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
 }
 
-.status-indicator.normal {
-    background-color: var(--success-color);
+.status-indicator.success {
+    background: var(--success-green);
+    color: var(--white);
 }
 
 .status-indicator.warning {
-    background-color: var(--warning-color);
+    background: var(--warning-orange);
+    color: var(--white);
 }
 
-.status-indicator.critical {
-    background-color: var(--danger-color);
+.status-indicator.error {
+    background: var(--danger-red);
+    color: var(--white);
 }
 
-/* Responsive Design for Mortality Card */
+/* Farm Info Box - Professional Styling */
+.farm-info-box {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    position: relative;
+    overflow: hidden;
+}
+
+.farm-info-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--farm-theme-gradient);
+}
+
+.farm-info-box h2 {
+    color: var(--farm-theme-primary);
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+}
+
+.header-box {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.header-box div {
+    background: none;
+    padding: var(--spacing-sm);
+    border: none;
+    font-size: var(--font-size-base);
+    color: var(--gray-700);
+    line-height: 1.6;
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: var(--spacing-sm);
+}
+
+.header-box strong {
+    color: var(--gray-700);
+    font-weight: 600;
+}
+
+/* Floor Toggle Container */
+.floor-toggle-container {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.floor-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    font-size: var(--font-size-base);
+}
+
+.floor-toggle {
+    position: relative;
+    display: inline-block;
+    width: 120px;
+    height: 40px;
+}
+
+.floor-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+
+
+.floor-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--gray-300);
+    transition: var(--transition-normal);
+    border-radius: 40px;
+}
+
+.floor-toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 32px;
+    width: 32px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: var(--transition-normal);
+    border-radius: 50%;
+}
+
+.floor-toggle input:checked + .floor-toggle-slider {
+    background-color: var(--farm-theme-primary);
+}
+
+.floor-toggle input:checked + .floor-toggle-slider:before {
+    transform: translateX(80px);
+}
+
+/* Calendar Container */
+.calendar-container {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+}
+
+.calendar-header {
+    background: var(--farm-theme-gradient);
+    color: var(--white);
+    padding: var(--spacing-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.calendar-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+}
+
+.calendar-header h3 {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+    color: var(--white);
+}
+
+.farm-totals-box {
+    background: rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 1;
+}
+
+.farm-totals-box strong {
+    color: var(--white);
+    font-weight: 600;
+}
+
+/* Content Layout - Notes above, mortality card middle, ammonia below */
+.content-layout {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+    padding: var(--spacing-lg);
+}
+
+/* Notes info box - above everything */
+.notes-info-box {
+    order: 1;
+    width: 100%;
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Calendar container (mortality card) - in the middle */
+.calendar-container {
+    order: 2;
+    width: 100%;
+}
+
+/* Ammonia info box - below mortality card */
+.custom-info-box {
+    order: 3;
+    width: 100%;
+    margin-top: var(--spacing-lg);
+}
+
+/* Side column should not interfere with ordering */
+.side-column {
+    display: contents;
+}
+
+
+
+
+
+/* Ensure notes info box has proper styling */
+.notes-info-box {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    position: relative;
+    overflow: hidden;
+}
+
+.notes-info-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #059669, #10b981);
+}
+
+.custom-info-title {
+    color: var(--gray-900);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+    border-bottom: 2px solid #059669;
+    padding-bottom: var(--spacing-sm);
+}
+
+.notes-content {
+    color: var(--gray-700);
+    line-height: 1.6;
+    font-size: var(--font-size-base);
+}
+
+/* Custom Info Box */
+.custom-info-box {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    position: relative;
+    overflow: hidden;
+}
+
+.custom-info-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ea580c, #f97316);
+}
+
+/* Custom Ammonia Table */
+.custom-ammonia-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: var(--spacing-md);
+}
+
+.custom-ammonia-table th {
+    background: var(--gray-100);
+    color: var(--gray-700);
+    padding: var(--spacing-sm);
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.custom-ammonia-table td {
+    padding: var(--spacing-sm);
+    border-bottom: 1px solid var(--gray-100);
+    color: var(--gray-600);
+}
+
+.custom-ammonia-table tr:hover {
+    background: var(--gray-50);
+}
+
+/* Mortality Table Improvements - Full Width */
+#mortality_table {
+    width: 100%;
+    min-width: 1600px;
+    border-collapse: collapse;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: visible;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    margin-top: var(--spacing-md);
+    min-height: 600px;
+    table-layout: auto;
+}
+
+/* Make table cells much wider to prevent cutoff */
+#mortality_table td {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    text-align: center;
+    border: 1px solid var(--gray-200);
+    position: relative;
+    height: 90px;
+    vertical-align: middle;
+    width: auto;
+    min-width: 160px;
+    max-width: none;
+    overflow: visible;
+    white-space: nowrap;
+}
+
+#mortality_table th {
+    background: var(--farm-theme-gradient);
+    color: var(--white);
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: center;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+}
+
+
+
+.mortality-cell {
+    position: relative;
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+.mortality-cell:hover {
+    background: var(--gray-50);
+    transform: scale(1.02);
+}
+
+.cell-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-xs);
+    height: 80px;
+}
+
+.cell-data {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    height: 80px;
+}
+
+/* Culls in top-left corner - clean simple style */
+.top-left {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-size: var(--font-size-sm);
+    color: var(--gray-700);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* Total in center */
+.center {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--gray-900);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    line-height: 1.2;
+}
+
+/* Mortality in top-right corner - clean simple style */
+.bottom-right {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: var(--font-size-sm);
+    color: var(--gray-700);
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* Tooltip */
+.tooltip {
+    position: relative;
+}
+
+.tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: var(--gray-900);
+    color: var(--white);
+    text-align: center;
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: var(--font-size-xs);
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .main-layout {
+        padding: var(--spacing-md);
+    }
+
+    .content-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .header-box {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
 @media (max-width: 768px) {
-    .mortality-card-container {
-        margin: 10px;
-    }
-
-    .mortality-card-content {
-        padding: 20px;
-    }
-
-    .mortality-card-header {
-        padding: 20px;
-    }
-
-    .mortality-card-header h2 {
-        font-size: 24px;
-    }
-
-    .mortality-summary {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px;
-    }
-
-    .summary-card {
-        padding: 15px;
-    }
-
-    .summary-card .value {
-        font-size: 28px;
-    }
-
-    .mortality-records-header {
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start;
-    }
-
-    .filter-row {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .filter-group {
-        min-width: auto;
-        width: 100%;
-    }
-
-    .mortality-actions {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .btn-export-mortality,
-    .btn-print-mortality {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .mortality-table {
-        font-size: 12px;
-    }
-
-    .mortality-table th,
-    .mortality-table td {
-        padding: 8px 6px;
-    }
-}
-
-@media (max-width: 480px) {
-    .mortality-card-content {
-        padding: 15px;
-    }
-
-    .mortality-card-header {
-        padding: 15px;
-    }
-
-    .mortality-card-header h2 {
-        font-size: 20px;
-    }
-
-    .mortality-card-header p {
-        font-size: 14px;
+    .main-layout {
+        padding: var(--spacing-sm);
     }
 
     .mortality-summary {
         grid-template-columns: 1fr;
-        gap: 10px;
-    }
-
-    .summary-card {
-        padding: 12px;
-    }
-
-    .summary-card .value {
-        font-size: 24px;
+        gap: var(--spacing-sm);
     }
 
     .mortality-filters {
-        padding: 15px;
-    }
-
-    .mortality-table {
-        font-size: 11px;
-    }
-
-    .mortality-table th,
-    .mortality-table td {
-        padding: 6px 4px;
-    }
-
-    .trend-chart {
-        padding: 15px;
-        min-height: 200px;
-    }
-}
-
-/* Print Styles for Mortality Card */
-@media print {
-    .mortality-card-container {
-        box-shadow: none;
-        border: 1px solid #ccc;
+        flex-direction: column;
     }
 
     .mortality-actions {
+        flex-direction: column;
+    }
+
+    .calendar-header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        text-align: center;
+    }
+    
+    .farm-totals-box {
+        width: 100%;
+    }
+    
+    .header-box {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-layout {
+        padding: 10px;
+    }
+
+    .mortality-card-header h1 {
+        font-size: var(--font-size-xl);
+    }
+
+    .mortality-records-header {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        align-items: flex-start;
+    }
+
+    .mortality-filters {
+        gap: var(--spacing-sm);
+    }
+}
+
+/* Print Styles */
+@media print {
+    .mortality-actions,
+    .mortality-filters {
         display: none !important;
     }
 
-    .mortality-table {
-        box-shadow: none;
-        border: 1px solid #ccc;
+    .main-layout {
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
-    .mortality-table th {
-        background: #f0f0f0 !important;
-        color: #000 !important;
-    }
-
-    .summary-card {
-        border: 1px solid #ccc;
-        box-shadow: none;
-    }
-
-    .trend-chart {
-        border: 1px solid #ccc;
-        background: white;
+    .mortality-card-container {
+        box-shadow: none !important;
+        border: none !important;
     }
 }

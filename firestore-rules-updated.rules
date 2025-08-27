@@ -1,0 +1,99 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+match /{document=**} {
+  allow read, write: if true;
+}
+
+    // ✅ Allow Read & Write access to `startnewcrop`
+    match /startnewcrop/{document} {
+      allow read, write: if true;
+    }
+
+    // ✅ Allow Read & Write access to `visitor_logs`
+    match /visitor_logs/{document} {
+      allow read, write: if true;
+    }
+    
+        // ✅ Allow Read & Write access to `shippingLogs`
+    match /shippingLogs/{document} {
+      allow read, write: if true;
+    }
+
+		// ✅ Allow Read & Write access to `vas-b1-f1-MC`
+match /vas-b1-f1-MC/{document} {
+  allow read, write: if true;
+}
+
+// ✅ Allow Read & Write access to `vas-b1-f2-MC`
+match /vas-b1-f2-MC/{document} {
+  allow read, write: if true;
+}
+
+// ✅ Allow Read & Write access to `vas-b1-f1-M`
+match /vas-b1-f1-M/{document} {
+  allow read, write: if true;
+}
+
+// ✅ Allow Read & Write access to `vas-b1-f2-M`
+match /vas-b1-f2-M/{document} {
+  allow read, write: if true;
+}
+
+// ✅ Allow Read & Write access to `vas-b1-f1-ER`
+match /vas-b1-f1-ER/{document} {
+  allow read, write: if true;
+}
+
+// ✅ Allow Read & Write access to `vas-b1-f2-ER`
+match /vas-b1-f2-ER/{document} {
+  allow read, write: if true;
+}
+
+   // Fix for ammonia_levels collection - allow all documents
+    match /ammonia_levels/{document} {
+      allow read, write: if true;
+    }
+    
+    match /ammonia_levels_f2/{document} {
+  allow read, write: if true;
+}
+    // Add fixed_days collection
+    match /fixed_days/{document} {
+      allow read, write: if true;
+    }
+  // ✅ Allow Read & Write access to `vas-b1-fl`
+    match /vas-b1-fl/{document} {
+      allow read, write: if true;
+    }
+// ✅ Allow Read & Write access to `humidity-density`
+match /humidity-density/{document} {
+  allow read, write: if true;
+}
+
+    // ✅ Allow Read & Write access to `humidity-density`
+match /humidity-density/{document} {
+  allow read, write: if true;
+}
+
+// ✅ Allow Read & Write access to `feed_schedules`
+match /feed_schedules/{document} {
+  allow read, write: if true;
+}
+
+// ✅ Allow Read & Write access to `system_alerts`
+match /system_alerts/{document} {
+  allow read, write: if true;
+}
+  }
+}
+
+
+
+
+
+
+
+

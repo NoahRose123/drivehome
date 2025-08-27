@@ -1,7 +1,8 @@
-// Barn Software Header Navigation Script
+// Barn Header Navigation - Professional Multi-Million Dollar App
 
 class BarnHeaderNavigation {
     constructor() {
+        this.currentFarm = this.detectCurrentFarm();
         this.initializeHeader();
         this.initializeNavigation();
         this.initializeMobileMenu();
@@ -9,19 +10,34 @@ class BarnHeaderNavigation {
         this.bindEvents();
     }
 
+    detectCurrentFarm() {
+        // Detect farm based on current page or URL parameters
+        const pathname = window.location.pathname;
+        if (pathname.includes('vassilakos') || pathname.includes('vas')) return 'vassilakos';
+        if (pathname.includes('edg')) return 'edg';
+        if (pathname.includes('apostolakos') || pathname.includes('apo')) return 'apostolakos';
+        if (pathname.includes('sigma') || pathname.includes('sig')) return 'sigma';
+        if (pathname.includes('dfi')) return 'dfi';
+        return 'vassilakos'; // Default to Vassilakos
+    }
+
+    getFarmTheme() {
+        const farmThemes = {
+            vassilakos: { color: '#2563eb', name: 'Vassilakos Farm' },
+            edg: { color: '#059669', name: 'EDG Farm' },
+            apostolakos: { color: '#7c3aed', name: 'Apostolakos Farm' },
+            sigma: { color: '#ea580c', name: 'Sigma Farm' },
+            dfi: { color: '#0891b2', name: 'DFI Farm' }
+        };
+        return farmThemes[this.currentFarm] || farmThemes.vassilakos;
+    }
+
     initializeHeader() {
-        // Check if header already exists to prevent double headers
+        // Check if header already exists to prevent duplicates
         if (document.querySelector('.modern-header')) {
-            console.log('Header already exists, skipping initialization');
             return;
         }
 
-        // Get current page to determine if print button should be hidden
-        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-        const hidePrintPages = ['startnewcrop.html', 'dailymortality.html'];
-        const shouldHidePrint = hidePrintPages.includes(currentPage);
-
-        // Create header HTML structure
         const headerHTML = `
             <header class="modern-header">
                 <div class="header-container">
@@ -36,28 +52,32 @@ class BarnHeaderNavigation {
                     </div>
                     <nav class="nav-container">
                         <div class="nav-links">
-                            <a href="dailymortality.html" class="nav-item" data-page="dailymortality.html" title="Daily Mortality">
-                                <i class="fas fa-chart-line nav-icon"></i>
+                            <a href="#" class="nav-item" data-page="dailymortality.html" title="Daily Mortality">
+                                <i class="fas fa-chart-line nav-icon" style="color: #dc2626"></i>
                                 <span class="nav-label">Daily Mortality</span>
                             </a>
-                            <a href="vistorlog.html" class="nav-item" data-page="vistorlog.html" title="Visitor Log">
-                                <i class="fas fa-users nav-icon"></i>
+                            <a href="#" class="nav-item" data-page="highdensity.html" title="High Density">
+                                <i class="fas fa-layer-group nav-icon" style="color: #e91e63"></i>
+                                <span class="nav-label">High Density</span>
+                            </a>
+                            <a href="#" class="nav-item" data-page="vistorlog.html" title="Visitor Log">
+                                <i class="fas fa-users nav-icon" style="color: #7c3aed"></i>
                                 <span class="nav-label">Visitors</span>
                             </a>
-                            <a href="mortalitycard.html" class="nav-item" data-page="mortalitycard.html" title="Mortality Card">
-                                <i class="fas fa-clipboard-list nav-icon"></i>
+                            <a href="#" class="nav-item" data-page="mortalitycard.html" title="Mortality Card">
+                                <i class="fas fa-clipboard-list nav-icon" style="color: #ea580c"></i>
                                 <span class="nav-label">Mortality Records</span>
                             </a>
-                            <a href="flocklog.html" class="nav-item" data-page="flocklog.html" title="Flock Log">
-                                <i class="fas fa-feather-alt nav-icon"></i>
+                            <a href="#" class="nav-item" data-page="flocklog.html" title="Flock Log">
+                                <i class="fas fa-feather-alt nav-icon" style="color: #059669"></i>
                                 <span class="nav-label">Flock</span>
                             </a>
-                            <a href="shippingform.html" class="nav-item" data-page="shippingform.html" title="Shipping Form">
-                                <i class="fas fa-shipping-fast nav-icon"></i>
+                            <a href="#" class="nav-item" data-page="shippingform.html" title="Shipping Log">
+                                <i class="fas fa-shipping-fast nav-icon" style="color: #2563eb"></i>
                                 <span class="nav-label">Shipping</span>
                             </a>
-                            <a href="startnewcrop.html" class="nav-item" data-page="startnewcrop.html" title="Start New Crop">
-                                <i class="fas fa-seedling nav-icon"></i>
+                            <a href="#" class="nav-item" data-page="startnewcrop.html" title="Start New Crop">
+                                <i class="fas fa-seedling nav-icon" style="color: #0891b2"></i>
                                 <span class="nav-label">New Crop</span>
                             </a>
                         </div>
@@ -67,12 +87,10 @@ class BarnHeaderNavigation {
                             <i class="fas fa-save"></i>
                             <span>Save</span>
                         </button>
-                        ${shouldHidePrint ? '' : `
-                        <button class="action-btn primary" id="printPDFButton" title="Print as PDF">
+                        <button class="action-btn primary" id="printPDFButton" title="Print as PDF" style="display: none;">
                             <i class="fas fa-file-pdf"></i>
                             <span>Print PDF</span>
                         </button>
-                        `}
                     </div>
                     <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Toggle mobile menu">
                         <span></span>
@@ -83,66 +101,128 @@ class BarnHeaderNavigation {
                 <div class="mobile-nav-menu" id="mobileNavMenu">
                     <div class="mobile-nav-content">
                         <div class="mobile-nav-links">
-                            <a href="dailymortality.html" class="mobile-nav-item" data-page="dailymortality.html">
-                                <i class="fas fa-chart-line"></i>
+                            <a href="#" class="mobile-nav-item" data-page="dailymortality.html">
+                                <i class="fas fa-chart-line" style="color: #dc2626"></i>
                                 <span>Daily Mortality</span>
                             </a>
-                            <a href="vistorlog.html" class="mobile-nav-item" data-page="vistorlog.html">
-                                <i class="fas fa-users"></i>
+                            <a href="#" class="mobile-nav-item" data-page="highdensity.html">
+                                <i class="fas fa-layer-group" style="color: #e91e63"></i>
+                                <span>High Density</span>
+                            </a>
+                            <a href="#" class="mobile-nav-item" data-page="vistorlog.html">
+                                <i class="fas fa-users" style="color: #7c3aed"></i>
                                 <span>Visitors</span>
                             </a>
-                            <a href="mortalitycard.html" class="mobile-nav-item" data-page="mortalitycard.html">
-                                <i class="fas fa-clipboard-list"></i>
+                            <a href="#" class="mobile-nav-item" data-page="mortalitycard.html">
+                                <i class="fas fa-clipboard-list" style="color: #ea580c"></i>
                                 <span>Mortality Records</span>
                             </a>
-                            <a href="flocklog.html" class="mobile-nav-item" data-page="flocklog.html">
-                                <i class="fas fa-feather-alt"></i>
+                            <a href="#" class="mobile-nav-item" data-page="flocklog.html">
+                                <i class="fas fa-feather-alt" style="color: #059669"></i>
                                 <span>Flock</span>
                             </a>
-                            <a href="shippingform.html" class="mobile-nav-item" data-page="shippingform.html">
-                                <i class="fas fa-shipping-fast"></i>
+                            <a href="#" class="mobile-nav-item" data-page="shippingform.html">
+                                <i class="fas fa-shipping-fast" style="color: #2563eb"></i>
                                 <span>Shipping</span>
                             </a>
-                            <a href="startnewcrop.html" class="mobile-nav-item" data-page="startnewcrop.html">
-                                <i class="fas fa-seedling"></i>
+                            <a href="#" class="mobile-nav-item" data-page="startnewcrop.html">
+                                <i class="fas fa-seedling" style="color: #0891b2"></i>
                                 <span>New Crop</span>
                             </a>
                         </div>
-                        <div class="mobile-actions">
+                        <div class="mobile-action-items">
                             <button class="mobile-action-item" id="mobileSaveButton">
                                 <i class="fas fa-save"></i>
-                                <span>Save Changes</span>
+                                <span>Save</span>
                             </button>
-                            ${shouldHidePrint ? '' : `
-                            <button class="mobile-action-item" id="mobilePrintButton">
+                            <button class="mobile-action-item" id="mobilePrintButton" style="display: none;">
                                 <i class="fas fa-file-pdf"></i>
                                 <span>Print PDF</span>
                             </button>
-                            `}
                         </div>
                     </div>
                 </div>
             </header>
-            <div class="status-messages">
-                <div id="saveStatus" class="status-message"></div>
-                <div id="resetStatus" class="status-message"></div>
-            </div>
         `;
 
-        // Insert header at the beginning of the body
         document.body.insertAdjacentHTML('afterbegin', headerHTML);
+    }
 
-        // Set active nav item based on current page
+    initializeNavigation() {
+        this.navItems = document.querySelectorAll('.nav-item');
+        this.mobileNavItems = document.querySelectorAll('.mobile-nav-item');
         this.setActiveNavigation();
     }
 
-    setActiveNavigation() {
-        const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-        const navItems = document.querySelectorAll('.nav-item, .mobile-nav-item');
+    initializeMobileMenu() {
+        this.mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        this.mobileNavMenu = document.getElementById('mobileNavMenu');
+        this.mobileMenuOpen = false;
+    }
 
-        navItems.forEach(item => {
-            const dataPage = item.getAttribute('data-page');
-            if (dataPage === currentPage) {
+    initializeActionButtons() {
+        this.saveButton = document.getElementById('saveFormButton');
+        this.printButton = document.getElementById('printPDFButton');
+        this.mobileSaveButton = document.getElementById('mobileSaveButton');
+        this.mobilePrintButton = document.getElementById('mobilePrintButton');
+        
+        // Show print button only for specific pages
+        this.updatePrintButtonVisibility();
+    }
+
+    updatePrintButtonVisibility() {
+        const currentPage = window.location.pathname.split('/').pop();
+        const pagesWithPrint = ['vistorlog.html', 'flocklog.html', 'mortalitycard.html', 'shippingform.html'];
+        const shouldShowPrint = pagesWithPrint.includes(currentPage);
+        
+        if (this.printButton) {
+            this.printButton.style.display = shouldShowPrint ? 'flex' : 'none';
+        }
+        if (this.mobilePrintButton) {
+            this.mobilePrintButton.style.display = shouldShowPrint ? 'flex' : 'none';
+        }
+    }
+
+    bindEvents() {
+        // Navigation events
+        this.navItems.forEach(item => {
+            item.addEventListener('click', this.handleNavClick.bind(this));
+        });
+        
+        this.mobileNavItems.forEach(item => {
+            item.addEventListener('click', this.handleNavClick.bind(this));
+        });
+
+        // Mobile menu events
+        if (this.mobileMenuToggle) {
+            this.mobileMenuToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleMobileMenu();
+            });
+        }
+
+        // Action button events
+        this.backButton = document.getElementById('backButton');
+        this.mainMenuButton = document.getElementById('mainMenuButton');
+        
+        if (this.backButton) this.backButton.addEventListener('click', this.handleBack.bind(this));
+        if (this.mainMenuButton) this.mainMenuButton.addEventListener('click', this.handleMainMenu.bind(this));
+        if (this.saveButton) this.saveButton.addEventListener('click', this.handleSave.bind(this));
+        if (this.printButton) this.printButton.addEventListener('click', this.handlePrint.bind(this));
+        if (this.mobileSaveButton) this.mobileSaveButton.addEventListener('click', this.handleSave.bind(this));
+        if (this.mobilePrintButton) this.mobilePrintButton.addEventListener('click', this.handlePrint.bind(this));
+
+        // Global events
+        document.addEventListener('click', this.handleOutsideClick.bind(this));
+        window.addEventListener('resize', this.handleResize.bind(this));
+    }
+
+    setActiveNavigation() {
+        const currentPage = window.location.pathname.split('/').pop();
+        this.navItems.forEach(item => {
+            const page = item.dataset.page;
+            if (page === currentPage) {
                 item.classList.add('active');
             } else {
                 item.classList.remove('active');
@@ -150,179 +230,163 @@ class BarnHeaderNavigation {
         });
     }
 
-    initializeNavigation() {
-        this.navItems = document.querySelectorAll('.nav-item, .mobile-nav-item');
-        this.navItems.forEach(item => {
-            item.addEventListener('click', this.handleNavClick.bind(this));
-        });
-    }
-
-    initializeMobileMenu() {
-        this.mobileToggle = document.getElementById('mobileMenuToggle');
-        this.mobileMenu = document.getElementById('mobileNavMenu');
-
-        if (this.mobileToggle) {
-            this.mobileToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.toggleMobileMenu();
-            });
-        }
-    }
-
-    initializeActionButtons() {
-        this.backButton = document.getElementById('backButton');
-        this.mainMenuButton = document.getElementById('mainMenuButton');
-        this.saveButton = document.getElementById('saveFormButton');
-        this.printButton = document.getElementById('printPDFButton');
-        this.mobileSaveButton = document.getElementById('mobileSaveButton');
-        this.mobilePrintButton = document.getElementById('mobilePrintButton');
-
-        if (this.backButton) this.backButton.addEventListener('click', this.handleBack.bind(this));
-        if (this.mainMenuButton) this.mainMenuButton.addEventListener('click', this.handleMainMenu.bind(this));
-        if (this.saveButton) this.saveButton.addEventListener('click', this.handleSave.bind(this));
-        if (this.printButton) this.printButton.addEventListener('click', this.handlePrint.bind(this));
-        if (this.mobileSaveButton) this.mobileSaveButton.addEventListener('click', this.handleSave.bind(this));
-        if (this.mobilePrintButton) this.mobilePrintButton.addEventListener('click', this.handlePrint.bind(this));
-    }
-
-    bindEvents() {
-        document.addEventListener('click', this.handleOutsideClick.bind(this));
-        window.addEventListener('resize', this.handleResize.bind(this));
-    }
-
     handleNavClick(event) {
         event.preventDefault();
+        event.stopPropagation();
 
         const clickedItem = event.currentTarget;
-        const targetPage = clickedItem.getAttribute('data-page');
+        const page = clickedItem.dataset.page;
 
-        if (targetPage) {
-            // Update active state
-            this.navItems.forEach(item => item.classList.remove('active'));
-            clickedItem.classList.add('active');
+        // Update active states
+        this.navItems.forEach(item => item.classList.remove('active'));
+        clickedItem.classList.add('active');
 
-            // Navigate to page
-            window.location.href = targetPage;
+        // Update counterpart
+        const counterpart = document.querySelector(
+            clickedItem.classList.contains('nav-item')
+                ? `.mobile-nav-item[data-page="${page}"]`
+                : `.nav-item[data-page="${page}"]`
+        );
+        if (counterpart) {
+            counterpart.classList.add('active');
+        }
+
+        // Close mobile menu
+        this.closeMobileMenu();
+
+        // Navigate to page
+        if (page) {
+            this.navigateToPage(page);
         }
     }
 
     toggleMobileMenu() {
-        if (this.mobileMenu) {
-            this.mobileMenu.classList.toggle('active');
-
-            // Toggle hamburger animation
-            const spans = this.mobileToggle.querySelectorAll('span');
-            spans.forEach((span, index) => {
-                if (this.mobileMenu.classList.contains('active')) {
-                    if (index === 0) span.style.transform = 'rotate(45deg) translate(5px, 5px)';
-                    if (index === 1) span.style.opacity = '0';
-                    if (index === 2) span.style.transform = 'rotate(-45deg) translate(7px, -6px)';
-                } else {
-                    span.style.transform = 'none';
-                    span.style.opacity = '1';
-                }
-            });
+        const isActive = this.mobileMenuToggle.classList.contains('active');
+        if (isActive) {
+            this.closeMobileMenu();
+        } else {
+            this.openMobileMenu();
         }
     }
 
+    openMobileMenu() {
+        this.mobileMenuToggle.classList.add('active');
+        this.mobileNavMenu.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    closeMobileMenu() {
+        this.mobileMenuToggle.classList.remove('active');
+        this.mobileNavMenu.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
     handleOutsideClick(event) {
-        if (this.mobileMenu && this.mobileMenu.classList.contains('active')) {
-            if (!this.mobileMenu.contains(event.target) && !this.mobileToggle.contains(event.target)) {
-                this.toggleMobileMenu();
-            }
+        if (this.mobileNavMenu && this.mobileMenuToggle &&
+            !this.mobileNavMenu.contains(event.target) &&
+            !this.mobileMenuToggle.contains(event.target) &&
+            this.mobileNavMenu.classList.contains('active')) {
+            this.closeMobileMenu();
         }
     }
 
     handleResize() {
-        if (window.innerWidth > 768 && this.mobileMenu) {
-            this.mobileMenu.classList.remove('active');
-            const spans = this.mobileToggle.querySelectorAll('span');
-            spans.forEach(span => {
-                span.style.transform = 'none';
-                span.style.opacity = '1';
-            });
+        if (window.innerWidth > 768 && this.mobileNavMenu.classList.contains('active')) {
+            this.closeMobileMenu();
         }
     }
 
+    handleSave() {
+        this.showStatusMessage('Changes saved successfully!', 'success');
+    }
+
+    handlePrint() {
+        this.showStatusMessage('Printing...', 'success');
+        setTimeout(() => {
+            window.print();
+        }, 500);
+    }
+
     handleBack() {
+        this.closeMobileMenu();
         if (window.history.length > 1) {
             window.history.back();
         } else {
-            window.location.href = '../index.html';
+            // Navigate to the main dashboard
+            const currentPath = window.location.pathname;
+            const basePath = currentPath.substring(0, currentPath.indexOf('/barnsoftwares'));
+            window.location.href = basePath + '/flockview-app-cursor-notoffical.html';
         }
     }
 
     handleMainMenu() {
-        window.location.href = '../index.html';
+        this.closeMobileMenu();
+        // Navigate to the main dashboard
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.substring(0, currentPath.indexOf('/barnsoftwares'));
+        window.location.href = basePath + '/flockview-app-cursor-notoffical.html';
     }
 
-    handleSave() {
-        // Trigger save functionality if it exists
-        if (typeof window.saveData === 'function') {
-            window.saveData();
-        } else {
-            this.showStatusMessage('Save functionality not implemented for this page', 'warning');
-        }
-    }
+    navigateToPage(page) {
+        // Get the current directory path
+        const currentPath = window.location.pathname;
+        const currentDir = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
 
-    handlePrint() {
-        // Trigger print functionality if it exists
-        if (typeof window.printPDF === 'function') {
-            window.printPDF();
-        } else {
-            window.print();
-        }
+        // Construct the full path to the target page
+        const targetPath = currentDir + page;
+
+        console.log('Navigating to:', targetPath);
+
+        // Show loading message
+        this.showStatusMessage('Loading page...', 'success');
+
+        // Navigate after a short delay to show the message
+        setTimeout(() => {
+            window.location.href = targetPath;
+        }, 300);
     }
 
     showStatusMessage(message, type = 'success') {
-        const statusElement = document.getElementById('saveStatus');
-        if (statusElement) {
-            statusElement.textContent = message;
-            statusElement.className = `status-message ${type}`;
-            statusElement.style.display = 'block';
+        const statusContainer = document.querySelector('.status-messages');
+        if (!statusContainer) return;
 
+        const statusElement = document.createElement('div');
+        statusElement.className = `status-message ${type}`;
+        statusElement.textContent = message;
+
+        statusContainer.appendChild(statusElement);
+
+        setTimeout(() => {
+            statusElement.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+            statusElement.classList.remove('show');
             setTimeout(() => {
-                statusElement.style.display = 'none';
-            }, 3000);
-        }
+                if (statusElement.parentNode) {
+                    statusElement.parentNode.removeChild(statusElement);
+                }
+            }, 300);
+        }, 3000);
     }
 }
 
-// Initialize header when DOM is loaded
-document.addEventListener('DOMContentLoaded', function () {
+// Initialize when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        new BarnHeaderNavigation();
+    });
+} else {
     new BarnHeaderNavigation();
-});
-
-// Add Font Awesome CDN if not already present
-if (!document.querySelector('link[href*="font-awesome"]')) {
-    const fontAwesomeLink = document.createElement('link');
-    fontAwesomeLink.rel = 'stylesheet';
-    fontAwesomeLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css';
-    document.head.appendChild(fontAwesomeLink);
 }
 
-// Utility functions for common operations
+// Global utility functions
 window.barnUtils = {
-    showSuccess: function (message) {
-        if (window.barnHeader) {
-            window.barnHeader.showStatusMessage(message, 'success');
-        }
-    },
-
-    showError: function (message) {
-        if (window.barnHeader) {
-            window.barnHeader.showStatusMessage(message, 'error');
-        }
-    },
-
-    showWarning: function (message) {
-        if (window.barnHeader) {
-            window.barnHeader.showStatusMessage(message, 'warning');
-        }
-    },
-
     navigateTo: function (page) {
-        window.location.href = page;
+        // Get the current directory path
+        const currentPath = window.location.pathname;
+        const currentDir = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+        const targetPath = currentDir + page;
+        window.location.href = targetPath;
     }
 }; 

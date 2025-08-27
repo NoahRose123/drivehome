@@ -16,6 +16,10 @@
     <link rel="stylesheet" href="../barnsoftwares-css/barn-software-styles.css">
     <link rel="stylesheet" href="../barnsoftwares-css/mortalitycard.css">
     <script src="../barnsoftwares-css/barn-header.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -393,10 +397,12 @@
 </head>
 
 <body>
+
+
     <!-- Main Layout Wrapper -->
     <div class="main-layout">
         <!-- Floor Toggle at the Top -->
-        <div class="floor-toggle-container">
+        <div class="floor-toggle-container" id="floor-toggle">
             <span class="floor-label">Bottom Floor</span>
             <label class="floor-toggle">
                 <input type="checkbox" id="floor_toggle" unchecked>
@@ -406,7 +412,7 @@
         </div>
 
         <!-- Farm Info at the Top -->
-        <div class="farm-info-box">
+        <div class="farm-info-box" id="farm-info">
             <h2 id="rsmsize">Vassilakos Barn 1</h2>
             <div class="header-box">
                 <div><strong>Farm Name:</strong> <span id="farm_name">Loading...</span></div>
@@ -425,7 +431,7 @@
         </div>
 
         <!-- Calendar Section (Left) -->
-        <div class="calendar-container">
+        <div class="calendar-container" id="mortality-card">
             <div class="content-layout">
                 <!-- Calendar Section (Left) -->
                 <div class="calendar-container">
@@ -439,22 +445,19 @@
 
                     <table id="mortality_table" border="1"></table>
 
-                    <!-- Save Button -->
-                    <div class="save-button-container">
-                        <button id="save_button" class="save-button">Save as PDF</button>
-                    </div>
+                    <button id="save_button" class="save-button">Save as PDF</button>
                 </div>
 
                 <!-- Right Side Column for Ammonia and Notes -->
                 <div class="side-column">
                     <!-- Notes Box (appears first/top) -->
-                    <div class="notes-info-box">
+                    <div class="notes-info-box" id="notes-section">
                         <h3 class="custom-info-title">Notes</h3>
                         <div class="notes-content" id="notes_display">Loading...</div>
                     </div>
 
                     <!-- Ammonia Levels Box (appears second/bottom) -->
-                    <div class="custom-info-box">
+                    <div class="custom-info-box" id="ammonia-levels">
                         <h3 class="custom-info-title">Ammonia Levels</h3>
                         <table class="custom-ammonia-table">
                             <thead>
@@ -502,6 +505,8 @@
             </div>
         </div>
     </div>
+
+
 </body>
 
 </html>
