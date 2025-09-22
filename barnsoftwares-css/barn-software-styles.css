@@ -59,6 +59,7 @@
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
     --radius-xl: 1rem;
+    --radius-full: 9999px;
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -78,6 +79,8 @@
     padding: 0;
     box-sizing: border-box;
 }
+img, video { max-width: 100%; height: auto; }
+html, body { -webkit-text-size-adjust: 100%; }
 
 body {
     font-family: var(--font-family);

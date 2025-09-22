@@ -13,6 +13,7 @@ const initializeApp = () => {
     setupFormHandlers();
     setupRealTimeUpdates();
     setupMobileOptimization();
+    setupThemeToggle();
 };
 
 /**
@@ -34,6 +35,9 @@ const setupNavigation = () => {
             showSection(targetSection);
         });
     });
+    
+    // Setup profile dropdown
+    setupProfileDropdown();
 };
 
 /**
@@ -642,6 +646,96 @@ const startNewFlock = (barnId) => {
     showToast(`Start new flock in ${barnId} functionality coming soon!`, 'info');
 };
 
+// Profile action functions
+const openProfileSettings = () => {
+    showToast('Profile settings functionality coming soon!', 'info');
+    document.getElementById('profileMenu').classList.remove('active');
+};
+
+const openSystemSettings = () => {
+    showToast('System settings functionality coming soon!', 'info');
+    document.getElementById('profileMenu').classList.remove('active');
+};
+
+const openNotifications = () => {
+    showToast('Notifications functionality coming soon!', 'info');
+    document.getElementById('profileMenu').classList.remove('active');
+};
+
+const openHelp = () => {
+    showToast('Help & Support functionality coming soon!', 'info');
+    document.getElementById('profileMenu').classList.remove('active');
+};
+
+const logout = () => {
+    showToast('Logout functionality coming soon!', 'info');
+    document.getElementById('profileMenu').classList.remove('active');
+};
+
+/**
+ * Theme toggle functionality
+ */
+const setupThemeToggle = () => {
+    const themeToggle = document.getElementById('themeToggle');
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    
+    // Set initial theme
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateThemeIcon(currentTheme);
+    
+    // Add click handler
+    themeToggle.addEventListener('click', () => {
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    });
+};
+
+/**
+ * Update theme toggle icon
+ */
+const updateThemeIcon = (theme) => {
+    const themeToggle = document.getElementById('themeToggle');
+    const icon = themeToggle.querySelector('i');
+    
+    if (theme === 'dark') {
+        icon.className = 'fas fa-sun';
+        themeToggle.title = 'Switch to Light Mode';
+    } else {
+        icon.className = 'fas fa-moon';
+        themeToggle.title = 'Switch to Dark Mode';
+    }
+};
+
+/**
+ * Profile dropdown functionality
+ */
+const setupProfileDropdown = () => {
+    const profileDropdown = document.getElementById('profileDropdown');
+    const profileMenu = document.getElementById('profileMenu');
+    
+    // Toggle dropdown on click
+    profileDropdown.addEventListener('click', (e) => {
+        e.stopPropagation();
+        profileMenu.classList.toggle('active');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!profileDropdown.contains(e.target)) {
+            profileMenu.classList.remove('active');
+        }
+    });
+    
+    // Close dropdown with escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            profileMenu.classList.remove('active');
+        }
+    });
+};
+
 // Export functions for global access
 window.FlockViewApp = {
     addNewFlock,
@@ -665,5 +759,17 @@ window.FlockViewApp = {
     startNewFlock,
     openModal,
     closeModal,
-    showToast
+    showToast,
+    openProfileSettings,
+    openSystemSettings,
+    openNotifications,
+    openHelp,
+    logout,
+    toggleTheme: () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    }
 }; 
