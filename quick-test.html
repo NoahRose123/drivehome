@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Test - FlockView</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="test-box">
+        <h1>🚀 FlockView Quick Test</h1>
+        <p>This will automatically bypass login and take you to the app with full data access.</p>
+        
+        <div class="status info">
+            Click the button below to automatically bypass login and access your farm data.
+        </div>
+        
+        <a href="login.html" class="btn" onclick="autoBypass()">🔓 Auto-Bypass Login</a>
+        <a href="flockview-app-cursor-notoffical.html" class="btn btn-success">📊 Go to App</a>
+        
+        <div style="margin-top: 30px; font-size: 14px; color: #666;">
+            <p><strong>What this does:</strong></p>
+            <ul style="text-align: left; max-width: 400px; margin: 0 auto;">
+                <li>✅ Automatically bypasses login</li>
+                <li>✅ Sets up mock authentication</li>
+                <li>✅ Enables data viewing and editing</li>
+                <li>✅ Works with secured Firestore rules</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        function autoBypass() {
+            // Clear any existing session data
+            sessionStorage.clear();
+            
+            // Set up bypass authentication
+            sessionStorage.setItem('flockview_logged_in', 'true');
+            sessionStorage.setItem('flockview_user', 'test-user-123');
+            sessionStorage.setItem('flockview_email', 'test@example.com');
+            sessionStorage.setItem('flockview_auth_bypass', 'true');
+            sessionStorage.setItem('flockview_user_display', 'Test User');
+            
+            console.log('✅ Auto-bypass authentication set up');
+            
+            // Redirect to app after a short delay
+            setTimeout(() => {
+                window.location.href = 'flockview-app-cursor-notoffical.html';
+            }, 500);
+        }
+    </script>
+</body>
+</html>

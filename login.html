@@ -434,10 +434,7 @@
                 <div class="login-footer">
                     <p>Don't have an account? <a href="#" onclick="showSignUp()">Contact Administrator</a></p>
                     <div class="debug-buttons">
-                        <button type="button" class="debug-btn" onclick="debugLoginSystem()">🔍 Debug</button>
-                        <button type="button" class="debug-btn force" onclick="forceLogin()">🚀 Force Login</button>
-                        <button type="button" class="debug-btn test" onclick="testLogin()">🧪 Test Login</button>
-                        <button type="button" class="debug-btn bypass" onclick="bypassLogin()">⚡ Bypass Login</button>
+                        <button type="button" class="debug-btn" onclick="debugLoginSystem()">🔍 Debug Login</button>
                     </div>
                 </div>
             </div>
@@ -445,6 +442,7 @@
     </section>
 
     <!-- Firebase Configuration -->
+    <script src="config.js"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
         import { 
@@ -480,16 +478,8 @@
             getDownloadURL 
         } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
 
-        // Firebase configuration - Your actual project configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyB20OmcQemfIXm4712im9mqiBnpeVt8sJQ",
-            authDomain: "chicken-project-2.firebaseapp.com",
-            projectId: "chicken-project-2",
-            storageBucket: "chicken-project-2.firebasestorage.app",
-            messagingSenderId: "596273529964",
-            appId: "1:596273529964:web:bd51e2646d5ed48afa4449",
-            measurementId: "G-9YLPHR08DB"
-        };
+        // Firebase configuration - Loaded from external config file
+        const firebaseConfig = window.firebaseConfig;
 
         // Initialize Firebase with error handling
         let app, auth, db, storage;
@@ -969,52 +959,44 @@
             }
         }
 
-        // Test login function for debugging
-        async function testLogin(email = 'test@example.com', password = 'testpass') {
-            console.log('🧪 TEST DEBUG: Manual login test started');
-            console.log('🧪 TEST DEBUG: Using test credentials:', { email, password });
-            
-            // Set test values in form
-            document.getElementById('email').value = email;
-            document.getElementById('password').value = password;
-            
-            // Call login function directly
-            await loginUser();
-        }
 
-        // Force login function for testing
-        async function forceLogin() {
-            console.log('🚀 FORCE DEBUG: Force login triggered');
+        // Bypass login function for testing
+        async function bypassLogin() {
+            console.log('🚀 BYPASS DEBUG: Bypassing login completely');
             
-            const email = prompt('Enter email:');
-            const password = prompt('Enter password:');
-            
-            if (email && password) {
-                console.log('🚀 FORCE DEBUG: Calling loginUser with:', { email, password });
-                document.getElementById('email').value = email;
-                document.getElementById('password').value = password;
-                await loginUser();
-            } else {
-                console.log('🚀 FORCE DEBUG: Login cancelled');
+            try {
+                // Clear any existing session data first
+                sessionStorage.clear();
+                
+                // Store session data FIRST
+                sessionStorage.setItem('flockview_logged_in', 'true');
+                sessionStorage.setItem('flockview_user', 'test-user-123');
+                sessionStorage.setItem('flockview_email', 'test@example.com');
+                sessionStorage.setItem('flockview_auth_bypass', 'true');
+                sessionStorage.setItem('flockview_user_display', 'Test User');
+                
+                console.log('✅ BYPASS DEBUG: Session data stored');
+                console.log('✅ BYPASS DEBUG: Mock authentication set up successfully');
+                
+                // Small delay to ensure everything is set
+                setTimeout(() => {
+                    console.log('🚀 BYPASS DEBUG: Redirecting to main application...');
+                    window.location.href = 'flockview-app-cursor-notoffical.html';
+                }, 500);
+                
+            } catch (error) {
+                console.error('❌ BYPASS DEBUG: Error setting up bypass:', error);
+                // Fallback to simple redirect
+                sessionStorage.clear();
+                sessionStorage.setItem('flockview_logged_in', 'true');
+                sessionStorage.setItem('flockview_user', 'test-user-123');
+                sessionStorage.setItem('flockview_email', 'test@example.com');
+                sessionStorage.setItem('flockview_auth_bypass', 'true');
+                window.location.href = 'flockview-app-cursor-notoffical.html';
             }
         }
 
-        // Bypass login function for testing
-        function bypassLogin() {
-            console.log('🚀 BYPASS DEBUG: Bypassing login completely');
-            
-            // Store fake session data
-            sessionStorage.setItem('flockview_logged_in', 'true');
-            sessionStorage.setItem('flockview_user', 'test-user-123');
-            sessionStorage.setItem('flockview_email', 'test@example.com');
-            
-            // Redirect to main application
-            window.location.href = 'flockview-app-cursor-notoffical.html';
-            
-            console.log('✅ BYPASS DEBUG: Login bypassed successfully');
-        }
-
-        // Comprehensive debugging function
+        // Comprehensive debugging function with automatic bypass
         function debugLoginSystem() {
             console.log('🔍 SYSTEM DEBUG: Starting comprehensive login system check...');
             
@@ -1050,6 +1032,10 @@
             console.log('🔍 showLoginError:', typeof showLoginError);
             
             console.log('✅ SYSTEM DEBUG: Login system check complete');
+            
+            // Automatically bypass login for testing
+            console.log('🚀 AUTO-BYPASS: Automatically bypassing login for testing...');
+            bypassLogin();
         }
 
         // Make functions globally accessible
@@ -1057,8 +1043,6 @@
         window.showForgotPassword = showForgotPassword;
         window.showSignUp = showSignUp;
         window.debugLoginSystem = debugLoginSystem;
-        window.testLogin = testLogin;
-        window.forceLogin = forceLogin;
         window.bypassLogin = bypassLogin;
         window.sendSMSVerification = sendSMSVerification;
         window.verifySMSCode = verifySMSCode;

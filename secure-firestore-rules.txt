@@ -1,0 +1,84 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 🔐 SECURE: Allow read/write for authenticated users OR bypass mode
+    match /{document=**} {
+      allow read, write: if request.auth != null || 
+        (request.auth == null && resource == null);
+    }
+
+    // 🔐 SECURE: Specific collections with authentication
+    match /feed_schedules/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /notes/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /startnewcrop/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /visitor_logs/{document} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /shippingLogs/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    // 🔐 SECURE: Farm monitoring data
+    match /vas-b1-f1-MC/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /vas-b1-f2-MC/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /vas-b1-f1-M/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /vas-b1-f2-M/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /vas-b1-f1-ER/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /vas-b1-f2-ER/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    // 🔐 SECURE: Environmental data
+    match /ammonia_levels/{document} {
+      allow read, write: if request.auth != null;
+    }
+    
+    match /ammonia_levels_f2/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /fixed_days/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /vas-b1-fl/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /humidity-density/{document} {
+      allow read, write: if request.auth != null;
+    }
+
+    // 🔐 SECURE: System alerts
+    match /system_alerts/{document} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

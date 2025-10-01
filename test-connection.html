@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlockView - Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 FlockView Connection Test</h1>
+        <p>This page tests your Firebase connection and data access.</p>
+        
+        <div id="testResults"></div>
+        
+        <button onclick="runTests()">🧪 Run All Tests</button>
+        <button onclick="testFirebase()">🔥 Test Firebase</button>
+        <button onclick="testAuth()">🔐 Test Authentication</button>
+        <button onclick="testData()">📊 Test Data Access</button>
+        <button onclick="clearResults()">🗑️ Clear Results</button>
+        
+        <div style="margin-top: 20px;">
+            <a href="login.html">← Back to Login</a> | 
+            <a href="flockview-app-cursor-notoffical.html">→ Go to App</a>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+
+        let app, db, auth;
+
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> - ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        async function testFirebase() {
+            addResult('🔥 Testing Firebase initialization...', 'info');
+            
+            try {
+                if (!window.firebaseConfig) {
+                    throw new Error('Firebase config not found');
+                }
+                
+                app = initializeApp(window.firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                addResult('✅ Firebase initialized successfully', 'success');
+                return true;
+            } catch (error) {
+                addResult(`❌ Firebase initialization failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testAuth() {
+            addResult('🔐 Testing authentication...', 'info');
+            
+            try {
+                const isLoggedIn = sessionStorage.getItem('flockview_logged_in');
+                const authBypass = sessionStorage.getItem('flockview_auth_bypass');
+                
+                if (isLoggedIn === 'true') {
+                    if (authBypass === 'true') {
+                        addResult('✅ Bypass authentication active', 'success');
+                        return true;
+                    } else {
+                        addResult('✅ User authentication active', 'success');
+                        return true;
+                    }
+                } else {
+                    addResult('❌ No authentication found', 'error');
+                    return false;
+                }
+            } catch (error) {
+                addResult(`❌ Authentication test failed: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function testData() {
+            addResult('📊 Testing data access...', 'info');
+            
+            try {
+                if (!db) {
+                    throw new Error('Database not initialized');
+                }
+                
+                // Test reading from feed_schedules collection
+                const feedSchedulesRef = collection(db, 'feed_schedules');
+                const snapshot = await getDocs(feedSchedulesRef);
+                
+                addResult(`✅ Data access successful - Found ${snapshot.size} feed schedules`, 'success');
+                return true;
+            } catch (error) {
+                if (error.code === 'permission-denied') {
+                    addResult('❌ Permission denied - Check Firestore rules', 'error');
+                } else {
+                    addResult(`❌ Data access failed: ${error.message}`, 'error');
+                }
+                return false;
+            }
+        }
+
+        async function runTests() {
+            clearResults();
+            addResult('🚀 Starting comprehensive tests...', 'info');
+            
+            const firebaseOk = await testFirebase();
+            const authOk = await testAuth();
+            const dataOk = await testData();
+            
+            if (firebaseOk && authOk && dataOk) {
+                addResult('🎉 All tests passed! Your system is working correctly.', 'success');
+            } else {
+                addResult('⚠️ Some tests failed. Check the results above.', 'error');
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('testResults').innerHTML = '';
+        }
+
+        // Make functions globally available
+        window.runTests = runTests;
+        window.testFirebase = testFirebase;
+        window.testAuth = testAuth;
+        window.testData = testData;
+        window.clearResults = clearResults;
+
+        // Auto-run tests on page load
+        setTimeout(runTests, 1000);
+    </script>
+</body>
+</html>

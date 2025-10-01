@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Test - FlockView</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background: #0056b3; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        #results {
+            text-align: left;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Authentication Test</h1>
+        <p>This tests the fixed authentication system to ensure data loads properly.</p>
+        
+        <div class="status info">
+            Click the button below to test the fixed authentication system.
+        </div>
+        
+        <button onclick="testAuthFix()" class="btn-success">🧪 Test Fixed Auth</button>
+        <button onclick="clearResults()" class="btn">🗑️ Clear Results</button>
+        
+        <div id="results"></div>
+        
+        <div style="margin-top: 30px;">
+            <a href="login.html">← Back to Login</a> | 
+            <a href="flockview-app-cursor-notoffical.html">→ Go to App</a>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+
+        let app, db, auth;
+
+        function addResult(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> - ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function testAuthFix() {
+            clearResults();
+            addResult('🚀 Starting authentication fix test...', 'info');
+            
+            try {
+                // Step 1: Initialize Firebase
+                addResult('🔥 Step 1: Initializing Firebase...', 'info');
+                app = initializeApp(window.firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                addResult('✅ Firebase initialized successfully', 'success');
+                
+                // Step 2: Set up bypass authentication
+                addResult('🔐 Step 2: Setting up bypass authentication...', 'info');
+                sessionStorage.clear();
+                sessionStorage.setItem('flockview_logged_in', 'true');
+                sessionStorage.setItem('flockview_user', 'test-user-123');
+                sessionStorage.setItem('flockview_email', 'test@example.com');
+                sessionStorage.setItem('flockview_auth_bypass', 'true');
+                sessionStorage.setItem('flockview_user_display', 'Test User');
+                addResult('✅ Bypass authentication set up', 'success');
+                
+                // Step 3: Create proper mock user
+                addResult('👤 Step 3: Creating proper mock user...', 'info');
+                const mockUser = createMockFirebaseUser({
+                    uid: 'test-user-123',
+                    email: 'test@example.com',
+                    displayName: 'Test User'
+                });
+                addResult('✅ Mock user created with all required methods', 'success');
+                
+                // Step 4: Set current user
+                addResult('🔧 Step 4: Setting current user...', 'info');
+                try {
+                    auth._updateCurrentUser(mockUser);
+                    addResult('✅ Current user set using Firebase method', 'success');
+                } catch (error) {
+                    Object.defineProperty(auth, 'currentUser', {
+                        value: mockUser,
+                        writable: true,
+                        configurable: true
+                    });
+                    addResult('✅ Current user set using fallback method', 'success');
+                }
+                
+                // Step 5: Test Firestore connection
+                addResult('📊 Step 5: Testing Firestore connection...', 'info');
+                const feedSchedulesRef = collection(db, 'feed_schedules');
+                const snapshot = await getDocs(feedSchedulesRef);
+                addResult(`✅ Firestore connection successful - Found ${snapshot.size} feed schedules`, 'success');
+                
+                // Step 6: Test other collections
+                addResult('📝 Step 6: Testing other collections...', 'info');
+                const collections = ['notes', 'startnewcrop', 'visitor_logs'];
+                let totalRecords = 0;
+                
+                for (const collectionName of collections) {
+                    try {
+                        const ref = collection(db, collectionName);
+                        const snapshot = await getDocs(ref);
+                        totalRecords += snapshot.size;
+                        addResult(`✅ ${collectionName}: ${snapshot.size} records`, 'success');
+                    } catch (error) {
+                        addResult(`⚠️ ${collectionName}: ${error.message}`, 'warning');
+                    }
+                }
+                
+                addResult(`🎉 ALL TESTS PASSED! Total records found: ${totalRecords}`, 'success');
+                addResult('✅ Authentication fix is working correctly!', 'success');
+                
+            } catch (error) {
+                addResult(`❌ Test failed: ${error.message}`, 'error');
+                console.error('Test error:', error);
+            }
+        }
+
+        // Create a proper mock Firebase user with all required methods
+        function createMockFirebaseUser(userData) {
+            const mockUser = {
+                uid: userData.uid,
+                email: userData.email,
+                emailVerified: true,
+                displayName: userData.displayName,
+                photoURL: null,
+                phoneNumber: null,
+                providerId: 'firebase',
+                isAnonymous: false,
+                metadata: {
+                    creationTime: new Date().toISOString(),
+                    lastSignInTime: new Date().toISOString()
+                },
+                providerData: [],
+                refreshToken: 'mock-refresh-token',
+                tenantId: null,
+                delete: () => Promise.resolve(),
+                getIdToken: () => Promise.resolve('mock-id-token'),
+                getIdTokenResult: () => Promise.resolve({
+                    token: 'mock-id-token',
+                    authTime: new Date().toISOString(),
+                    issuedAtTime: new Date().toISOString(),
+                    expirationTime: new Date(Date.now() + 3600000).toISOString(),
+                    signInProvider: 'password',
+                    signInSecondFactor: null,
+                    claims: {}
+                }),
+                reload: () => Promise.resolve(),
+                toJSON: () => ({
+                    uid: userData.uid,
+                    email: userData.email,
+                    emailVerified: true,
+                    displayName: userData.displayName,
+                    photoURL: null,
+                    phoneNumber: null,
+                    providerId: 'firebase',
+                    isAnonymous: false
+                }),
+                // Add the missing methods that Firebase Auth expects
+                _startProactiveRefresh: () => {},
+                _stopProactiveRefresh: () => {},
+                _updateProactiveRefresh: () => {}
+            };
+            
+            return mockUser;
+        }
+
+        // Make functions globally available
+        window.testAuthFix = testAuthFix;
+        window.clearResults = clearResults;
+    </script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Fix - FlockView</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .fix-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background: #c82333; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="fix-container">
+        <h1>🚨 Quick Fix for FlockView</h1>
+        <p>Fix the Firebase Auth errors and Firestore rules issues.</p>
+        
+        <div class="status error">
+            <strong>Current Issues:</strong><br>
+            • Firebase Auth internal errors<br>
+            • Firestore rules too open (security warning)<br>
+            • Data loading stuck
+        </div>
+        
+        <h2>🔧 STEP 1: Fix Firestore Rules</h2>
+        
+        <div class="status warning">
+            <strong>Copy this code to Firebase Console → Firestore → Rules:</strong>
+        </div>
+        
+        <div class="code-block">
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+        </div>
+        
+        <div class="status info">
+            <strong>Steps:</strong><br>
+            1. Go to <a href="https://console.firebase.google.com/" target="_blank">Firebase Console</a><br>
+            2. Select "Chicken Project 2"<br>
+            3. Go to Firestore Database → Rules<br>
+            4. Replace ALL existing rules with the code above<br>
+            5. Click "Publish"
+        </div>
+        
+        <h2>🧪 STEP 2: Test the Fix</h2>
+        
+        <button onclick="testFix()" class="btn-success">🧪 Test After Rules Update</button>
+        
+        <div id="testResults"></div>
+        
+        <div style="margin-top: 30px;">
+            <a href="login.html">← Back to Login</a> | 
+            <a href="flockview-app-cursor-notoffical.html">→ Go to App</a>
+        </div>
+    </div>
+
+    <script>
+        function testFix() {
+            const results = document.getElementById('testResults');
+            results.innerHTML = '<div class="status info">Testing fix...</div>';
+            
+            // Clear any existing session data
+            sessionStorage.clear();
+            
+            // Set up bypass authentication
+            sessionStorage.setItem('flockview_logged_in', 'true');
+            sessionStorage.setItem('flockview_user', 'test-user-123');
+            sessionStorage.setItem('flockview_email', 'test@example.com');
+            sessionStorage.setItem('flockview_auth_bypass', 'true');
+            sessionStorage.setItem('flockview_user_display', 'Test User');
+            
+            results.innerHTML = '<div class="status success">✅ Bypass authentication set up. Redirecting to app...</div>';
+            
+            // Redirect to app
+            setTimeout(() => {
+                window.location.href = 'flockview-app-cursor-notoffical.html';
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

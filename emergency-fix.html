@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Fix - FlockView</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .fix-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { background: #c82333; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #1e7e34; }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+            font-family: monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="fix-container">
+        <h1>🚨 Emergency Fix for FlockView</h1>
+        <p>Your app is getting permission denied errors. Here are the immediate fixes:</p>
+        
+        <div class="status error">
+            <strong>Problem:</strong> Permission denied errors even with open Firestore rules
+        </div>
+        
+        <h2>🔧 IMMEDIATE FIX - Choose One:</h2>
+        
+        <div class="status info">
+            <strong>Option 1: Quick Fix (Recommended for now)</strong><br>
+            Use completely open Firestore rules temporarily
+        </div>
+        
+        <div class="code-block">
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+        </div>
+        
+        <button onclick="showSecureRules()" class="btn-success">🔒 Show Secure Rules (Later)</button>
+        
+        <div id="secureRules" style="display: none;">
+            <div class="status warning">
+                <strong>Option 2: Secure Rules (After fixing auth)</strong><br>
+                Use these rules once authentication is working properly
+            </div>
+            
+            <div class="code-block">
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow everything for authenticated users
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+            </div>
+        </div>
+        
+        <h2>📋 Steps to Fix:</h2>
+        <ol style="text-align: left; max-width: 600px; margin: 0 auto;">
+            <li><strong>Go to Firebase Console</strong> → <a href="https://console.firebase.google.com/" target="_blank">https://console.firebase.google.com/</a></li>
+            <li><strong>Select "Chicken Project 2"</strong></li>
+            <li><strong>Go to Firestore Database → Rules</strong></li>
+            <li><strong>Replace ALL existing rules</strong> with the code above</li>
+            <li><strong>Click "Publish"</strong></li>
+            <li><strong>Test your app</strong> - it should work immediately</li>
+        </ol>
+        
+        <div class="status success">
+            <strong>After applying the fix:</strong><br>
+            Your app should work immediately without permission errors
+        </div>
+        
+        <button onclick="testApp()" class="btn-success">🧪 Test App After Fix</button>
+        
+        <div style="margin-top: 30px;">
+            <a href="login.html">← Back to Login</a> | 
+            <a href="flockview-app-cursor-notoffical.html">→ Go to App</a>
+        </div>
+    </div>
+
+    <script>
+        function showSecureRules() {
+            const secureRules = document.getElementById('secureRules');
+            if (secureRules.style.display === 'none') {
+                secureRules.style.display = 'block';
+            } else {
+                secureRules.style.display = 'none';
+            }
+        }
+        
+        function testApp() {
+            // Clear any existing session data
+            sessionStorage.clear();
+            
+            // Set up bypass authentication
+            sessionStorage.setItem('flockview_logged_in', 'true');
+            sessionStorage.setItem('flockview_user', 'test-user-123');
+            sessionStorage.setItem('flockview_email', 'test@example.com');
+            sessionStorage.setItem('flockview_auth_bypass', 'true');
+            sessionStorage.setItem('flockview_user_display', 'Test User');
+            
+            // Redirect to app
+            window.location.href = 'flockview-app-cursor-notoffical.html';
+        }
+    </script>
+</body>
+</html>
