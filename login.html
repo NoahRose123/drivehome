@@ -293,6 +293,222 @@
             text-decoration: underline;
         }
 
+        /* Password Reset Modal Styles */
+        .password-reset-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .password-reset-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .password-reset-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+            color: white;
+            padding: 24px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .password-reset-header h2 {
+            margin: 0;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .close-reset-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .close-reset-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .reset-step {
+            padding: 32px 24px;
+        }
+
+        .reset-description {
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .reset-method-buttons {
+            display: grid;
+            gap: 16px;
+        }
+
+        .reset-method-btn {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reset-method-btn i {
+            font-size: 32px;
+            color: var(--primary-blue);
+            margin-bottom: 8px;
+        }
+
+        .reset-method-btn span {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .reset-method-btn small {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .reset-method-btn:hover {
+            border-color: var(--primary-blue);
+            background: #f0f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px 0;
+            margin-bottom: 16px;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: var(--primary-blue);
+        }
+
+        .reset-input-group {
+            margin-bottom: 20px;
+        }
+
+        .reset-input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .reset-input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .reset-input-group input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .reset-submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-green));
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .reset-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .reset-status {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .reset-status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .reset-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .reset-status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        #recaptcha-container-reset {
+            margin: 16px 0;
+        }
+
         /* Debug buttons */
         .debug-buttons {
             margin-top: 1rem;
@@ -441,8 +657,360 @@
         </div>
     </section>
 
+    <!-- Password Reset Modal -->
+    <div id="passwordResetModal" class="password-reset-modal" style="display: none;" onclick="if(event.target === this) closePasswordReset()">
+        <div class="password-reset-content">
+            <div class="password-reset-header">
+                <h2><i class="fas fa-key"></i> Reset Password</h2>
+                <button class="close-reset-btn" onclick="closePasswordReset()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Step 1: Choose Method -->
+            <div id="resetStep1" class="reset-step">
+                <p class="reset-description">Choose how you'd like to reset your password:</p>
+                
+                <div class="reset-method-buttons">
+                    <button class="reset-method-btn" onclick="selectResetMethod('email')">
+                        <i class="fas fa-envelope"></i>
+                        <span>Email Verification</span>
+                        <small>Receive a reset link via email</small>
+                    </button>
+                    
+                    <button class="reset-method-btn" onclick="selectResetMethod('sms')">
+                        <i class="fas fa-sms"></i>
+                        <span>SMS Verification</span>
+                        <small>Receive a code via text message</small>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Email Reset -->
+            <div id="resetStep2Email" class="reset-step" style="display: none;">
+                <button class="back-btn" onclick="backToResetMethod()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                
+                <p class="reset-description">Enter your email address to receive a password reset link:</p>
+                
+                <div class="reset-input-group">
+                    <label for="resetEmail">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="resetEmail" 
+                        placeholder="your.email@example.com"
+                        required
+                    />
+                </div>
+                
+                <button class="reset-submit-btn" onclick="sendPasswordResetEmail()">
+                    <i class="fas fa-paper-plane"></i>
+                    Send Reset Link
+                </button>
+                
+                <div id="emailResetStatus" class="reset-status" style="display: none;"></div>
+            </div>
+            
+            <!-- Step 2: SMS Reset -->
+            <div id="resetStep2SMS" class="reset-step" style="display: none;">
+                <button class="back-btn" onclick="backToResetMethod()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                
+                <p class="reset-description">Enter your phone number to receive a verification code:</p>
+                
+                <div class="reset-input-group">
+                    <label for="resetPhone">Phone Number</label>
+                    <input 
+                        type="tel" 
+                        id="resetPhone" 
+                        placeholder="+1 (555) 123-4567"
+                        required
+                    />
+                </div>
+                
+                <div id="recaptcha-container-reset"></div>
+                
+                <button class="reset-submit-btn" onclick="sendPasswordResetSMS()">
+                    <i class="fas fa-mobile-alt"></i>
+                    Send Verification Code
+                </button>
+                
+                <div id="smsResetStatus" class="reset-status" style="display: none;"></div>
+            </div>
+            
+            <!-- Step 3: SMS Code Verification -->
+            <div id="resetStep3SMS" class="reset-step" style="display: none;">
+                <button class="back-btn" onclick="backToSMSInput()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                
+                <p class="reset-description">Enter the 6-digit code sent to your phone:</p>
+                
+                <div class="reset-input-group">
+                    <label for="smsCode">Verification Code</label>
+                    <input 
+                        type="text" 
+                        id="smsCode" 
+                        placeholder="123456"
+                        maxlength="6"
+                        required
+                    />
+                </div>
+                
+                <div class="reset-input-group">
+                    <label for="newPassword">New Password</label>
+                    <input 
+                        type="password" 
+                        id="newPassword" 
+                        placeholder="Enter new password"
+                        required
+                    />
+                </div>
+                
+                <div class="reset-input-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        placeholder="Confirm new password"
+                        required
+                    />
+                </div>
+                
+                <button class="reset-submit-btn" onclick="verifySMSAndResetPassword()">
+                    <i class="fas fa-check"></i>
+                    Reset Password
+                </button>
+                
+                <div id="smsVerifyStatus" class="reset-status" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase Configuration -->
     <script src="config.js"></script>
+    
+    <!-- Password Reset Functions (Must be outside module for onclick access) -->
+    <script>
+        // Global variables for password reset
+        let resetVerificationId = null;
+        let resetRecaptchaVerifier = null;
+        let globalAuth = null;
+
+        function showForgotPassword() {
+            console.log('🔑 Opening password reset modal...');
+            document.getElementById('passwordResetModal').style.display = 'flex';
+            // Reset to step 1
+            document.getElementById('resetStep1').style.display = 'block';
+            document.getElementById('resetStep2Email').style.display = 'none';
+            document.getElementById('resetStep2SMS').style.display = 'none';
+            document.getElementById('resetStep3SMS').style.display = 'none';
+        }
+
+        function closePasswordReset() {
+            console.log('🔑 Closing password reset modal...');
+            document.getElementById('passwordResetModal').style.display = 'none';
+        }
+
+        function selectResetMethod(method) {
+            document.getElementById('resetStep1').style.display = 'none';
+            
+            if (method === 'email') {
+                document.getElementById('resetStep2Email').style.display = 'block';
+            } else if (method === 'sms') {
+                document.getElementById('resetStep2SMS').style.display = 'block';
+            }
+        }
+
+        function backToResetMethod() {
+            document.getElementById('resetStep1').style.display = 'block';
+            document.getElementById('resetStep2Email').style.display = 'none';
+            document.getElementById('resetStep2SMS').style.display = 'none';
+        }
+
+        function backToSMSInput() {
+            document.getElementById('resetStep2SMS').style.display = 'block';
+            document.getElementById('resetStep3SMS').style.display = 'none';
+        }
+
+        async function sendPasswordResetEmail() {
+            const email = document.getElementById('resetEmail').value.trim();
+            const statusDiv = document.getElementById('emailResetStatus');
+            
+            if (!email) {
+                statusDiv.className = 'reset-status error';
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please enter your email address';
+                statusDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                statusDiv.className = 'reset-status info';
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending reset email...';
+                statusDiv.style.display = 'block';
+
+                // Use the global Firebase auth methods
+                if (!globalAuth || !window.firebasePasswordReset) {
+                    throw new Error('Firebase not initialized properly');
+                }
+
+                // Use Firebase's sendPasswordResetEmail method
+                await window.firebasePasswordReset(globalAuth, email, {
+                    url: 'https://flockview.ca/login.html',
+                    handleCodeInApp: false
+                });
+
+                statusDiv.className = 'reset-status success';
+                statusDiv.innerHTML = `
+                    <i class="fas fa-check-circle"></i> 
+                    <strong>Reset email sent!</strong><br>
+                    Check your inbox for password reset instructions. The link will expire in 1 hour.
+                `;
+                
+                setTimeout(() => {
+                    closePasswordReset();
+                }, 5000);
+
+            } catch (error) {
+                console.error('Password reset error:', error);
+                statusDiv.className = 'reset-status error';
+                
+                if (error.code === 'auth/user-not-found') {
+                    statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> No account found with this email address';
+                } else if (error.code === 'auth/invalid-email') {
+                    statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid email address format';
+                } else if (error.code === 'auth/too-many-requests') {
+                    statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Too many requests. Please try again later';
+                } else if (error.message && error.message.includes('requests-from-referer')) {
+                    statusDiv.innerHTML = `
+                        <i class="fas fa-exclamation-circle"></i> 
+                        <strong>Domain Not Authorized</strong><br>
+                        Your Firebase API key may need to be updated to allow this domain.<br>
+                        <small>Current domain should be: flockview.ca</small>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${error.message}`;
+                }
+                statusDiv.style.display = 'block';
+            }
+        }
+
+        async function sendPasswordResetSMS() {
+            const phone = document.getElementById('resetPhone').value.trim();
+            const statusDiv = document.getElementById('smsResetStatus');
+            
+            if (!phone) {
+                statusDiv.className = 'reset-status error';
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please enter your phone number';
+                statusDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                statusDiv.className = 'reset-status info';
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing reCAPTCHA...';
+                statusDiv.style.display = 'block';
+
+                // Initialize reCAPTCHA if not already done
+                if (!resetRecaptchaVerifier && globalAuth && window.RecaptchaVerifier) {
+                    resetRecaptchaVerifier = new window.RecaptchaVerifier(globalAuth, 'recaptcha-container-reset', {
+                        size: 'normal',
+                        callback: (response) => {
+                            console.log('reCAPTCHA verified');
+                        }
+                    });
+                    await resetRecaptchaVerifier.render();
+                }
+
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending verification code...';
+
+                if (!window.PhoneAuthProvider) {
+                    throw new Error('Firebase Phone Authentication not available');
+                }
+
+                const provider = new window.PhoneAuthProvider(globalAuth);
+                resetVerificationId = await provider.verifyPhoneNumber(phone, resetRecaptchaVerifier);
+
+                statusDiv.className = 'reset-status success';
+                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Verification code sent to your phone!';
+                
+                // Move to verification step
+                setTimeout(() => {
+                    document.getElementById('resetStep2SMS').style.display = 'none';
+                    document.getElementById('resetStep3SMS').style.display = 'block';
+                }, 1500);
+
+            } catch (error) {
+                console.error('SMS verification error:', error);
+                statusDiv.className = 'reset-status error';
+                
+                if (error.message && error.message.includes('requests-from-referer')) {
+                    statusDiv.innerHTML = `
+                        <i class="fas fa-exclamation-circle"></i> 
+                        <strong>Domain Not Authorized</strong><br>
+                        Your Firebase API key may need to be updated to allow this domain.<br>
+                        <small>Current domain should be: flockview.ca</small>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${error.message}`;
+                }
+                statusDiv.style.display = 'block';
+            }
+        }
+
+        async function verifySMSAndResetPassword() {
+            const code = document.getElementById('smsCode').value.trim();
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const statusDiv = document.getElementById('smsVerifyStatus');
+            
+            if (!code || !newPassword || !confirmPassword) {
+                statusDiv.className = 'reset-status error';
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please fill in all fields';
+                statusDiv.style.display = 'block';
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                statusDiv.className = 'reset-status error';
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Passwords do not match';
+                statusDiv.style.display = 'block';
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                statusDiv.className = 'reset-status error';
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Password must be at least 6 characters';
+                statusDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                statusDiv.className = 'reset-status info';
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying code and resetting password...';
+                statusDiv.style.display = 'block';
+
+                // Note: For production SMS password reset, you need a Firebase Cloud Function
+                // For now, show a helpful message
+                statusDiv.className = 'reset-status info';
+                statusDiv.innerHTML = `
+                    <i class="fas fa-info-circle"></i> 
+                    <strong>SMS Reset Available Soon</strong><br>
+                    Please use Email Verification for password reset.<br>
+                    SMS verification requires additional backend setup.
+                `;
+
+            } catch (error) {
+                console.error('Password reset error:', error);
+                statusDiv.className = 'reset-status error';
+                statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${error.message}`;
+                statusDiv.style.display = 'block';
+            }
+        }
+    </script>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
         import { 
@@ -469,7 +1037,10 @@
             PhoneAuthProvider,
             PhoneMultiFactorGenerator,
             RecaptchaVerifier,
-            TotpMultiFactorGenerator
+            TotpMultiFactorGenerator,
+            sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+            confirmPasswordReset as firebaseConfirmPasswordReset,
+            verifyPasswordResetCode as firebaseVerifyPasswordResetCode
         } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
         import { 
             getStorage, 
@@ -521,11 +1092,12 @@
         window.firebaseAuth = auth;
         window.firebaseSignIn = signInWithEmailAndPassword;
         window.firebaseSignOut = signOut;
-
-        // Login Functions
-        function showForgotPassword() {
-            alert('Password reset functionality is managed by administrators.\n\nPlease contact your system administrator for password assistance.');
-        }
+        window.firebasePasswordReset = firebaseSendPasswordResetEmail;
+        window.RecaptchaVerifier = RecaptchaVerifier;
+        window.PhoneAuthProvider = PhoneAuthProvider;
+        
+        // Set global auth for password reset functions
+        globalAuth = auth;
 
         function showSignUp() {
             alert('User registration is managed by administrators.\n\nPlease contact your system administrator to create an account.');
@@ -1033,14 +1605,18 @@
             
             console.log('✅ SYSTEM DEBUG: Login system check complete');
             
-            // Automatically bypass login for testing
-            console.log('🚀 AUTO-BYPASS: Automatically bypassing login for testing...');
-            bypassLogin();
+            // Ask user if they want to bypass login
+            const shouldBypass = confirm('Debug complete. Would you like to bypass login for testing?');
+            if (shouldBypass) {
+                console.log('🚀 USER CHOICE: Bypassing login...');
+                bypassLogin();
+            } else {
+                console.log('✅ USER CHOICE: Normal login flow selected');
+            }
         }
 
         // Make functions globally accessible
         window.togglePassword = togglePassword;
-        window.showForgotPassword = showForgotPassword;
         window.showSignUp = showSignUp;
         window.debugLoginSystem = debugLoginSystem;
         window.bypassLogin = bypassLogin;
@@ -1053,8 +1629,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 DOM DEBUG: DOMContentLoaded event fired');
             
-            // Run comprehensive debug check
-            setTimeout(debugLoginSystem, 1000);
+            // Debug button is available for manual testing if needed
+            // User can click the "🔍 Debug Login" button to run diagnostics
             
             const loginForm = document.getElementById('loginForm');
             
