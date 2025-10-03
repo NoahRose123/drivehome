@@ -511,6 +511,9 @@
 
             <div class="login-link">
                 <p>Already have an account? <a href="login.html">Sign in here</a></p>
+                <p style="margin-top: 10px; font-size: 0.85rem; color: #666;">
+                    Having issues? <a href="#" onclick="event.preventDefault(); clearFirebaseCache(); location.reload();" style="color: #e74c3c;">Clear cache and retry</a>
+                </p>
             </div>
         </div>
     </div>
@@ -544,40 +547,113 @@
             measurementId: "G-9YLPHR08DB"
         };
         
-        // Initialize Firebase immediately
-        initializeFirebase();
-
         let auth, db, recaptchaVerifier, verificationId;
+        let initAttempts = 0;
 
-        function initializeFirebase() {
+        function clearFirebaseCache() {
+            console.log('🧹 Clearing corrupted Firebase cache...');
+            
+            // Clear localStorage
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key && (key.startsWith('firebase:') || key.includes('Auth') || key.includes('chicken-project-2'))) {
+                    localStorage.removeItem(key);
+                }
+            }
+            
+            // Clear sessionStorage
+            for (let i = sessionStorage.length - 1; i >= 0; i--) {
+                const key = sessionStorage.key(i);
+                if (key && (key.startsWith('firebase:') || key.includes('Auth') || key.includes('chicken-project-2'))) {
+                    sessionStorage.removeItem(key);
+                }
+            }
+            
+            console.log('✅ Firebase cache cleared');
+        }
+
+        async function initializeFirebase() {
             try {
+                console.log('🔥 Initializing Firebase...');
+                initAttempts++;
+                
                 // Initialize Firebase
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
 
-                // Wait for auth to be ready before setting up listeners
-                auth.onAuthStateChanged((user) => {
-                    console.log('🔥 Firebase initialized for signup');
-                    setupEventListeners();
-                }, (error) => {
-                    console.log('🔥 Firebase auth state change error (non-critical):', error);
-                    // Still set up listeners even if there's an auth error
-                    setupEventListeners();
-                });
+                console.log('✅ Firebase initialized successfully');
+                console.log('✅ Auth:', !!auth);
+                console.log('✅ Firestore:', !!db);
+
+                // Set up event listeners immediately
+                setupEventListeners();
+                
+                // Handle auth state with better error recovery
+                const unsubscribe = auth.onAuthStateChanged(
+                    (user) => {
+                        if (user) {
+                            console.log('👤 User already signed in:', user.email);
+                        } else {
+                            console.log('👤 No user signed in (ready for signup)');
+                        }
+                    },
+                    (error) => {
+                        console.error('⚠️ Auth state error:', error);
+                        
+                        // Silently handle internal errors by clearing cache
+                        if (error.code === 'auth/internal-error') {
+                            console.log('🔄 Clearing corrupted auth cache...');
+                            clearFirebaseCache();
+                            
+                            // Only reload once to prevent infinite loop
+                            if (initAttempts === 1 && !sessionStorage.getItem('auth_cleared')) {
+                                sessionStorage.setItem('auth_cleared', 'true');
+                                console.log('🔄 Reloading page to apply fix...');
+                                setTimeout(() => window.location.reload(), 500);
+                            }
+                        }
+                    }
+                );
                 
             } catch (error) {
                 console.error('❌ Firebase initialization error:', error);
-                showError('Failed to initialize authentication system');
+                
+                // If internal error, try clearing cache
+                if (error.code === 'auth/internal-error' && initAttempts < 2) {
+                    console.log('🔄 Attempting to fix by clearing cache and reloading...');
+                    clearFirebaseCache();
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+                } else {
+                    showError('Failed to initialize authentication system. Please clear your browser cache and try again.');
+                }
             }
         }
 
+        // Initialize Firebase when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeFirebase);
+        } else {
+            initializeFirebase();
+        }
+
         function setupEventListeners() {
+            console.log('📋 Setting up event listeners...');
+            
             const form = document.getElementById('signupForm');
             const phoneInput = document.getElementById('phone');
             const passwordInput = document.getElementById('password');
             const confirmPasswordInput = document.getElementById('confirmPassword');
             const verifyPhoneBtn = document.getElementById('verifyPhoneBtn');
+
+            if (!form || !phoneInput || !passwordInput || !confirmPasswordInput || !verifyPhoneBtn) {
+                console.error('❌ Required form elements not found');
+                return;
+            }
+
+            console.log('✅ All form elements found');
 
             // Form submission
             form.addEventListener('submit', handleSignup);
@@ -599,6 +675,8 @@
 
             // Phone verification
             verifyPhoneBtn.addEventListener('click', sendPhoneVerification);
+            
+            console.log('✅ Event listeners set up successfully');
         }
 
         function validatePhone() {
@@ -924,6 +1002,9 @@
             showError,
             showSuccess
         };
+        
+        // Make clearFirebaseCache globally accessible
+        window.clearFirebaseCache = clearFirebaseCache;
     </script>
 </body>
 </html>
