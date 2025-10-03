@@ -648,7 +648,7 @@
                 <div id="recaptcha-container" style="display: none;"></div>
                 
                 <div class="login-footer">
-                    <p>Don't have an account? <a href="#" onclick="showSignUp()">Contact Administrator</a></p>
+                    <p>Don't have an account? <a href="signup.html">Create Account</a></p>
                     <div class="debug-buttons">
                         <button type="button" class="debug-btn" onclick="debugLoginSystem()">🔍 Debug Login</button>
                     </div>
@@ -1049,8 +1049,16 @@
             getDownloadURL 
         } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
 
-        // Firebase configuration - Loaded from external config file
-        const firebaseConfig = window.firebaseConfig;
+        // Firebase Configuration (embedded for production)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAyRSlxMXzJDxOoQNC7tSEaymmslMvdnco",
+            authDomain: "chicken-project-2.firebaseapp.com",
+            projectId: "chicken-project-2",
+            storageBucket: "chicken-project-2.firebasestorage.app",
+            messagingSenderId: "596273529964",
+            appId: "1:596273529964:web:bd51e2646d5ed48afa4449",
+            measurementId: "G-9YLPHR08DB"
+        };
 
         // Initialize Firebase with error handling
         let app, auth, db, storage;

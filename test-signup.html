@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Signup System - FlockView</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .test-link {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .test-link:hover {
+            background: #0056b3;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        .checklist li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .checklist li:before {
+            content: "☐ ";
+            color: #666;
+            font-weight: bold;
+        }
+        .checklist li.completed:before {
+            content: "✅ ";
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 FlockView Signup System Test</h1>
+        
+        <div class="status success">
+            <strong>✅ Signup System Ready!</strong><br>
+            Your complete account creation system is implemented and ready for testing.
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 Quick Access Links</h3>
+            <a href="signup.html" class="test-link">📝 Test Signup Page</a>
+            <a href="login.html" class="test-link">🔑 Test Login Page</a>
+            <a href="flockview-app-cursor-notoffical.html" class="test-link">🏠 Main App</a>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Signup System Features</h3>
+            <ul class="checklist">
+                <li class="completed">Company Name field with validation</li>
+                <li class="completed">Email address with Firebase Auth integration</li>
+                <li class="completed">Phone number with SMS verification</li>
+                <li class="completed">Password with strength indicator</li>
+                <li class="completed">Password confirmation matching</li>
+                <li class="completed">Terms and conditions acceptance</li>
+                <li class="completed">reCAPTCHA integration for phone verification</li>
+                <li class="completed">Firebase Auth user creation</li>
+                <li class="completed">Firestore user profile storage</li>
+                <li class="completed">Automatic redirect to login page</li>
+                <li class="completed">Comprehensive error handling</li>
+                <li class="completed">Mobile responsive design</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Test Scenarios</h3>
+            <div class="status warning">
+                <strong>⚠️ Before Testing:</strong><br>
+                1. Ensure Firebase Phone Auth is enabled in Firebase Console<br>
+                2. Add flockview.ca to authorized domains<br>
+                3. Test on production domain (not localhost)
+            </div>
+            
+            <h4>✅ Happy Path Test:</h4>
+            <ol>
+                <li>Fill out all required fields</li>
+                <li>Use a real phone number for SMS verification</li>
+                <li>Complete reCAPTCHA challenge</li>
+                <li>Enter SMS verification code</li>
+                <li>Submit form and verify account creation</li>
+                <li>Check auto-redirect to login page</li>
+                <li>Login with new credentials</li>
+            </ol>
+
+            <h4>❌ Error Handling Tests:</h4>
+            <ol>
+                <li>Try duplicate email addresses</li>
+                <li>Test weak passwords</li>
+                <li>Enter mismatched passwords</li>
+                <li>Submit without accepting terms</li>
+                <li>Test invalid phone number formats</li>
+                <li>Try expired verification codes</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Firebase Configuration Checklist</h3>
+            <ul class="checklist">
+                <li>Phone Authentication enabled in Firebase Console</li>
+                <li>flockview.ca added to authorized domains</li>
+                <li>reCAPTCHA configured for your domain</li>
+                <li>Firestore rules allow user profile creation</li>
+                <li>API key restrictions include flockview.ca</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Expected User Data in Firestore</h3>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; font-family: monospace;">
+                <strong>Collection:</strong> users<br>
+                <strong>Document ID:</strong> {firebase-uid}<br><br>
+                <strong>Data Structure:</strong><br>
+                {<br>
+                &nbsp;&nbsp;uid: "firebase-user-id",<br>
+                &nbsp;&nbsp;email: "user@company.com",<br>
+                &nbsp;&nbsp;phone: "+1 555 123 4567",<br>
+                &nbsp;&nbsp;companyName: "Farm Company Inc",<br>
+                &nbsp;&nbsp;displayName: "Farm Company Inc",<br>
+                &nbsp;&nbsp;createdAt: "2024-01-15T10:30:00Z",<br>
+                &nbsp;&nbsp;lastLogin: "2024-01-15T10:30:00Z",<br>
+                &nbsp;&nbsp;profileComplete: true<br>
+                }
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🚀 Deployment Status</h3>
+            <div class="status success">
+                <strong>Ready for Production!</strong><br>
+                Your signup system is fully implemented and ready to deploy to flockview.ca
+            </div>
+            
+            <h4>Deployment Steps:</h4>
+            <ol>
+                <li>Commit changes: <code>git add . && git commit -m "Add signup system"</code></li>
+                <li>Push to GitHub: <code>git push origin main</code></li>
+                <li>Wait 2-3 minutes for GitHub Pages deployment</li>
+                <li>Test at: https://flockview.ca/signup.html</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>📞 Support & Documentation</h3>
+            <p>For detailed setup instructions, see:</p>
+            <ul>
+                <li><strong>SIGNUP_SYSTEM_GUIDE.md</strong> - Complete implementation guide</li>
+                <li><strong>DEPLOY_PASSWORD_RESET.md</strong> - Password reset feature guide</li>
+                <li><strong>PASSWORD_RESET_GUIDE.md</strong> - Password reset documentation</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+

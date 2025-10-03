@@ -99,3 +99,4 @@ If you need assistance with any of these steps, the key points are:
 - Add domain restrictions
 - Update your local `config.js` file
 - Never commit `config.js` to GitHub
+
