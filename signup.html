@@ -54,8 +54,105 @@
             z-index: 1;
         }
 
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .progress-step::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: -50%;
+            right: 50%;
+            height: 2px;
+            background: #e1e5e9;
+            z-index: 0;
+        }
+
+        .progress-step:first-child::before {
+            display: none;
+        }
+
+        .progress-step.active::before {
+            background: #3b82f6;
+        }
+
+        .progress-step.completed::before {
+            background: #10b981;
+        }
+
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e1e5e9;
+            color: #6b7280;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 8px;
+        }
+
+        .progress-step.active .step-icon {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .progress-step.completed .step-icon {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .progress-step.active .step-label {
+            color: #3b82f6;
+        }
+
+        .progress-step.completed .step-label {
+            color: #10b981;
+        }
+
         .signup-form {
             padding: 40px 30px;
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .form-group {
@@ -71,9 +168,15 @@
             font-size: 0.95rem;
         }
 
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
         .form-group input {
             width: 100%;
-            padding: 15px 20px;
+            padding: 15px 45px 15px 20px;
             border: 2px solid #e1e5e9;
             border-radius: 12px;
             font-size: 1rem;
@@ -83,9 +186,9 @@
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #3b82f6;
             background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .form-group input.error {
@@ -105,10 +208,16 @@
             transform: translateY(-50%);
             color: #999;
             font-size: 1.1rem;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .input-icon.clickable:hover {
+            color: #3b82f6;
         }
 
         .form-group:has(input:focus) .input-icon {
-            color: #667eea;
+            color: #3b82f6;
         }
 
         .form-group:has(input.error) .input-icon {
@@ -117,6 +226,12 @@
 
         .form-group:has(input.success) .input-icon {
             color: #27ae60;
+        }
+
+        .field-error {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-top: 5px;
         }
 
         .password-strength {
@@ -144,58 +259,47 @@
         .strength-good { background: #3498db; }
         .strength-strong { background: #27ae60; }
 
-        .phone-verification {
-            margin-top: 15px;
-            padding: 15px;
+        .verification-section {
             background: #f8f9fa;
-            border-radius: 8px;
-            border: 1px solid #e1e5e9;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e1e5e9;
+            margin-bottom: 20px;
         }
 
-        .phone-verification.hidden {
-            display: none;
+        .verification-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #333;
         }
 
-        #recaptcha-container {
-            margin: 10px 0;
+        .verification-input {
+            text-align: center;
+            font-size: 1.5rem;
+            letter-spacing: 8px;
+            font-weight: 600;
         }
 
-        .verify-phone-btn {
-            background: #667eea;
-            color: white;
+        .resend-btn {
+            background: none;
             border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
+            color: #3b82f6;
             font-size: 0.9rem;
-            transition: all 0.3s ease;
-            width: 100%;
+            cursor: pointer;
+            margin-top: 10px;
+            text-decoration: underline;
         }
 
-        .verify-phone-btn:hover {
-            background: #5a6fd8;
+        .resend-btn:hover {
+            color: #2563eb;
         }
 
-        .verify-phone-btn:disabled {
-            background: #ccc;
+        .resend-btn:disabled {
+            color: #999;
             cursor: not-allowed;
         }
 
-        .verification-code-group {
-            margin-top: 15px;
-        }
-
-        .verification-code-group.hidden {
-            display: none;
-        }
-
-        .verification-code-group input {
-            text-align: center;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-        }
-
-        .signup-btn {
+        .signup-btn, .next-btn, .back-btn {
             width: 100%;
             padding: 18px;
             background: #3b82f6;
@@ -210,30 +314,36 @@
             overflow: hidden;
         }
 
-        .signup-btn:hover {
+        .signup-btn:hover, .next-btn:hover {
             background: #2563eb;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
         }
 
-        .signup-btn:disabled {
+        .signup-btn:disabled, .next-btn:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
 
-        .signup-btn .spinner {
+        .back-btn {
+            background: #6b7280;
+            margin-bottom: 15px;
+        }
+
+        .back-btn:hover {
+            background: #4b5563;
+        }
+
+        .btn-spinner {
             display: none;
             margin-right: 10px;
         }
 
-        .signup-btn.loading .spinner {
+        .signup-btn.loading .btn-spinner,
+        .next-btn.loading .btn-spinner {
             display: inline-block;
-        }
-
-        .signup-btn.loading .btn-text {
-            opacity: 0.7;
         }
 
         .error-message {
@@ -266,14 +376,14 @@
         }
 
         .login-link a {
-            color: #667eea;
+            color: #3b82f6;
             text-decoration: none;
             font-weight: 600;
             transition: color 0.3s ease;
         }
 
         .login-link a:hover {
-            color: #5a6fd8;
+            color: #2563eb;
         }
 
         .terms-checkbox {
@@ -291,12 +401,22 @@
         }
 
         .terms-checkbox a {
-            color: #667eea;
+            color: #3b82f6;
             text-decoration: none;
         }
 
         .terms-checkbox a:hover {
             text-decoration: underline;
+        }
+
+        .optional-badge {
+            background: #e1e5e9;
+            color: #6b7280;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-weight: 500;
         }
 
         @media (max-width: 480px) {
@@ -317,22 +437,6 @@
                 padding: 30px 20px;
             }
         }
-
-        /* Animation for form steps */
-        .form-step {
-            transition: all 0.3s ease;
-        }
-
-        .form-step.hidden {
-            opacity: 0;
-            transform: translateX(20px);
-            pointer-events: none;
-        }
-
-        .form-step.active {
-            opacity: 1;
-            transform: translateX(0);
-        }
     </style>
 </head>
 <body>
@@ -342,171 +446,245 @@
             <p>Join FlockView and start managing your farm</p>
         </div>
 
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="progress-step active" id="step1Progress">
+                <div class="step-icon">1</div>
+                <div class="step-label">Details</div>
+            </div>
+            <div class="progress-step" id="step2Progress">
+                <div class="step-icon">2</div>
+                <div class="step-label">Verify</div>
+            </div>
+            <div class="progress-step" id="step3Progress">
+                <div class="step-icon">3</div>
+                <div class="step-label">Complete</div>
+            </div>
+        </div>
+
         <div class="signup-form">
             <div id="errorMessage" class="error-message"></div>
             <div id="successMessage" class="success-message"></div>
 
             <form id="signupForm">
-                <!-- Personal Information -->
-                <div class="form-group">
-                    <label for="firstName">
-                        <i class="fas fa-user"></i> First Name *
-                    </label>
-                    <input 
-                        type="text" 
-                        id="firstName" 
-                        name="firstName" 
-                        placeholder="Enter your first name"
-                        required
-                    >
-                    <i class="fas fa-user input-icon"></i>
-                </div>
-
-                <div class="form-group">
-                    <label for="lastName">
-                        <i class="fas fa-user"></i> Last Name *
-                    </label>
-                    <input 
-                        type="text" 
-                        id="lastName" 
-                        name="lastName" 
-                        placeholder="Enter your last name"
-                        required
-                    >
-                    <i class="fas fa-user input-icon"></i>
-                </div>
-
-                <!-- Company Information (Optional) -->
-                <div class="form-group">
-                    <label for="companyName">
-                        <i class="fas fa-building"></i> Company Name (Optional)
-                    </label>
-                    <input 
-                        type="text" 
-                        id="companyName" 
-                        name="companyName" 
-                        placeholder="Enter your company name (optional)"
-                    >
-                    <i class="fas fa-building input-icon"></i>
-                </div>
-
-                <!-- Email -->
-                <div class="form-group">
-                    <label for="email">
-                        <i class="fas fa-envelope"></i> Email Address *
-                    </label>
-                    <input 
-                        type="email" 
-                        id="email" 
-                        name="email" 
-                        placeholder="your.email@company.com"
-                        required
-                    >
-                    <i class="fas fa-envelope input-icon"></i>
-                </div>
-
-                <!-- Phone Number -->
-                <div class="form-group">
-                    <label for="phone">
-                        <i class="fas fa-phone"></i> Phone Number *
-                    </label>
-                    <input 
-                        type="tel" 
-                        id="phone" 
-                        name="phone" 
-                        placeholder="555-123-4567 or +1 555 123 4567"
-                        required
-                    >
-                    <i class="fas fa-phone input-icon"></i>
-                    
-                    <!-- Phone Verification Section -->
-                    <div class="phone-verification hidden" id="phoneVerification">
-                        <p style="margin-bottom: 10px; font-size: 0.9rem; color: #666;">
-                            <i class="fas fa-info-circle"></i> 
-                            We'll send a verification code to your phone
-                        </p>
-                        <div id="recaptcha-container"></div>
-                        <button type="button" class="verify-phone-btn" id="verifyPhoneBtn">
-                            <i class="fas fa-sms"></i> Send Verification Code
-                        </button>
-                        
-                        <div class="verification-code-group hidden" id="verificationCodeGroup">
-                            <label for="verificationCode" style="margin-top: 15px;">
-                                <i class="fas fa-key"></i> Verification Code *
-                            </label>
+                <!-- Step 1: Basic Information -->
+                <div class="form-step active" id="step1">
+                    <div class="form-group">
+                        <label for="firstName">
+                            <i class="fas fa-user"></i> First Name *
+                        </label>
+                        <div class="input-wrapper">
                             <input 
                                 type="text" 
-                                id="verificationCode" 
-                                name="verificationCode" 
-                                placeholder="Enter 6-digit code"
+                                id="firstName" 
+                                name="firstName" 
+                                placeholder="Enter your first name"
+                                required
+                            >
+                            <i class="fas fa-user input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName">
+                            <i class="fas fa-user"></i> Last Name *
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="lastName" 
+                                name="lastName" 
+                                placeholder="Enter your last name"
+                                required
+                            >
+                            <i class="fas fa-user input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="companyName">
+                            <i class="fas fa-building"></i> Company Name
+                            <span class="optional-badge">Optional</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="companyName" 
+                                name="companyName" 
+                                placeholder="Enter your company name"
+                            >
+                            <i class="fas fa-building input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope"></i> Email Address *
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                placeholder="your.email@company.com"
+                                required
+                            >
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">
+                            <i class="fas fa-phone"></i> Phone Number
+                            <span class="optional-badge">Optional</span>
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                name="phone" 
+                                placeholder="555-123-4567 or +1 555 123 4567"
+                            >
+                            <i class="fas fa-phone input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i> Password *
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                placeholder="Create a strong password"
+                                required
+                            >
+                            <i class="fas fa-eye input-icon clickable" id="togglePassword"></i>
+                        </div>
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <span id="strengthText">Enter a password</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            <i class="fas fa-lock"></i> Confirm Password *
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                id="confirmPassword" 
+                                name="confirmPassword" 
+                                placeholder="Confirm your password"
+                                required
+                            >
+                            <i class="fas fa-eye input-icon clickable" id="toggleConfirmPassword"></i>
+                        </div>
+                    </div>
+
+                    <div class="terms-checkbox">
+                        <input type="checkbox" id="termsAccepted" name="termsAccepted" required>
+                        <label for="termsAccepted">
+                            I agree to the <a href="#" target="_blank">Terms of Service</a> 
+                            and <a href="#" target="_blank">Privacy Policy</a> *
+                        </label>
+                    </div>
+
+                    <button type="button" class="next-btn" id="nextBtn">
+                        <i class="fas fa-spinner fa-spin btn-spinner"></i>
+                        <span class="btn-text">
+                            Continue <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Step 2: Verification -->
+                <div class="form-step" id="step2">
+                    <div class="verification-section">
+                        <h3><i class="fas fa-envelope"></i> Email Verification</h3>
+                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
+                            We've sent a 6-digit code to <strong id="emailDisplay"></strong>
+                        </p>
+                        <div class="form-group">
+                            <input 
+                                type="text" 
+                                id="emailCode" 
+                                name="emailCode" 
+                                placeholder="000000"
                                 maxlength="6"
+                                class="verification-input"
                             >
                         </div>
+                        <button type="button" class="resend-btn" id="resendEmailBtn" disabled>
+                            Resend code <span id="emailTimer">(60s)</span>
+                        </button>
                     </div>
-                </div>
 
-                <!-- Password -->
-                <div class="form-group">
-                    <label for="password">
-                        <i class="fas fa-lock"></i> Password *
-                    </label>
-                    <input 
-                        type="password" 
-                        id="password" 
-                        name="password" 
-                        placeholder="Create a strong password"
-                        required
-                    >
-                    <i class="fas fa-lock input-icon"></i>
-                    <div class="password-strength" id="passwordStrength">
-                        <div class="strength-bar">
-                            <div class="strength-fill" id="strengthFill"></div>
+                    <div class="verification-section" id="phoneVerificationSection" style="display: none;">
+                        <h3><i class="fas fa-mobile-alt"></i> Phone Verification</h3>
+                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">
+                            We've sent a 6-digit code to <strong id="phoneDisplay"></strong>
+                        </p>
+                        <div class="form-group">
+                            <input 
+                                type="text" 
+                                id="phoneCode" 
+                                name="phoneCode" 
+                                placeholder="000000"
+                                maxlength="6"
+                                class="verification-input"
+                            >
                         </div>
-                        <span id="strengthText">Enter a password</span>
+                        <button type="button" class="resend-btn" id="resendPhoneBtn" disabled>
+                            Resend code <span id="phoneTimer">(60s)</span>
+                        </button>
+                    </div>
+
+                    <button type="button" class="back-btn" onclick="goToStep(1)">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button type="button" class="next-btn" id="verifyBtn">
+                        <i class="fas fa-spinner fa-spin btn-spinner"></i>
+                        <span class="btn-text">
+                            Verify & Continue <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Step 3: Complete -->
+                <div class="form-step" id="step3">
+                    <div style="text-align: center; padding: 40px 0;">
+                        <div style="font-size: 4rem; color: #10b981; margin-bottom: 20px;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h2 style="color: #333; margin-bottom: 10px;">Account Created!</h2>
+                        <p style="color: #666; margin-bottom: 30px;">
+                            Your account has been successfully created.<br>
+                            Redirecting you to login...
+                        </p>
+                        <div class="spinner" style="border: 3px solid #f3f4f6; border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;">
+                        </div>
                     </div>
                 </div>
-
-                <!-- Confirm Password -->
-                <div class="form-group">
-                    <label for="confirmPassword">
-                        <i class="fas fa-lock"></i> Confirm Password *
-                    </label>
-                    <input 
-                        type="password" 
-                        id="confirmPassword" 
-                        name="confirmPassword" 
-                        placeholder="Confirm your password"
-                        required
-                    >
-                    <i class="fas fa-lock input-icon"></i>
-                </div>
-
-                <!-- Terms and Conditions -->
-                <div class="terms-checkbox">
-                    <input type="checkbox" id="termsAccepted" name="termsAccepted" required>
-                    <label for="termsAccepted">
-                        I agree to the <a href="#" target="_blank">Terms of Service</a> 
-                        and <a href="#" target="_blank">Privacy Policy</a> *
-                    </label>
-                </div>
-
-                <!-- Submit Button -->
-                <button type="submit" class="signup-btn" id="signupBtn">
-                    <i class="fas fa-spinner fa-spin spinner"></i>
-                    <span class="btn-text">
-                        <i class="fas fa-user-plus"></i> Create Account
-                    </span>
-                </button>
             </form>
 
             <div class="login-link">
                 <p>Already have an account? <a href="login.html">Sign in here</a></p>
-                <p style="margin-top: 10px; font-size: 0.85rem; color: #666;">
-                    Having issues? <a href="#" onclick="event.preventDefault(); clearFirebaseCache(); location.reload();" style="color: #e74c3c;">Clear cache and retry</a>
-                </p>
             </div>
         </div>
     </div>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -516,9 +694,7 @@
             getAuth, 
             createUserWithEmailAndPassword, 
             updateProfile,
-            RecaptchaVerifier,
-            PhoneAuthProvider,
-            signInWithCredential
+            sendEmailVerification
         } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { 
             getFirestore, 
@@ -526,7 +702,7 @@
             setDoc 
         } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
-        // Firebase Configuration (embedded for production)
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAyRSlxMXzJDxOoQNC7tSEaymmslMvdnco",
             authDomain: "chicken-project-2.firebaseapp.com",
@@ -537,92 +713,28 @@
             measurementId: "G-9YLPHR08DB"
         };
         
-        let auth, db, recaptchaVerifier, verificationId;
-        let initAttempts = 0;
+        let auth, db;
+        let currentStep = 1;
+        let formData = {};
+        let emailVerificationCode = '';
+        let phoneVerificationCode = '';
+        let emailTimerInterval, phoneTimerInterval;
 
-        function clearFirebaseCache() {
-            console.log('🧹 Clearing corrupted Firebase cache...');
-            
-            // Clear localStorage
-            for (let i = localStorage.length - 1; i >= 0; i--) {
-                const key = localStorage.key(i);
-                if (key && (key.startsWith('firebase:') || key.includes('Auth') || key.includes('chicken-project-2'))) {
-                    localStorage.removeItem(key);
-                }
-            }
-            
-            // Clear sessionStorage
-            for (let i = sessionStorage.length - 1; i >= 0; i--) {
-                const key = sessionStorage.key(i);
-                if (key && (key.startsWith('firebase:') || key.includes('Auth') || key.includes('chicken-project-2'))) {
-                    sessionStorage.removeItem(key);
-                }
-            }
-            
-            console.log('✅ Firebase cache cleared');
-        }
-
-        async function initializeFirebase() {
+        // Initialize Firebase
+        function initializeFirebase() {
             try {
-                console.log('🔥 Initializing Firebase...');
-                initAttempts++;
-                
-                // Initialize Firebase
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
-
-                console.log('✅ Firebase initialized successfully');
-                console.log('✅ Auth:', !!auth);
-                console.log('✅ Firestore:', !!db);
-
-                // Set up event listeners immediately
+                console.log('✅ Firebase initialized');
                 setupEventListeners();
-                
-                // Handle auth state with better error recovery
-                const unsubscribe = auth.onAuthStateChanged(
-                    (user) => {
-                        if (user) {
-                            console.log('👤 User already signed in:', user.email);
-                        } else {
-                            console.log('👤 No user signed in (ready for signup)');
-                        }
-                    },
-                    (error) => {
-                        console.error('⚠️ Auth state error:', error);
-                        
-                        // Silently handle internal errors by clearing cache
-                        if (error.code === 'auth/internal-error') {
-                            console.log('🔄 Clearing corrupted auth cache...');
-                            clearFirebaseCache();
-                            
-                            // Only reload once to prevent infinite loop
-                            if (initAttempts === 1 && !sessionStorage.getItem('auth_cleared')) {
-                                sessionStorage.setItem('auth_cleared', 'true');
-                                console.log('🔄 Reloading page to apply fix...');
-                                setTimeout(() => window.location.reload(), 500);
-                            }
-                        }
-                    }
-                );
-                
             } catch (error) {
                 console.error('❌ Firebase initialization error:', error);
-                
-                // If internal error, try clearing cache
-                if (error.code === 'auth/internal-error' && initAttempts < 2) {
-                    console.log('🔄 Attempting to fix by clearing cache and reloading...');
-                    clearFirebaseCache();
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 500);
-                } else {
-                    showError('Failed to initialize authentication system. Please clear your browser cache and try again.');
-                }
+                showError('Failed to initialize authentication system');
             }
         }
 
-        // Initialize Firebase when DOM is ready
+        // Initialize when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initializeFirebase);
         } else {
@@ -630,63 +742,61 @@
         }
 
         function setupEventListeners() {
-            console.log('📋 Setting up event listeners...');
+            // Name validation - only letters and spaces, single phrase
+            const firstName = document.getElementById('firstName');
+            const lastName = document.getElementById('lastName');
             
-            const form = document.getElementById('signupForm');
-            const phoneInput = document.getElementById('phone');
-            const passwordInput = document.getElementById('password');
-            const confirmPasswordInput = document.getElementById('confirmPassword');
-            const verifyPhoneBtn = document.getElementById('verifyPhoneBtn');
+            firstName.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' ');
+            });
+            
+            lastName.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' ');
+            });
 
-            if (!form || !phoneInput || !passwordInput || !confirmPasswordInput || !verifyPhoneBtn) {
-                console.error('❌ Required form elements not found');
-                return;
-            }
-
-            console.log('✅ All form elements found');
-
-            // Form submission
-            form.addEventListener('submit', handleSignup);
-
-            // Phone number validation and verification setup
-            phoneInput.addEventListener('blur', validatePhone);
-            phoneInput.addEventListener('input', () => {
-                const phoneVerification = document.getElementById('phoneVerification');
-                if (isValidPhone(phoneInput.value)) {
-                    phoneVerification.classList.remove('hidden');
+            // Password toggle
+            document.getElementById('togglePassword').addEventListener('click', () => {
+                const passwordInput = document.getElementById('password');
+                const icon = document.getElementById('togglePassword');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
                 } else {
-                    phoneVerification.classList.add('hidden');
+                    passwordInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
                 }
             });
 
-            // Password strength checking
-            passwordInput.addEventListener('input', checkPasswordStrength);
-            confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+            document.getElementById('toggleConfirmPassword').addEventListener('click', () => {
+                const passwordInput = document.getElementById('confirmPassword');
+                const icon = document.getElementById('toggleConfirmPassword');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
 
-            // Phone verification
-            verifyPhoneBtn.addEventListener('click', sendPhoneVerification);
+            // Password strength
+            document.getElementById('password').addEventListener('input', checkPasswordStrength);
             
-            console.log('✅ Event listeners set up successfully');
-        }
-
-        function validatePhone() {
-            const phoneInput = document.getElementById('phone');
-            const phone = phoneInput.value.trim();
+            // Next button (Step 1)
+            document.getElementById('nextBtn').addEventListener('click', handleStep1);
             
-            if (phone && !isValidPhone(phone)) {
-                showFieldError(phoneInput, 'Please enter a valid phone number (e.g., +1 555 123 4567)');
-                return false;
-            } else {
-                clearFieldError(phoneInput);
-                return true;
-            }
-        }
+            // Verify button (Step 2)
+            document.getElementById('verifyBtn').addEventListener('click', handleStep2);
+            
+            // Resend buttons
+            document.getElementById('resendEmailBtn').addEventListener('click', resendEmailCode);
+            document.getElementById('resendPhoneBtn').addEventListener('click', resendPhoneCode);
 
-        function isValidPhone(phone) {
-            // Basic phone validation - accepts various formats
-            const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
-            const cleanPhone = phone.replace(/[\s\-\(\)]/g, '');
-            return phoneRegex.test(cleanPhone) && cleanPhone.length >= 10;
+            console.log('✅ Event listeners set up');
         }
 
         function checkPasswordStrength() {
@@ -695,169 +805,77 @@
             const strengthText = document.getElementById('strengthText');
             
             let strength = 0;
-            let strengthLabel = '';
-            let strengthClass = '';
-
             if (password.length >= 8) strength++;
             if (/[a-z]/.test(password)) strength++;
             if (/[A-Z]/.test(password)) strength++;
             if (/[0-9]/.test(password)) strength++;
             if (/[^A-Za-z0-9]/.test(password)) strength++;
 
-            switch (strength) {
-                case 0:
-                case 1:
-                    strengthLabel = 'Very Weak';
-                    strengthClass = 'strength-weak';
-                    break;
-                case 2:
-                    strengthLabel = 'Weak';
-                    strengthClass = 'strength-fair';
-                    break;
-                case 3:
-                    strengthLabel = 'Fair';
-                    strengthClass = 'strength-good';
-                    break;
-                case 4:
-                    strengthLabel = 'Good';
-                    strengthClass = 'strength-strong';
-                    break;
-                case 5:
-                    strengthLabel = 'Strong';
-                    strengthClass = 'strength-strong';
-                    break;
-            }
-
+            const labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+            const classes = ['strength-weak', 'strength-fair', 'strength-good', 'strength-strong', 'strength-strong'];
+            
             const percentage = (strength / 5) * 100;
             strengthFill.style.width = percentage + '%';
-            strengthFill.className = 'strength-fill ' + strengthClass;
-            strengthText.textContent = strengthLabel;
-
-            // Update input styling
-            const passwordInput = document.getElementById('password');
-            if (password.length >= 8 && strength >= 3) {
-                passwordInput.classList.add('success');
-                passwordInput.classList.remove('error');
-            } else if (password.length > 0) {
-                passwordInput.classList.add('error');
-                passwordInput.classList.remove('success');
-            } else {
-                passwordInput.classList.remove('error', 'success');
-            }
+            strengthFill.className = 'strength-fill ' + (classes[strength - 1] || '');
+            strengthText.textContent = labels[strength] || 'Enter a password';
         }
 
-        function validatePasswordMatch() {
+        function goToStep(step) {
+            // Update progress
+            document.querySelectorAll('.progress-step').forEach((el, index) => {
+                el.classList.remove('active', 'completed');
+                if (index + 1 < step) {
+                    el.classList.add('completed');
+                } else if (index + 1 === step) {
+                    el.classList.add('active');
+                }
+            });
+
+            // Update form steps
+            document.querySelectorAll('.form-step').forEach((el, index) => {
+                el.classList.remove('active');
+                if (index + 1 === step) {
+                    el.classList.add('active');
+                }
+            });
+
+            currentStep = step;
+        }
+
+        async function handleStep1() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const companyName = document.getElementById('companyName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            const confirmInput = document.getElementById('confirmPassword');
-
-            if (confirmPassword && password !== confirmPassword) {
-                showFieldError(confirmInput, 'Passwords do not match');
-                return false;
-            } else if (confirmPassword && password === confirmPassword) {
-                clearFieldError(confirmInput);
-                return true;
-            }
-            return true;
-        }
-
-        function formatPhoneForFirebase(phone) {
-            // Remove all non-digit characters except +
-            let cleaned = phone.replace(/[^\d+]/g, '');
-            
-            // If it doesn't start with +, assume US/Canada and add +1
-            if (!cleaned.startsWith('+')) {
-                // Remove leading 1 if present (US numbers often start with 1)
-                if (cleaned.startsWith('1') && cleaned.length === 11) {
-                    cleaned = cleaned.substring(1);
-                }
-                cleaned = '+1' + cleaned;
-            }
-            
-            console.log('📱 Original phone:', phone);
-            console.log('📱 Formatted phone:', cleaned);
-            return cleaned;
-        }
-
-        async function sendPhoneVerification() {
-            const phoneInput = document.getElementById('phone');
-            const phone = phoneInput.value.trim();
-            const verifyBtn = document.getElementById('verifyPhoneBtn');
-            const verificationCodeGroup = document.getElementById('verificationCodeGroup');
-
-            if (!phone) {
-                showError('Please enter a phone number first');
-                return;
-            }
-
-            // Format phone number to E.164 format
-            const formattedPhone = formatPhoneForFirebase(phone);
-            
-            // Basic validation
-            if (formattedPhone.length < 10 || !formattedPhone.startsWith('+')) {
-                showError('Please enter a valid phone number (e.g., +1 555 123 4567 or just 555 123 4567)');
-                return;
-            }
-
-            try {
-                verifyBtn.disabled = true;
-                verifyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-                // Initialize reCAPTCHA
-                if (!recaptchaVerifier) {
-                    recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                        size: 'normal',
-                        callback: (response) => {
-                            console.log('reCAPTCHA verified');
-                        }
-                    });
-                    await recaptchaVerifier.render();
-                }
-
-                // Send verification code with formatted phone
-                const provider = new PhoneAuthProvider(auth);
-                verificationId = await provider.verifyPhoneNumber(formattedPhone, recaptchaVerifier);
-
-                // Show verification code input
-                verificationCodeGroup.classList.remove('hidden');
-                verifyBtn.innerHTML = '<i class="fas fa-check"></i> Code Sent!';
-                verifyBtn.style.background = '#27ae60';
-
-                showSuccess('Verification code sent to your phone!');
-
-            } catch (error) {
-                console.error('Phone verification error:', error);
-                verifyBtn.disabled = false;
-                verifyBtn.innerHTML = '<i class="fas fa-sms"></i> Send Verification Code';
-
-                if (error.message && error.message.includes('requests-from-referer')) {
-                    showError('Phone verification requires domain authorization. This will work on flockview.ca');
-                } else {
-                    showError('Failed to send verification code: ' + error.message);
-                }
-            }
-        }
-
-        async function handleSignup(e) {
-            e.preventDefault();
-            
-            const signupBtn = document.getElementById('signupBtn');
-            const formData = new FormData(e.target);
-            
-            const firstName = formData.get('firstName').trim();
-            const lastName = formData.get('lastName').trim();
-            const companyName = formData.get('companyName').trim();
-            const email = formData.get('email').trim();
-            const phoneRaw = formData.get('phone').trim();
-            const phone = formatPhoneForFirebase(phoneRaw); // Format phone for storage
-            const password = formData.get('password');
-            const confirmPassword = formData.get('confirmPassword');
-            const verificationCode = formData.get('verificationCode');
-            const termsAccepted = formData.get('termsAccepted');
+            const termsAccepted = document.getElementById('termsAccepted').checked;
 
             // Validation
-            if (!firstName || !lastName || !email || !phone || !password || !confirmPassword) {
+            if (!firstName || !lastName || !email || !password || !confirmPassword) {
                 showError('Please fill in all required fields');
+                return;
+            }
+
+            // Name validation - no numbers, single phrase
+            if (/\d/.test(firstName)) {
+                showError('First name cannot contain numbers');
+                return;
+            }
+
+            if (/\d/.test(lastName)) {
+                showError('Last name cannot contain numbers');
+                return;
+            }
+
+            if (firstName.trim().split(/\s+/).length > 2) {
+                showError('First name should be one or two words only');
+                return;
+            }
+
+            if (lastName.trim().split(/\s+/).length > 2) {
+                showError('Last name should be one or two words only');
                 return;
             }
 
@@ -876,93 +894,198 @@
                 return;
             }
 
-            if (!isValidPhone(phone)) {
-                showError('Please enter a valid phone number');
-                return;
+            // Store form data
+            formData = { firstName, lastName, companyName, email, phone, password };
+
+            // Generate verification codes
+            emailVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+            if (phone) {
+                phoneVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
             }
 
-            // Phone verification is optional on localhost for testing
-            const isLocalhost = window.location.hostname === 'localhost' || 
-                              window.location.hostname === '127.0.0.1';
-            
-            if (!verificationCode && !isLocalhost) {
-                showError('Please verify your phone number first');
-                return;
-            }
+            // Show loading
+            const btn = document.getElementById('nextBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
 
             try {
-                signupBtn.classList.add('loading');
-                signupBtn.disabled = true;
-
-                // On localhost, skip phone verification for testing
-                if (!isLocalhost && verificationCode) {
-                    // Verify phone number with code (production only)
-                    const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
-                    const phoneResult = await signInWithCredential(auth, credential);
-                    
-                    // Sign out from phone auth and create email account
-                    await auth.signOut();
-
-                    // Wait a moment for auth state to clear
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                } else if (isLocalhost) {
-                    console.log('🧪 Testing mode: Skipping phone verification on localhost');
+                // Send email verification code
+                await sendVerificationEmail(email, emailVerificationCode);
+                
+                // If phone provided, send SMS (simulated for now)
+                if (phone) {
+                    document.getElementById('phoneVerificationSection').style.display = 'block';
+                    document.getElementById('phoneDisplay').textContent = phone;
+                    console.log(`📱 Phone verification code: ${phoneVerificationCode}`);
                 }
 
-                // Create user with email and password
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                // Update UI
+                document.getElementById('emailDisplay').textContent = email;
+                
+                // Start timers
+                startEmailTimer();
+                if (phone) startPhoneTimer();
+
+                // Go to step 2
+                goToStep(2);
+                showSuccess('Verification codes sent! Check your email' + (phone ? ' and phone' : ''));
+            } catch (error) {
+                console.error('❌ Error:', error);
+                showError('Failed to send verification codes. Please try again.');
+            } finally {
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        async function sendVerificationEmail(email, code) {
+            // In production, this would send via your backend
+            // For now, we'll log it and simulate
+            console.log(`📧 Email verification code for ${email}: ${code}`);
+            
+            // Simulate API call
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, 1000);
+            });
+        }
+
+        function startEmailTimer() {
+            let seconds = 60;
+            const btn = document.getElementById('resendEmailBtn');
+            const timer = document.getElementById('emailTimer');
+            btn.disabled = true;
+            
+            emailTimerInterval = setInterval(() => {
+                seconds--;
+                timer.textContent = `(${seconds}s)`;
+                if (seconds <= 0) {
+                    clearInterval(emailTimerInterval);
+                    btn.disabled = false;
+                    timer.textContent = '';
+                }
+            }, 1000);
+        }
+
+        function startPhoneTimer() {
+            let seconds = 60;
+            const btn = document.getElementById('resendPhoneBtn');
+            const timer = document.getElementById('phoneTimer');
+            btn.disabled = true;
+            
+            phoneTimerInterval = setInterval(() => {
+                seconds--;
+                timer.textContent = `(${seconds}s)`;
+                if (seconds <= 0) {
+                    clearInterval(phoneTimerInterval);
+                    btn.disabled = false;
+                    timer.textContent = '';
+                }
+            }, 1000);
+        }
+
+        async function resendEmailCode() {
+            emailVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+            await sendVerificationEmail(formData.email, emailVerificationCode);
+            startEmailTimer();
+            showSuccess('Email verification code resent!');
+        }
+
+        async function resendPhoneCode() {
+            phoneVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+            console.log(`📱 Phone verification code: ${phoneVerificationCode}`);
+            startPhoneTimer();
+            showSuccess('Phone verification code resent!');
+        }
+
+        async function handleStep2() {
+            const emailCode = document.getElementById('emailCode').value.trim();
+            const phoneCode = document.getElementById('phoneCode').value.trim();
+
+            // Validate email code
+            if (!emailCode || emailCode.length !== 6) {
+                showError('Please enter the 6-digit email verification code');
+                return;
+            }
+
+            if (emailCode !== emailVerificationCode) {
+                showError('Invalid email verification code');
+                return;
+            }
+
+            // Validate phone code if phone was provided
+            if (formData.phone) {
+                if (!phoneCode || phoneCode.length !== 6) {
+                    showError('Please enter the 6-digit phone verification code');
+                    return;
+                }
+
+                if (phoneCode !== phoneVerificationCode) {
+                    showError('Invalid phone verification code');
+                    return;
+                }
+            }
+
+            // Show loading
+            const btn = document.getElementById('verifyBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                // Create Firebase account
+                const userCredential = await createUserWithEmailAndPassword(
+                    auth, 
+                    formData.email, 
+                    formData.password
+                );
                 const user = userCredential.user;
 
-                // Create display name from first and last name
-                const displayName = `${firstName} ${lastName}`;
-                const fullDisplayName = companyName ? `${displayName} (${companyName})` : displayName;
+                // Update profile
+                const displayName = `${formData.firstName} ${formData.lastName}`;
+                const fullDisplayName = formData.companyName 
+                    ? `${displayName} (${formData.companyName})` 
+                    : displayName;
 
-                // Update user profile with display name
-                await updateProfile(user, {
-                    displayName: fullDisplayName
-                });
+                await updateProfile(user, { displayName: fullDisplayName });
 
-                // Store additional user data in Firestore
+                // Store in Firestore
                 await setDoc(doc(db, 'users', user.uid), {
                     uid: user.uid,
-                    email: email,
-                    phone: phone,
-                    firstName: firstName,
-                    lastName: lastName,
-                    companyName: companyName || null,
+                    email: formData.email,
+                    phone: formData.phone || null,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    companyName: formData.companyName || null,
                     displayName: fullDisplayName,
                     createdAt: new Date(),
                     lastLogin: new Date(),
-                    profileComplete: true
+                    profileComplete: true,
+                    emailVerified: true,
+                    phoneVerified: formData.phone ? true : false
                 });
 
-                showSuccess('Account created successfully! Redirecting to login...');
-                
-                // Redirect to login page after 2 seconds
+                // Show success step
+                goToStep(3);
+
+                // Redirect after delay
                 setTimeout(() => {
                     window.location.href = 'login.html';
-                }, 2000);
+                }, 3000);
 
             } catch (error) {
-                console.error('Signup error:', error);
-                signupBtn.classList.remove('loading');
-                signupBtn.disabled = false;
-
+                console.error('❌ Signup error:', error);
+                
                 if (error.code === 'auth/email-already-in-use') {
                     showError('An account with this email already exists');
                 } else if (error.code === 'auth/weak-password') {
-                    showError('Password is too weak. Please choose a stronger password');
-                } else if (error.code === 'auth/invalid-email') {
-                    showError('Invalid email address');
-                } else if (error.code === 'auth/phone-number-already-exists') {
-                    showError('This phone number is already registered');
-                } else if (error.code === 'auth/invalid-verification-code') {
-                    showError('Invalid verification code. Please try again');
-                } else if (error.code === 'auth/code-expired') {
-                    showError('Verification code has expired. Please request a new one');
+                    showError('Password is too weak');
                 } else {
                     showError('Failed to create account: ' + error.message);
                 }
+                
+                btn.classList.remove('loading');
+                btn.disabled = false;
             }
         }
 
@@ -974,7 +1097,6 @@
             errorDiv.style.display = 'block';
             successDiv.style.display = 'none';
             
-            // Auto-hide after 5 seconds
             setTimeout(() => {
                 errorDiv.style.display = 'none';
             }, 5000);
@@ -988,52 +1110,13 @@
             successDiv.style.display = 'block';
             errorDiv.style.display = 'none';
             
-            // Auto-hide after 5 seconds
             setTimeout(() => {
                 successDiv.style.display = 'none';
             }, 5000);
         }
 
-        function showFieldError(input, message) {
-            input.classList.add('error');
-            input.classList.remove('success');
-            
-            // Remove existing error message
-            const existingError = input.parentNode.querySelector('.field-error');
-            if (existingError) {
-                existingError.remove();
-            }
-            
-            // Add new error message
-            const errorDiv = document.createElement('div');
-            errorDiv.className = 'field-error';
-            errorDiv.style.cssText = 'color: #e74c3c; font-size: 0.8rem; margin-top: 5px;';
-            errorDiv.textContent = message;
-            input.parentNode.appendChild(errorDiv);
-        }
-
-        function clearFieldError(input) {
-            input.classList.remove('error');
-            input.classList.add('success');
-            
-            const existingError = input.parentNode.querySelector('.field-error');
-            if (existingError) {
-                existingError.remove();
-            }
-        }
-
-        // Make functions globally available for debugging
-        window.signupDebug = {
-            validatePhone,
-            checkPasswordStrength,
-            sendPhoneVerification,
-            showError,
-            showSuccess
-        };
-        
-        // Make clearFirebaseCache globally accessible
-        window.clearFirebaseCache = clearFirebaseCache;
+        // Make goToStep globally accessible
+        window.goToStep = goToStep;
     </script>
 </body>
 </html>
-
