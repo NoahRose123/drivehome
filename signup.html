@@ -891,7 +891,11 @@
                 return;
             }
 
-            if (!verificationCode) {
+            // Phone verification is optional on localhost for testing
+            const isLocalhost = window.location.hostname === 'localhost' || 
+                              window.location.hostname === '127.0.0.1';
+            
+            if (!verificationCode && !isLocalhost) {
                 showError('Please verify your phone number first');
                 return;
             }
@@ -900,15 +904,20 @@
                 signupBtn.classList.add('loading');
                 signupBtn.disabled = true;
 
-                // Verify phone number with code
-                const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
-                const phoneResult = await signInWithCredential(auth, credential);
-                
-                // Sign out from phone auth and create email account
-                await auth.signOut();
+                // On localhost, skip phone verification for testing
+                if (!isLocalhost && verificationCode) {
+                    // Verify phone number with code (production only)
+                    const credential = PhoneAuthProvider.credential(verificationId, verificationCode);
+                    const phoneResult = await signInWithCredential(auth, credential);
+                    
+                    // Sign out from phone auth and create email account
+                    await auth.signOut();
 
-                // Wait a moment for auth state to clear
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                    // Wait a moment for auth state to clear
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } else if (isLocalhost) {
+                    console.log('🧪 Testing mode: Skipping phone verification on localhost');
+                }
 
                 // Create user with email and password
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
