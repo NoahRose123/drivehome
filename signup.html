@@ -424,7 +424,7 @@
                         type="tel" 
                         id="phone" 
                         name="phone" 
-                        placeholder="+1 (555) 123-4567"
+                        placeholder="555-123-4567 or +1 555 123 4567"
                         required
                     >
                     <i class="fas fa-phone input-icon"></i>
@@ -771,13 +771,41 @@
             return true;
         }
 
+        function formatPhoneForFirebase(phone) {
+            // Remove all non-digit characters except +
+            let cleaned = phone.replace(/[^\d+]/g, '');
+            
+            // If it doesn't start with +, assume US/Canada and add +1
+            if (!cleaned.startsWith('+')) {
+                // Remove leading 1 if present (US numbers often start with 1)
+                if (cleaned.startsWith('1') && cleaned.length === 11) {
+                    cleaned = cleaned.substring(1);
+                }
+                cleaned = '+1' + cleaned;
+            }
+            
+            console.log('📱 Original phone:', phone);
+            console.log('📱 Formatted phone:', cleaned);
+            return cleaned;
+        }
+
         async function sendPhoneVerification() {
-            const phone = document.getElementById('phone').value.trim();
+            const phoneInput = document.getElementById('phone');
+            const phone = phoneInput.value.trim();
             const verifyBtn = document.getElementById('verifyPhoneBtn');
             const verificationCodeGroup = document.getElementById('verificationCodeGroup');
 
-            if (!phone || !isValidPhone(phone)) {
-                showError('Please enter a valid phone number first');
+            if (!phone) {
+                showError('Please enter a phone number first');
+                return;
+            }
+
+            // Format phone number to E.164 format
+            const formattedPhone = formatPhoneForFirebase(phone);
+            
+            // Basic validation
+            if (formattedPhone.length < 10 || !formattedPhone.startsWith('+')) {
+                showError('Please enter a valid phone number (e.g., +1 555 123 4567 or just 555 123 4567)');
                 return;
             }
 
@@ -796,9 +824,9 @@
                     await recaptchaVerifier.render();
                 }
 
-                // Send verification code
+                // Send verification code with formatted phone
                 const provider = new PhoneAuthProvider(auth);
-                verificationId = await provider.verifyPhoneNumber(phone, recaptchaVerifier);
+                verificationId = await provider.verifyPhoneNumber(formattedPhone, recaptchaVerifier);
 
                 // Show verification code input
                 verificationCodeGroup.classList.remove('hidden');
@@ -830,7 +858,8 @@
             const lastName = formData.get('lastName').trim();
             const companyName = formData.get('companyName').trim();
             const email = formData.get('email').trim();
-            const phone = formData.get('phone').trim();
+            const phoneRaw = formData.get('phone').trim();
+            const phone = formatPhoneForFirebase(phoneRaw); // Format phone for storage
             const password = formData.get('password');
             const confirmPassword = formData.get('confirmPassword');
             const verificationCode = formData.get('verificationCode');
