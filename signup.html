@@ -916,15 +916,8 @@
                 // Update UI
                 document.getElementById('emailDisplay').textContent = email;
                 
-                // Hide phone verification if no phone provided
-                if (phone) {
-                    document.getElementById('phoneVerificationSection').style.display = 'block';
-                    document.getElementById('phoneDisplay').textContent = phone;
-                    showSuccess('Verification email sent! Check your inbox and spam folder.');
-                } else {
-                    document.getElementById('phoneVerificationSection').style.display = 'none';
-                    showSuccess('Verification email sent! Check your inbox and spam folder.');
-                }
+                // Phone is now handled separately (optional)
+                showSuccess('Verification email sent! Check your inbox and spam folder.');
 
                 // Go to step 2 (now just shows instructions)
                 goToStep(2);
@@ -933,13 +926,18 @@
                 console.error('❌ Error:', error);
                 
                 if (error.code === 'auth/email-already-in-use') {
-                    showError('An account with this email already exists. Please login instead.');
+                    showError('This email is already registered. Please login instead or use the forgot password option.');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 3000);
                 } else if (error.code === 'auth/invalid-email') {
                     showError('Invalid email address format.');
+                } else if (error.code === 'auth/weak-password') {
+                    showError('Password is too weak. Please use at least 8 characters.');
                 } else {
-                    showError('Failed to create account. Please try again.');
+                    showError('Failed to create account. Please try again or contact support.');
                 }
-            } finally {
+                
                 btn.classList.remove('loading');
                 btn.disabled = false;
             }
