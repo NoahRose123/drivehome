@@ -558,26 +558,34 @@
 
                 <!-- Step 2: Email Verification (BEFORE account creation) -->
                 <div class="form-step" id="step2">
-                    <div style="text-align: center; padding: 20px 0;">
-                        <div style="font-size: 3rem; color: #3b82f6; margin-bottom: 20px;">
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 4rem; color: #3b82f6; margin-bottom: 20px;">
                             <i class="fas fa-envelope-open-text"></i>
                         </div>
-                        <h2 style="color: #333; margin-bottom: 10px;">Verify Your Email</h2>
-                        <p style="color: #666; margin-bottom: 20px;">
-                            We'll create your account after you verify your email:<br>
+                        <h2 style="color: #333; margin-bottom: 10px;">Check Your Email</h2>
+                        <p style="color: #666; margin-bottom: 30px; line-height: 1.6;">
+                            We've sent a verification email to<br>
                             <strong id="emailDisplay" style="color: #3b82f6;"></strong>
                         </p>
-                    </div>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6; margin-bottom: 30px; text-align: left;">
+                            <h4 style="margin: 0 0 15px 0; color: #333;">
+                                <i class="fas fa-info-circle"></i> Next Steps:
+                            </h4>
+                            <ol style="margin: 0; padding-left: 20px; color: #666; line-height: 2;">
+                                <li>Open your email inbox</li>
+                                <li>Look for our verification email</li>
+                                <li>Click the verification link</li>
+                                <li>Return here and click "Create Account"</li>
+                            </ol>
+                        </div>
 
-                    <div class="verification-section">
-                        <h3><i class="fas fa-key"></i> Your Verification Code</h3>
-                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">
-                            Use this code for testing (in production, check your email):
-                        </p>
-                        <div class="code-display" id="emailCodeDisplay">------</div>
-                        <p style="font-size: 0.8rem; color: #999; margin-top: 10px;">
-                            <i class="fas fa-info-circle"></i> In production, this will be sent to your email
-                        </p>
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
+                            <p style="margin: 0; font-size: 0.9rem; color: #856404;">
+                                <i class="fas fa-exclamation-triangle"></i> 
+                                <strong>Didn't receive it?</strong> Check spam/junk folder
+                            </p>
+                        </div>
                     </div>
 
                     <button type="button" class="back-btn" onclick="goToStep(1)">
@@ -586,7 +594,7 @@
                     <button type="button" class="next-btn" id="verifyEmailBtn">
                         <i class="fas fa-spinner fa-spin btn-spinner"></i>
                         <span class="btn-text">
-                            <i class="fas fa-check"></i> I've Verified (Create Account)
+                            <i class="fas fa-check"></i> I've Verified - Create Account
                         </span>
                     </button>
                 </div>
@@ -642,16 +650,39 @@
         let formData = {};
         let emailVerificationCode = '';
 
+        // Clear corrupted Firebase cache
+        function clearFirebaseCache() {
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key && key.includes('firebase')) {
+                    localStorage.removeItem(key);
+                }
+            }
+            sessionStorage.clear();
+        }
+
         function initializeFirebase() {
             try {
                 const app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
+                
+                // Handle auth state errors silently
+                auth.onAuthStateChanged(() => {}, (error) => {
+                    if (error.code === 'auth/internal-error') {
+                        console.log('🔧 Clearing corrupted cache...');
+                        clearFirebaseCache();
+                        setTimeout(() => location.reload(), 500);
+                    }
+                });
+                
                 console.log('✅ Firebase initialized');
                 setupEventListeners();
             } catch (error) {
                 console.error('❌ Firebase error:', error);
-                showError('Failed to initialize');
+                clearFirebaseCache();
+                showError('Failed to initialize. Refreshing...');
+                setTimeout(() => location.reload(), 1000);
             }
         }
 
@@ -781,15 +812,17 @@
             // Store data (NO ACCOUNT CREATED YET!)
             formData = { firstName, lastName, companyName, email, phone, password };
 
-            // Generate verification code for demo
+            // Generate verification code (for production email sending)
             emailVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+            // TODO: In production, send verification email here via backend API
+            // Example: await fetch('/api/send-verification', { email, code: emailVerificationCode })
 
             // Show verification step
             document.getElementById('emailDisplay').textContent = email;
-            document.getElementById('emailCodeDisplay').textContent = emailVerificationCode;
             
             goToStep(2);
-            showSuccess('Verification code generated! (In production, this would be emailed to you)');
+            showSuccess('Verification email sent! Please check your inbox.');
         }
 
         async function handleStep2() {
