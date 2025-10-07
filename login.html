@@ -101,12 +101,6 @@
             font-size: 2rem;
             font-weight: 700;
             color: var(--text-primary);
-            margin: 0 0 0.5rem 0;
-        }
-
-        .login-header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
             margin: 0;
         }
 
@@ -134,11 +128,14 @@
             align-items: center;
         }
 
-        .input-wrapper i {
+        .input-wrapper i.fa-envelope,
+        .input-wrapper i.fa-lock {
             position: absolute;
             left: 1rem;
             color: var(--text-secondary);
             z-index: 1;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .input-wrapper input {
@@ -164,11 +161,12 @@
             border: none;
             color: var(--text-secondary);
             cursor: pointer;
-            padding: 0.25rem;
+            padding: 0.5rem;
             border-radius: 4px;
             transition: color 0.3s ease;
             top: 50%;
             transform: translateY(-50%);
+            z-index: 2;
         }
 
         .password-toggle:hover {
@@ -510,44 +508,6 @@
             margin: 16px 0;
         }
 
-        /* Debug buttons */
-        .debug-buttons {
-            margin-top: 1rem;
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .debug-btn {
-            background: #f0f0f0;
-            border: 1px solid #ccc;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .debug-btn:hover {
-            background: #e0e0e0;
-        }
-
-        .debug-btn.force {
-            background: #e0f2fe;
-            border-color: #0288d1;
-        }
-
-        .debug-btn.test {
-            background: #f3e5f5;
-            border-color: #7b1fa2;
-        }
-
-        .debug-btn.bypass {
-            background: #fff3e0;
-            border-color: #f57c00;
-        }
-
         /* Responsive Login Styles */
         @media (max-width: 768px) {
             .login-card {
@@ -584,10 +544,6 @@
                 gap: 1rem;
                 align-items: flex-start;
             }
-
-            .debug-buttons {
-                flex-direction: column;
-            }
         }
     </style>
 </head>
@@ -602,7 +558,6 @@
                         <span class="logo-text">Flock<span class="logo-accent">View</span></span>
                     </div>
                     <h1>Welcome Back</h1>
-                    <p>Sign in to access your farm management dashboard</p>
                 </div>
                 
                 <form class="login-form" id="loginForm">
@@ -610,7 +565,7 @@
                         <label for="email">Email or Phone Number</label>
                         <div class="input-wrapper">
                             <i class="fas fa-envelope"></i>
-                            <input type="text" id="email" name="email" placeholder="email@example.com or 555-123-4567" required>
+                            <input type="text" id="email" name="email" placeholder="email@example.com or 555-123-4567" required autocomplete="username">
                         </div>
                     </div>
                     
@@ -618,7 +573,7 @@
                         <label for="password">Password</label>
                         <div class="input-wrapper">
                             <i class="fas fa-lock"></i>
-                            <input type="password" id="password" name="password" required>
+                            <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
                             <button type="button" class="password-toggle" onclick="togglePassword()">
                                 <i class="fas fa-eye" id="passwordToggleIcon"></i>
                             </button>
@@ -650,9 +605,6 @@
                 
                 <div class="login-footer">
                     <p>Don't have an account? <a href="signup.html">Create Account</a></p>
-                    <div class="debug-buttons">
-                        <button type="button" class="debug-btn" onclick="debugLoginSystem()">🔍 Debug Login</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -790,9 +742,6 @@
         </div>
     </div>
 
-    <!-- Firebase Configuration -->
-    <script src="config.js"></script>
-    
     <!-- Password Reset Functions (Must be outside module for onclick access) -->
     <script>
         // Global variables for password reset
@@ -801,7 +750,6 @@
         let globalAuth = null;
 
         function showForgotPassword() {
-            console.log('🔑 Opening password reset modal...');
             document.getElementById('passwordResetModal').style.display = 'flex';
             // Reset to step 1
             document.getElementById('resetStep1').style.display = 'block';
@@ -811,7 +759,6 @@
         }
 
         function closePasswordReset() {
-            console.log('🔑 Closing password reset modal...');
             document.getElementById('passwordResetModal').style.display = 'none';
         }
 
@@ -852,14 +799,12 @@
                 statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending reset email...';
                 statusDiv.style.display = 'block';
 
-                // Use the global Firebase auth methods
                 if (!globalAuth || !window.firebasePasswordReset) {
                     throw new Error('Firebase not initialized properly');
                 }
 
-                // Use Firebase's sendPasswordResetEmail method
                 await window.firebasePasswordReset(globalAuth, email, {
-                    url: 'https://flockview.ca/login.html',
+                    url: window.location.origin + '/login.html',
                     handleCodeInApp: false
                 });
 
@@ -884,13 +829,6 @@
                     statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid email address format';
                 } else if (error.code === 'auth/too-many-requests') {
                     statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Too many requests. Please try again later';
-                } else if (error.message && error.message.includes('requests-from-referer')) {
-                    statusDiv.innerHTML = `
-                        <i class="fas fa-exclamation-circle"></i> 
-                        <strong>Domain Not Authorized</strong><br>
-                        Your Firebase API key may need to be updated to allow this domain.<br>
-                        <small>Current domain should be: flockview.ca</small>
-                    `;
                 } else {
                     statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${error.message}`;
                 }
@@ -914,7 +852,6 @@
                 statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Initializing reCAPTCHA...';
                 statusDiv.style.display = 'block';
 
-                // Initialize reCAPTCHA if not already done
                 if (!resetRecaptchaVerifier && globalAuth && window.RecaptchaVerifier) {
                     resetRecaptchaVerifier = new window.RecaptchaVerifier(globalAuth, 'recaptcha-container-reset', {
                         size: 'normal',
@@ -937,7 +874,6 @@
                 statusDiv.className = 'reset-status success';
                 statusDiv.innerHTML = '<i class="fas fa-check-circle"></i> Verification code sent to your phone!';
                 
-                // Move to verification step
                 setTimeout(() => {
                     document.getElementById('resetStep2SMS').style.display = 'none';
                     document.getElementById('resetStep3SMS').style.display = 'block';
@@ -946,17 +882,7 @@
             } catch (error) {
                 console.error('SMS verification error:', error);
                 statusDiv.className = 'reset-status error';
-                
-                if (error.message && error.message.includes('requests-from-referer')) {
-                    statusDiv.innerHTML = `
-                        <i class="fas fa-exclamation-circle"></i> 
-                        <strong>Domain Not Authorized</strong><br>
-                        Your Firebase API key may need to be updated to allow this domain.<br>
-                        <small>Current domain should be: flockview.ca</small>
-                    `;
-                } else {
-                    statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${error.message}`;
-                }
+                statusDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${error.message}`;
                 statusDiv.style.display = 'block';
             }
         }
@@ -981,9 +907,9 @@
                 return;
             }
 
-            if (newPassword.length < 6) {
+            if (newPassword.length < 8) {
                 statusDiv.className = 'reset-status error';
-                statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Password must be at least 6 characters';
+                statusDiv.innerHTML = '<i class="fas fa-exclamation-circle"></i> Password must be at least 8 characters';
                 statusDiv.style.display = 'block';
                 return;
             }
@@ -993,8 +919,6 @@
                 statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying code and resetting password...';
                 statusDiv.style.display = 'block';
 
-                // Note: For production SMS password reset, you need a Firebase Cloud Function
-                // For now, show a helpful message
                 statusDiv.className = 'reset-status info';
                 statusDiv.innerHTML = `
                     <i class="fas fa-info-circle"></i> 
@@ -1017,40 +941,27 @@
         import { 
             getFirestore, 
             collection, 
-            addDoc, 
             getDocs, 
             query, 
             where, 
-            orderBy, 
-            serverTimestamp,
-            deleteDoc,
             doc,
             getDoc,
-            updateDoc,
-            setDoc
+            setDoc,
+            serverTimestamp
         } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
         import { 
             getAuth, 
             signInWithEmailAndPassword, 
-            signOut, 
             onAuthStateChanged,
             getMultiFactorResolver,
             PhoneAuthProvider,
             PhoneMultiFactorGenerator,
             RecaptchaVerifier,
             TotpMultiFactorGenerator,
-            sendPasswordResetEmail as firebaseSendPasswordResetEmail,
-            confirmPasswordReset as firebaseConfirmPasswordReset,
-            verifyPasswordResetCode as firebaseVerifyPasswordResetCode
+            sendPasswordResetEmail as firebaseSendPasswordResetEmail
         } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
-        import { 
-            getStorage, 
-            ref, 
-            uploadBytes, 
-            getDownloadURL 
-        } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-storage.js";
 
-        // Firebase Configuration (embedded for production)
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAyRSlxMXzJDxOoQNC7tSEaymmslMvdnco",
             authDomain: "chicken-project-2.firebaseapp.com",
@@ -1061,126 +972,90 @@
             measurementId: "G-9YLPHR08DB"
         };
 
-        // Initialize Firebase with error handling
-        let app, auth, db, storage;
+        // Initialize Firebase
+        let app, auth, db;
         
         try {
             app = initializeApp(firebaseConfig);
-            
-            // Initialize Firebase Auth
             auth = getAuth(app);
-            
-            // Initialize Firestore and Storage
             db = getFirestore(app);
-            storage = getStorage(app);
-            
-        console.log('🔥 Firebase initialized:', !!app);
-        console.log('🔥 Firestore initialized:', !!db);
-        console.log('🔥 Auth initialized:', !!auth);
-        
-        // Test Firebase connection
-        if (auth) {
-            console.log('🔐 Firebase Auth ready for authentication');
-            console.log('🔐 Multi-Factor Authentication support available');
-        }
-        if (db) {
-            console.log('🗄️ Firestore ready for database operations');
-        }
-            
+            console.log('✅ Firebase initialized');
         } catch (error) {
             console.error('❌ Firebase initialization failed:', error);
-            console.warn('⚠️ Using mock Firebase services for development');
-            
-            // Create mock services for development
             auth = { currentUser: null };
             db = null;
-            storage = null;
         }
         
         // Make Firebase services available globally
         window.firebaseAuth = auth;
         window.firebaseSignIn = signInWithEmailAndPassword;
-        window.firebaseSignOut = signOut;
         window.firebasePasswordReset = firebaseSendPasswordResetEmail;
         window.RecaptchaVerifier = RecaptchaVerifier;
         window.PhoneAuthProvider = PhoneAuthProvider;
-        
-        // Set global auth for password reset functions
         globalAuth = auth;
 
-        function showSignUp() {
-            alert('User registration is managed by administrators.\n\nPlease contact your system administrator to create an account.');
+        // Security: Check for auth state tampering
+        function validateAuthState() {
+            // Verify sessionStorage hasn't been manually tampered with
+            const loggedIn = sessionStorage.getItem('flockview_logged_in');
+            const userId = sessionStorage.getItem('flockview_user');
+            const bypass = sessionStorage.getItem('flockview_auth_bypass');
+            
+            // If bypass flag is set, clear it (no bypassing allowed!)
+            if (bypass) {
+                console.warn('⚠️ SECURITY: Auth bypass attempt detected - clearing session');
+                sessionStorage.clear();
+                return false;
+            }
+            
+            // If logged in flag is set but no valid Firebase user, clear session
+            if (loggedIn === 'true' && !auth.currentUser) {
+                console.warn('⚠️ SECURITY: Invalid session detected - clearing');
+                sessionStorage.clear();
+                return false;
+            }
+            
+            return true;
         }
 
         function showLoginError(message) {
-            console.log('🔍 ERROR DEBUG: showLoginError called with message:', message);
-            
             const errorDiv = document.getElementById('loginError');
             const errorMessage = document.getElementById('errorMessage');
             
-            console.log('🔍 ERROR DEBUG: Error elements found:', {
-                errorDiv: !!errorDiv,
-                errorMessage: !!errorMessage
-            });
-            
             if (errorMessage) {
                 errorMessage.textContent = message;
-                console.log('✅ ERROR DEBUG: Error message set');
-            } else {
-                console.error('❌ ERROR DEBUG: Error message element not found!');
             }
             
             if (errorDiv) {
                 errorDiv.style.display = 'flex';
-                console.log('✅ ERROR DEBUG: Error div shown');
-            } else {
-                console.error('❌ ERROR DEBUG: Error div not found!');
             }
             
-            // Hide error after 5 seconds
             setTimeout(() => {
                 if (errorDiv) {
                     errorDiv.style.display = 'none';
-                    console.log('✅ ERROR DEBUG: Error auto-hidden after 5 seconds');
                 }
             }, 5000);
         }
 
         function hideLoginError() {
             const errorDiv = document.getElementById('loginError');
-            errorDiv.style.display = 'none';
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
         }
 
         function setLoginLoading(loading) {
-            console.log('🔍 LOADING DEBUG: setLoginLoading called with:', loading);
-            
             const loginBtn = document.querySelector('.login-btn');
-            const btnText = document.querySelector('.btn-text');
-            const btnSpinner = document.querySelector('.btn-spinner');
-            
-            console.log('🔍 LOADING DEBUG: Elements found:', {
-                loginBtn: !!loginBtn,
-                btnText: !!btnText,
-                btnSpinner: !!btnSpinner
-            });
             
             if (loading) {
-                console.log('🔍 LOADING DEBUG: Setting loading state to true');
                 if (loginBtn) {
                     loginBtn.classList.add('loading');
                     loginBtn.disabled = true;
-                    console.log('✅ LOADING DEBUG: Login button set to loading');
-                } else {
-                    console.error('❌ LOADING DEBUG: Login button not found!');
                 }
             } else {
-                console.log('🔍 LOADING DEBUG: Setting loading state to false');
                 if (loginBtn) {
                     loginBtn.classList.remove('loading');
                     loginBtn.disabled = false;
-                    console.log('✅ LOADING DEBUG: Login button set to normal');
-                } else {
-                    console.error('❌ LOADING DEBUG: Login button not found!');
                 }
             }
         }
@@ -1204,7 +1079,6 @@
         let mfaResolver = null;
         let recaptchaVerifier = null;
 
-        // Initialize reCAPTCHA for MFA
         function initRecaptcha() {
             if (!recaptchaVerifier && window.firebaseAuth) {
                 recaptchaVerifier = new RecaptchaVerifier(window.firebaseAuth, 'recaptcha-container', {
@@ -1217,7 +1091,6 @@
             return recaptchaVerifier;
         }
 
-        // Show MFA verification modal
         function showMFAVerification(hints) {
             const mfaModal = document.createElement('div');
             mfaModal.id = 'mfa-modal';
@@ -1255,7 +1128,6 @@
             `;
             document.body.appendChild(mfaModal);
 
-            // Show appropriate MFA method based on available hints
             hints.forEach((hint, index) => {
                 if (hint.factorId === PhoneMultiFactorGenerator.FACTOR_ID) {
                     document.getElementById('phone-mfa').style.display = 'block';
@@ -1265,7 +1137,6 @@
             });
         }
 
-        // Send SMS verification code
         async function sendSMSVerification() {
             try {
                 initRecaptcha();
@@ -1285,7 +1156,6 @@
             }
         }
 
-        // Verify SMS code
         async function verifySMSCode() {
             const code = document.getElementById('sms-code').value;
             if (!code || code.length !== 6) {
@@ -1300,7 +1170,6 @@
                 const userCredential = await mfaResolver.resolveSignIn(multiFactorAssertion);
                 console.log('✅ MFA login successful');
                 
-                // Complete login process
                 completeMFAFlow(userCredential.user);
             } catch (error) {
                 console.error('❌ SMS verification failed:', error);
@@ -1308,7 +1177,6 @@
             }
         }
 
-        // Verify TOTP code
         async function verifyTOTPCode() {
             const code = document.getElementById('totp-code').value;
             if (!code || code.length !== 6) {
@@ -1323,7 +1191,6 @@
                 const userCredential = await mfaResolver.resolveSignIn(multiFactorAssertion);
                 console.log('✅ MFA login successful');
                 
-                // Complete login process
                 completeMFAFlow(userCredential.user);
             } catch (error) {
                 console.error('❌ TOTP verification failed:', error);
@@ -1331,8 +1198,7 @@
             }
         }
 
-        // Complete MFA login flow
-        function completeMFAFlow(user) {
+        async function completeMFAFlow(user) {
             const email = document.getElementById('email').value.trim();
             const rememberMe = document.getElementById('rememberMe').checked;
             
@@ -1341,21 +1207,30 @@
                 localStorage.setItem('flockview_email', email);
             }
             
-            // Store login state
+            // Get user details from Firestore
+            try {
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    const displayName = `${userData.firstName || ''} ${userData.lastName || ''}`.trim() || user.email;
+                    sessionStorage.setItem('flockview_display_name', displayName);
+                    sessionStorage.setItem('flockview_first_name', userData.firstName || '');
+                    sessionStorage.setItem('flockview_last_name', userData.lastName || '');
+                }
+            } catch (error) {
+                console.error('⚠️ Could not fetch user details:', error);
+            }
+            
             sessionStorage.setItem('flockview_logged_in', 'true');
             sessionStorage.setItem('flockview_user', user.uid);
             sessionStorage.setItem('flockview_email', email);
             
-            // Hide MFA modal and redirect to main app
             document.getElementById('mfa-modal').remove();
-            
-            // Redirect to main application
             window.location.href = 'flockview-app-cursor-notoffical.html';
             
             console.log('✅ User logged in successfully with MFA:', email);
         }
 
-        // Cancel MFA
         function cancelMFA() {
             document.getElementById('mfa-modal').remove();
             setLoginLoading(false);
@@ -1378,21 +1253,12 @@
         }
 
         async function loginUser() {
-            console.log('🚀 LOGIN DEBUG: loginUser() function called');
-            
             const emailOrPhone = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const rememberMe = document.getElementById('rememberMe').checked;
 
-            console.log('🔍 LOGIN DEBUG: Form data collected:', {
-                input: emailOrPhone ? `${emailOrPhone.substring(0, 3)}***` : 'EMPTY',
-                passwordLength: password ? password.length : 0,
-                rememberMe: rememberMe
-            });
-
             // Validate inputs
             if (!emailOrPhone || !password) {
-                console.log('❌ LOGIN DEBUG: Validation failed - missing input or password');
                 showLoginError('Please enter both email/phone and password');
                 return;
             }
@@ -1402,8 +1268,7 @@
             let email = emailOrPhone;
             
             if (isPhone) {
-                console.log('📱 LOGIN DEBUG: Phone number detected, looking up email');
-                // Need to look up email from phone number in Firestore
+                // Look up email from phone number in Firestore
                 try {
                     const usersRef = collection(db, 'users');
                     const phoneFormatted = formatPhoneForFirebase(emailOrPhone);
@@ -1415,11 +1280,9 @@
                         return;
                     }
                     
-                    // Get the email from user document
                     email = querySnapshot.docs[0].data().email;
-                    console.log('✅ LOGIN DEBUG: Found email for phone number');
                 } catch (error) {
-                    console.error('❌ LOGIN DEBUG: Error looking up phone number:', error);
+                    console.error('❌ Error looking up phone number:', error);
                     showLoginError('Error finding account. Please try with email instead.');
                     return;
                 }
@@ -1427,54 +1290,29 @@
                 // Basic email validation
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(email)) {
-                    console.log('❌ LOGIN DEBUG: Validation failed - invalid email format');
                     showLoginError('Please enter a valid email or phone number');
                     return;
                 }
             }
 
-            console.log('✅ LOGIN DEBUG: Form validation passed');
             hideLoginError();
             setLoginLoading(true);
 
             try {
-                console.log('🔍 LOGIN DEBUG: Checking Firebase initialization...');
-                console.log('🔍 LOGIN DEBUG: window.firebaseAuth:', !!window.firebaseAuth);
-                console.log('🔍 LOGIN DEBUG: window.firebaseSignIn:', !!window.firebaseSignIn);
-                
                 // Check if Firebase is properly initialized
                 if (!window.firebaseAuth || !window.firebaseSignIn) {
-                    console.error('❌ LOGIN DEBUG: Firebase not properly initialized');
                     throw new Error('Firebase not properly initialized');
                 }
-                
-                console.log('✅ LOGIN DEBUG: Firebase is initialized, attempting authentication...');
-                console.log('🔍 LOGIN DEBUG: Calling window.firebaseSignIn with:', {
-                    auth: window.firebaseAuth,
-                    email: email,
-                    passwordLength: password.length
-                });
                 
                 // Firebase authentication
                 const userCredential = await window.firebaseSignIn(window.firebaseAuth, email, password);
                 const user = userCredential.user;
                 
-                console.log('✅ LOGIN DEBUG: Firebase authentication successful:', {
-                    userId: user.uid,
-                    email: user.email,
-                    emailVerified: user.emailVerified
-                });
-                
                 // Check if user exists in Firestore database
-                console.log('🔍 LOGIN DEBUG: Checking if user exists in database...');
                 try {
                     const userDoc = await getDoc(doc(db, 'users', user.uid));
                     
-                    if (userDoc.exists()) {
-                        console.log('✅ LOGIN DEBUG: User found in database:', userDoc.data());
-                    } else {
-                        console.log('❌ LOGIN DEBUG: User not found in database, creating user...');
-                        
+                    if (!userDoc.exists()) {
                         // Create user in database if they don't exist
                         await setDoc(doc(db, 'users', user.uid), {
                             email: user.email,
@@ -1484,23 +1322,16 @@
                             role: 'user',
                             status: 'active'
                         });
-                        
-                        console.log('✅ LOGIN DEBUG: User created in database');
                     }
-                    
                 } catch (dbError) {
-                    console.error('❌ LOGIN DEBUG: Database check failed:', dbError);
-                    console.log('⚠️ LOGIN DEBUG: Allowing login despite database check failure');
+                    console.error('❌ Database check failed:', dbError);
                 }
                 
                 // Successful login
                 if (rememberMe) {
-                    console.log('🔍 LOGIN DEBUG: Storing remember me data');
                     localStorage.setItem('flockview_remember', 'true');
                     localStorage.setItem('flockview_email', email);
                 }
-                
-                console.log('🔍 LOGIN DEBUG: Storing session data');
                 
                 // Get user's first and last name from Firestore
                 try {
@@ -1511,10 +1342,9 @@
                         sessionStorage.setItem('flockview_display_name', displayName);
                         sessionStorage.setItem('flockview_first_name', userData.firstName || '');
                         sessionStorage.setItem('flockview_last_name', userData.lastName || '');
-                        console.log('✅ LOGIN DEBUG: Stored user name:', displayName);
                     }
                 } catch (nameError) {
-                    console.error('⚠️ LOGIN DEBUG: Could not fetch user name:', nameError);
+                    console.error('⚠️ Could not fetch user name:', nameError);
                 }
                 
                 // Store login state
@@ -1522,33 +1352,19 @@
                 sessionStorage.setItem('flockview_user', user.uid);
                 sessionStorage.setItem('flockview_email', email);
                 
-                console.log('🔍 LOGIN DEBUG: Redirecting to main application');
                 // Redirect to main application
                 window.location.href = 'flockview-app-cursor-notoffical.html';
                 
-                console.log('✅ LOGIN DEBUG: User logged in successfully:', email);
+                console.log('✅ User logged in successfully:', email);
                 
             } catch (error) {
-                console.error('❌ LOGIN DEBUG: Login error caught:', error);
-                console.error('❌ LOGIN DEBUG: Error details:', {
-                    code: error.code,
-                    message: error.message,
-                    stack: error.stack
-                });
+                console.error('❌ Login error:', error);
                 
                 // Handle Multi-Factor Authentication requirement
                 if (error.code === 'auth/multi-factor-auth-required') {
-                    console.log('🔐 LOGIN DEBUG: Multi-Factor Authentication required');
-                    
-                    // Get the multi-factor resolver
                     mfaResolver = getMultiFactorResolver(window.firebaseAuth, error);
-                    console.log('🔍 LOGIN DEBUG: MFA resolver created:', !!mfaResolver);
-                    
-                    // Show MFA verification modal
                     showMFAVerification(mfaResolver.hints);
-                    console.log('✅ LOGIN DEBUG: MFA modal shown');
-                    
-                    return; // Don't show error, MFA modal is handling it
+                    return;
                 }
                 
                 // Handle other Firebase auth errors
@@ -1556,139 +1372,39 @@
                 
                 if (error.message === 'Firebase not properly initialized') {
                     errorMessage = 'Authentication service is not available. Please contact support.';
-                    console.log('❌ LOGIN DEBUG: Firebase initialization error');
                 } else {
-                    console.log('🔍 LOGIN DEBUG: Processing Firebase error code:', error.code);
                     switch (error.code) {
                         case 'auth/user-not-found':
                             errorMessage = 'No account found with this email address.';
-                            console.log('❌ LOGIN DEBUG: User not found error');
                             break;
                         case 'auth/wrong-password':
                             errorMessage = 'Incorrect password. Please try again.';
-                            console.log('❌ LOGIN DEBUG: Wrong password error');
                             break;
                         case 'auth/invalid-email':
                             errorMessage = 'Please enter a valid email address.';
-                            console.log('❌ LOGIN DEBUG: Invalid email error');
                             break;
                         case 'auth/user-disabled':
                             errorMessage = 'This account has been disabled. Please contact support.';
-                            console.log('❌ LOGIN DEBUG: User disabled error');
                             break;
                         case 'auth/too-many-requests':
                             errorMessage = 'Too many failed attempts. Please try again later.';
-                            console.log('❌ LOGIN DEBUG: Too many requests error');
                             break;
                         case 'auth/network-request-failed':
                             errorMessage = 'Network error. Please check your connection and try again.';
-                            console.log('❌ LOGIN DEBUG: Network error');
                             break;
                         case 'auth/invalid-credential':
                             errorMessage = 'Invalid email or password.';
-                            console.log('❌ LOGIN DEBUG: Invalid credential error');
-                            break;
-                        default:
-                            console.log('❌ LOGIN DEBUG: Unknown error code:', error.code);
                             break;
                     }
                 }
                 
-                console.log('🔍 LOGIN DEBUG: Showing error message:', errorMessage);
                 showLoginError(errorMessage);
                 setLoginLoading(false);
             }
         }
 
-
-        // Bypass login function for testing
-        async function bypassLogin() {
-            console.log('🚀 BYPASS DEBUG: Bypassing login completely');
-            
-            try {
-                // Clear any existing session data first
-                sessionStorage.clear();
-                
-                // Store session data FIRST
-                sessionStorage.setItem('flockview_logged_in', 'true');
-                sessionStorage.setItem('flockview_user', 'test-user-123');
-                sessionStorage.setItem('flockview_email', 'test@example.com');
-                sessionStorage.setItem('flockview_auth_bypass', 'true');
-                sessionStorage.setItem('flockview_user_display', 'Test User');
-                
-                console.log('✅ BYPASS DEBUG: Session data stored');
-                console.log('✅ BYPASS DEBUG: Mock authentication set up successfully');
-                
-                // Small delay to ensure everything is set
-                setTimeout(() => {
-                    console.log('🚀 BYPASS DEBUG: Redirecting to main application...');
-                    window.location.href = 'flockview-app-cursor-notoffical.html';
-                }, 500);
-                
-            } catch (error) {
-                console.error('❌ BYPASS DEBUG: Error setting up bypass:', error);
-                // Fallback to simple redirect
-                sessionStorage.clear();
-                sessionStorage.setItem('flockview_logged_in', 'true');
-                sessionStorage.setItem('flockview_user', 'test-user-123');
-                sessionStorage.setItem('flockview_email', 'test@example.com');
-                sessionStorage.setItem('flockview_auth_bypass', 'true');
-                window.location.href = 'flockview-app-cursor-notoffical.html';
-            }
-        }
-
-        // Comprehensive debugging function with automatic bypass
-        function debugLoginSystem() {
-            console.log('🔍 SYSTEM DEBUG: Starting comprehensive login system check...');
-            
-            // Check if all required elements exist
-            const elements = {
-                'loginForm': document.getElementById('loginForm'),
-                'email': document.getElementById('email'),
-                'password': document.getElementById('password'),
-                'loginBtn': document.querySelector('.login-btn'),
-                'loginError': document.getElementById('loginError'),
-                'errorMessage': document.getElementById('errorMessage')
-            };
-            
-            console.log('🔍 SYSTEM DEBUG: Element check results:');
-            Object.entries(elements).forEach(([name, element]) => {
-                if (element) {
-                    console.log(`✅ ${name}: Found`);
-                } else {
-                    console.error(`❌ ${name}: NOT FOUND!`);
-                }
-            });
-            
-            // Check Firebase initialization
-            console.log('🔍 SYSTEM DEBUG: Firebase check:');
-            console.log('🔍 window.firebaseAuth:', !!window.firebaseAuth);
-            console.log('🔍 window.firebaseSignIn:', !!window.firebaseSignIn);
-            console.log('🔍 window.firebaseSignOut:', !!window.firebaseSignOut);
-            
-            // Check if functions are defined
-            console.log('🔍 SYSTEM DEBUG: Function check:');
-            console.log('🔍 loginUser:', typeof loginUser);
-            console.log('🔍 setLoginLoading:', typeof setLoginLoading);
-            console.log('🔍 showLoginError:', typeof showLoginError);
-            
-            console.log('✅ SYSTEM DEBUG: Login system check complete');
-            
-            // Ask user if they want to bypass login
-            const shouldBypass = confirm('Debug complete. Would you like to bypass login for testing?');
-            if (shouldBypass) {
-                console.log('🚀 USER CHOICE: Bypassing login...');
-                bypassLogin();
-            } else {
-                console.log('✅ USER CHOICE: Normal login flow selected');
-            }
-        }
-
         // Make functions globally accessible
         window.togglePassword = togglePassword;
-        window.showSignUp = showSignUp;
-        window.debugLoginSystem = debugLoginSystem;
-        window.bypassLogin = bypassLogin;
         window.sendSMSVerification = sendSMSVerification;
         window.verifySMSCode = verifySMSCode;
         window.verifyTOTPCode = verifyTOTPCode;
@@ -1696,31 +1412,25 @@
 
         // Login form event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 DOM DEBUG: DOMContentLoaded event fired');
-            
-            // Debug button is available for manual testing if needed
-            // User can click the "🔍 Debug Login" button to run diagnostics
+            // Validate auth state on page load
+            validateAuthState();
             
             const loginForm = document.getElementById('loginForm');
             
             if (loginForm) {
-                console.log('✅ FORM DEBUG: Login form found, adding submit listener');
                 loginForm.addEventListener('submit', function(e) {
-                    console.log('🚀 FORM DEBUG: Form submit event triggered');
                     e.preventDefault();
-                    console.log('🔍 FORM DEBUG: Calling loginUser() function');
                     loginUser();
                 });
-            } else {
-                console.error('❌ FORM DEBUG: Login form not found!');
             }
             
-            // Check if user is already logged in
-            const isLoggedIn = sessionStorage.getItem('flockview_logged_in');
-            if (isLoggedIn === 'true') {
-                console.log('🔍 LOGIN DEBUG: User already logged in, redirecting to main app');
-                window.location.href = 'flockview-app-cursor-notoffical.html';
-            }
+            // Check if user is already logged in with VALID Firebase session
+            onAuthStateChanged(auth, (user) => {
+                if (user && sessionStorage.getItem('flockview_logged_in') === 'true') {
+                    console.log('✅ Valid session detected, redirecting to dashboard');
+                    window.location.href = 'flockview-app-cursor-notoffical.html';
+                }
+            });
         });
     </script>
 </body>
