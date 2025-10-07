@@ -972,6 +972,18 @@
             measurementId: "G-9YLPHR08DB"
         };
 
+        // Clear corrupted Firebase cache
+        function clearFirebaseCache() {
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key && key.includes('firebase')) {
+                    localStorage.removeItem(key);
+                }
+            }
+            sessionStorage.clear();
+            console.log('🧹 Firebase cache cleared');
+        }
+
         // Initialize Firebase
         let app, auth, db;
         
@@ -979,9 +991,23 @@
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
+            
+            // Handle auth state errors silently
+            auth.onAuthStateChanged(() => {}, (error) => {
+                if (error && error.code === 'auth/internal-error') {
+                    console.log('🔧 Clearing corrupted cache...');
+                    clearFirebaseCache();
+                    setTimeout(() => location.reload(), 500);
+                }
+            });
+            
             console.log('✅ Firebase initialized');
         } catch (error) {
             console.error('❌ Firebase initialization failed:', error);
+            if (error.code === 'auth/internal-error') {
+                clearFirebaseCache();
+                setTimeout(() => location.reload(), 500);
+            }
             auth = { currentUser: null };
             db = null;
         }
@@ -1364,6 +1390,30 @@
                 if (error.code === 'auth/multi-factor-auth-required') {
                     mfaResolver = getMultiFactorResolver(window.firebaseAuth, error);
                     showMFAVerification(mfaResolver.hints);
+                    return;
+                }
+                
+                // Handle localhost API key restriction error
+                if (error.code === 'auth/requests-from-referer-are-blocked' || 
+                    (error.message && error.message.includes('requests-from-referer'))) {
+                    const isLocalhost = window.location.hostname === 'localhost' || 
+                                       window.location.hostname === '127.0.0.1';
+                    
+                    if (isLocalhost) {
+                        showLoginError('⚠️ Testing on localhost requires API key configuration. Please test on the live domain: flockview.ca');
+                    } else {
+                        showLoginError('Domain not authorized. Please contact support.');
+                    }
+                    setLoginLoading(false);
+                    return;
+                }
+                
+                // Handle internal error (corrupted cache)
+                if (error.code === 'auth/internal-error') {
+                    console.log('🔧 Internal error detected, clearing cache...');
+                    clearFirebaseCache();
+                    showLoginError('Clearing cache and reloading...');
+                    setTimeout(() => location.reload(), 1000);
                     return;
                 }
                 
