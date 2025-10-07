@@ -461,14 +461,14 @@
 
                     <div class="form-group">
                         <label for="companyName">
-                            <i class="fas fa-building"></i> Company Name
-                            <span class="optional-badge">Optional</span>
+                            <i class="fas fa-building"></i> Company Name *
                         </label>
                         <div class="input-wrapper">
                             <input 
                                 type="text" 
                                 id="companyName" 
                                 placeholder="Enter your company name"
+                                required
                             >
                             <i class="fas fa-building input-icon"></i>
                         </div>
@@ -491,14 +491,14 @@
 
                     <div class="form-group">
                         <label for="phone">
-                            <i class="fas fa-phone"></i> Phone Number
-                            <span class="optional-badge">Optional</span>
+                            <i class="fas fa-phone"></i> Phone Number *
                         </label>
                         <div class="input-wrapper">
                             <input 
                                 type="tel" 
                                 id="phone" 
-                                placeholder="555-123-4567 or +1 555 123 4567"
+                                placeholder="+1 555-123-4567"
+                                required
                             >
                             <i class="fas fa-phone input-icon"></i>
                         </div>
@@ -556,34 +556,34 @@
                     </button>
                 </div>
 
-                <!-- Step 2: Email Verification (BEFORE account creation) -->
+                <!-- Step 2: Create Account & Send Verification -->
                 <div class="form-step" id="step2">
                     <div style="text-align: center; padding: 40px 20px;">
                         <div style="font-size: 4rem; color: #3b82f6; margin-bottom: 20px;">
-                            <i class="fas fa-envelope-open-text"></i>
+                            <i class="fas fa-user-check"></i>
                         </div>
-                        <h2 style="color: #333; margin-bottom: 10px;">Check Your Email</h2>
+                        <h2 style="color: #333; margin-bottom: 10px;">Ready to Create Your Account</h2>
                         <p style="color: #666; margin-bottom: 30px; line-height: 1.6;">
-                            We've sent a verification email to<br>
+                            We'll create your account and send a verification email to:<br>
                             <strong id="emailDisplay" style="color: #3b82f6;"></strong>
                         </p>
                         
                         <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6; margin-bottom: 30px; text-align: left;">
                             <h4 style="margin: 0 0 15px 0; color: #333;">
-                                <i class="fas fa-info-circle"></i> Next Steps:
+                                <i class="fas fa-info-circle"></i> What Happens Next:
                             </h4>
                             <ol style="margin: 0; padding-left: 20px; color: #666; line-height: 2;">
-                                <li>Open your email inbox</li>
-                                <li>Look for our verification email</li>
-                                <li>Click the verification link</li>
-                                <li>Return here and click "Create Account"</li>
+                                <li>We create your account</li>
+                                <li>Firebase sends you a verification email</li>
+                                <li>Click the link in the email</li>
+                                <li>Login with your credentials</li>
                             </ol>
                         </div>
 
-                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
-                            <p style="margin: 0; font-size: 0.9rem; color: #856404;">
-                                <i class="fas fa-exclamation-triangle"></i> 
-                                <strong>Didn't receive it?</strong> Check spam/junk folder
+                        <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
+                            <p style="margin: 0; font-size: 0.9rem; color: #075985;">
+                                <i class="fas fa-envelope"></i> 
+                                <strong>Email from:</strong> noreply@chicken-project-2.firebaseapp.com
                             </p>
                         </div>
                     </div>
@@ -594,7 +594,7 @@
                     <button type="button" class="next-btn" id="verifyEmailBtn">
                         <i class="fas fa-spinner fa-spin btn-spinner"></i>
                         <span class="btn-text">
-                            <i class="fas fa-check"></i> I've Verified - Create Account
+                            <i class="fas fa-rocket"></i> Create Account & Send Email
                         </span>
                     </button>
                 </div>
@@ -627,7 +627,8 @@
         import { 
             getAuth, 
             createUserWithEmailAndPassword, 
-            updateProfile
+            updateProfile,
+            sendEmailVerification
         } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { 
             getFirestore, 
@@ -783,8 +784,8 @@
             const confirmPassword = document.getElementById('confirmPassword').value;
             const termsAccepted = document.getElementById('termsAccepted').checked;
 
-            // Validation
-            if (!firstName || !lastName || !email || !password || !confirmPassword) {
+            // Validation - ALL fields required
+            if (!firstName || !lastName || !companyName || !email || !phone || !password || !confirmPassword) {
                 showError('Please fill in all required fields');
                 return;
             }
@@ -812,17 +813,11 @@
             // Store data (NO ACCOUNT CREATED YET!)
             formData = { firstName, lastName, companyName, email, phone, password };
 
-            // Generate verification code (for production email sending)
-            emailVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-            // TODO: In production, send verification email here via backend API
-            // Example: await fetch('/api/send-verification', { email, code: emailVerificationCode })
-
-            // Show verification step
+            // Show verification step - user will receive email from Firebase
             document.getElementById('emailDisplay').textContent = email;
             
             goToStep(2);
-            showSuccess('Verification email sent! Please check your inbox.');
+            showSuccess('Please check your email for the verification link from Firebase.');
         }
 
         async function handleStep2() {
@@ -831,7 +826,8 @@
             btn.disabled = true;
 
             try {
-                // NOW create the Firebase account (AFTER verification)
+                // Step 1: Create Firebase account
+                showSuccess('Creating account...');
                 const userCredential = await createUserWithEmailAndPassword(
                     auth, 
                     formData.email, 
@@ -839,7 +835,14 @@
                 );
                 const user = userCredential.user;
 
-                // Update profile
+                // Step 2: Send verification email
+                showSuccess('Sending verification email...');
+                await sendEmailVerification(user, {
+                    url: window.location.origin + '/login.html',
+                    handleCodeInApp: false
+                });
+
+                // Step 3: Update profile
                 const displayName = `${formData.firstName} ${formData.lastName}`;
                 const fullDisplayName = formData.companyName 
                     ? `${displayName} (${formData.companyName})` 
@@ -847,22 +850,24 @@
 
                 await updateProfile(user, { displayName: fullDisplayName });
 
-                // Store in Firestore
+                // Step 4: Store in Firestore (all fields required)
                 await setDoc(doc(db, 'users', user.uid), {
                     uid: user.uid,
                     email: formData.email,
-                    phone: formData.phone || null,
+                    phone: formData.phone,
                     firstName: formData.firstName,
                     lastName: formData.lastName,
-                    companyName: formData.companyName || null,
+                    companyName: formData.companyName,
                     displayName: fullDisplayName,
                     createdAt: new Date(),
                     lastLogin: new Date(),
                     profileComplete: true,
-                    emailVerified: true
+                    emailVerified: false,  // Not verified yet!
+                    phoneVerified: false
                 });
 
                 // Success!
+                showSuccess('✅ Verification email sent! Check your inbox.');
                 goToStep(3);
                 setTimeout(() => {
                     window.location.href = 'login.html';
