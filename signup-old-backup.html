@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - FlockView</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .signup-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .signup-header {
+            background: #3b82f6;
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .signup-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .signup-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .progress-step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .progress-step::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: -50%;
+            right: 50%;
+            height: 2px;
+            background: #e1e5e9;
+            z-index: 0;
+        }
+
+        .progress-step:first-child::before {
+            display: none;
+        }
+
+        .progress-step.active::before {
+            background: #3b82f6;
+        }
+
+        .progress-step.completed::before {
+            background: #10b981;
+        }
+
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e1e5e9;
+            color: #6b7280;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 8px;
+        }
+
+        .progress-step.active .step-icon {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .progress-step.completed .step-icon {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .progress-step.active .step-label {
+            color: #3b82f6;
+        }
+
+        .progress-step.completed .step-label {
+            color: #10b981;
+        }
+
+        .signup-form {
+            padding: 40px 30px;
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 45px 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group input.error {
+            border-color: #e74c3c;
+            background: #fdf2f2;
+        }
+
+        .form-group input.success {
+            border-color: #27ae60;
+            background: #f0f9f0;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 1.1rem;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .input-icon.clickable:hover {
+            color: #3b82f6;
+        }
+
+        .field-error {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: #e1e5e9;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-weak { background: #e74c3c; }
+        .strength-fair { background: #f39c12; }
+        .strength-good { background: #3498db; }
+        .strength-strong { background: #27ae60; }
+
+        .verification-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid #e1e5e9;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .verification-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .code-display {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 8px;
+            color: #3b82f6;
+            margin: 15px 0;
+            font-family: monospace;
+        }
+
+        .signup-btn, .next-btn, .back-btn {
+            width: 100%;
+            padding: 18px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .signup-btn:hover, .next-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .signup-btn:disabled, .next-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .back-btn {
+            background: #6b7280;
+            margin-bottom: 15px;
+        }
+
+        .back-btn:hover {
+            background: #4b5563;
+        }
+
+        .btn-spinner {
+            display: none;
+            margin-right: 10px;
+        }
+
+        .signup-btn.loading .btn-spinner,
+        .next-btn.loading .btn-spinner {
+            display: inline-block;
+        }
+
+        .error-message {
+            background: #fdf2f2;
+            color: #e74c3c;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #e74c3c;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #f0f9f0;
+            color: #27ae60;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #27ae60;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e5e9;
+        }
+
+        .login-link a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .terms-checkbox input[type="checkbox"] {
+            margin-right: 10px;
+            margin-top: 2px;
+            width: auto;
+        }
+
+        .optional-badge {
+            background: #e1e5e9;
+            color: #6b7280;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .signup-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .signup-header {
+                padding: 30px 20px;
+            }
+            
+            .signup-header h1 {
+                font-size: 2rem;
+            }
+            
+            .signup-form {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-header">
+            <h1><i class="fas fa-user-plus"></i> Create Account</h1>
+            <p>Join FlockView and start managing your farm</p>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="progress-step active" id="step1Progress">
+                <div class="step-icon">1</div>
+                <div class="step-label">Details</div>
+            </div>
+            <div class="progress-step" id="step2Progress">
+                <div class="step-icon">2</div>
+                <div class="step-label">Verify</div>
+            </div>
+            <div class="progress-step" id="step3Progress">
+                <div class="step-icon">3</div>
+                <div class="step-label">Complete</div>
+            </div>
+        </div>
+
+        <div class="signup-form">
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+
+            <form id="signupForm">
+                <!-- Step 1: Basic Information -->
+                <div class="form-step active" id="step1">
+                    <div class="form-group">
+                        <label for="firstName">
+                            <i class="fas fa-user"></i> First Name *
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="firstName" 
+                                placeholder="Enter your first name"
+                                required
+                            >
+                            <i class="fas fa-user input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lastName">
+                            <i class="fas fa-user"></i> Last Name *
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="lastName" 
+                                placeholder="Enter your last name"
+                                required
+                            >
+                            <i class="fas fa-user input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="companyName">
+                            <i class="fas fa-building"></i> Company Name *
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                id="companyName" 
+                                placeholder="Enter your company name"
+                                required
+                            >
+                            <i class="fas fa-building input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope"></i> Email Address *
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="email" 
+                                id="email" 
+                                placeholder="your.email@company.com"
+                                required
+                            >
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">
+                            <i class="fas fa-phone"></i> Phone Number *
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                placeholder="+1 555-123-4567"
+                                required
+                            >
+                            <i class="fas fa-phone input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i> Password *
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                placeholder="Create a strong password"
+                                required
+                            >
+                            <i class="fas fa-eye input-icon clickable" id="togglePassword"></i>
+                        </div>
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthFill"></div>
+                            </div>
+                            <span id="strengthText">Enter a password</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            <i class="fas fa-lock"></i> Confirm Password *
+                        </label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                id="confirmPassword" 
+                                placeholder="Confirm your password"
+                                required
+                            >
+                            <i class="fas fa-eye input-icon clickable" id="toggleConfirmPassword"></i>
+                        </div>
+                    </div>
+
+                    <div class="terms-checkbox">
+                        <input type="checkbox" id="termsAccepted" required>
+                        <label for="termsAccepted">
+                            I agree to the <a href="#" target="_blank">Terms of Service</a> 
+                            and <a href="#" target="_blank">Privacy Policy</a> *
+                        </label>
+                    </div>
+
+                    <button type="button" class="next-btn" id="nextBtn">
+                        <i class="fas fa-spinner fa-spin btn-spinner"></i>
+                        <span class="btn-text">
+                            Continue <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Step 2: Create Account & Send Verification -->
+                <div class="form-step" id="step2">
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 4rem; color: #3b82f6; margin-bottom: 20px;">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <h2 style="color: #333; margin-bottom: 10px;">Ready to Create Your Account</h2>
+                        <p style="color: #666; margin-bottom: 30px; line-height: 1.6;">
+                            We'll create your account and send a verification email to:<br>
+                            <strong id="emailDisplay" style="color: #3b82f6;"></strong>
+                        </p>
+                        
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; border-left: 4px solid #3b82f6; margin-bottom: 30px; text-align: left;">
+                            <h4 style="margin: 0 0 15px 0; color: #333;">
+                                <i class="fas fa-info-circle"></i> What Happens Next:
+                            </h4>
+                            <ol style="margin: 0; padding-left: 20px; color: #666; line-height: 2;">
+                                <li>We create your account</li>
+                                <li>Firebase sends you a verification email</li>
+                                <li>Click the link in the email</li>
+                                <li>Login with your credentials</li>
+                            </ol>
+                        </div>
+
+                        <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
+                            <p style="margin: 0; font-size: 0.9rem; color: #075985;">
+                                <i class="fas fa-envelope"></i> 
+                                <strong>Email from:</strong> noreply@chicken-project-2.firebaseapp.com
+                            </p>
+                        </div>
+                    </div>
+
+                    <button type="button" class="back-btn" onclick="goToStep(1)">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button type="button" class="next-btn" id="verifyEmailBtn">
+                        <i class="fas fa-spinner fa-spin btn-spinner"></i>
+                        <span class="btn-text">
+                            <i class="fas fa-rocket"></i> Create Account & Send Email
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Step 3: Success -->
+                <div class="form-step" id="step3">
+                    <div style="text-align: center; padding: 40px 0;">
+                        <div style="font-size: 4rem; color: #10b981; margin-bottom: 20px;">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h2 style="color: #333; margin-bottom: 10px;">Account Created!</h2>
+                        <p style="color: #666; margin-bottom: 30px;">
+                            Your account has been successfully created.<br>
+                            Redirecting you to login...
+                        </p>
+                        <div style="border: 3px solid #f3f4f6; border-top: 3px solid #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="login-link">
+                <p>Already have an account? <a href="login.html">Sign in here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { 
+            getAuth, 
+            createUserWithEmailAndPassword, 
+            updateProfile,
+            sendEmailVerification
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { 
+            getFirestore, 
+            doc, 
+            setDoc 
+        } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAyRSlxMXzJDxOoQNC7tSEaymmslMvdnco",
+            authDomain: "chicken-project-2.firebaseapp.com",
+            projectId: "chicken-project-2",
+            storageBucket: "chicken-project-2.firebasestorage.app",
+            messagingSenderId: "596273529964",
+            appId: "1:596273529964:web:bd51e2646d5ed48afa4449",
+            measurementId: "G-9YLPHR08DB"
+        };
+        
+        let auth, db;
+        let currentStep = 1;
+        let formData = {};
+        let emailVerificationCode = '';
+
+        // Clear corrupted Firebase cache
+        function clearFirebaseCache() {
+            for (let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if (key && key.includes('firebase')) {
+                    localStorage.removeItem(key);
+                }
+            }
+            sessionStorage.clear();
+        }
+
+        function initializeFirebase() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                // Handle auth state errors silently
+                auth.onAuthStateChanged(() => {}, (error) => {
+                    if (error.code === 'auth/internal-error') {
+                        console.log('🔧 Clearing corrupted cache...');
+                        clearFirebaseCache();
+                        setTimeout(() => location.reload(), 500);
+                    }
+                });
+                
+                console.log('✅ Firebase initialized');
+                setupEventListeners();
+            } catch (error) {
+                console.error('❌ Firebase error:', error);
+                clearFirebaseCache();
+                showError('Failed to initialize. Refreshing...');
+                setTimeout(() => location.reload(), 1000);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeFirebase);
+        } else {
+            initializeFirebase();
+        }
+
+        function setupEventListeners() {
+            // Name validation - only letters and spaces
+            const firstName = document.getElementById('firstName');
+            const lastName = document.getElementById('lastName');
+            
+            firstName.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' ');
+            });
+            
+            lastName.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '').replace(/\s+/g, ' ');
+            });
+
+            // Password toggles
+            document.getElementById('togglePassword').addEventListener('click', () => {
+                const input = document.getElementById('password');
+                const icon = document.getElementById('togglePassword');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+
+            document.getElementById('toggleConfirmPassword').addEventListener('click', () => {
+                const input = document.getElementById('confirmPassword');
+                const icon = document.getElementById('toggleConfirmPassword');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+
+            document.getElementById('password').addEventListener('input', checkPasswordStrength);
+            document.getElementById('nextBtn').addEventListener('click', handleStep1);
+            document.getElementById('verifyEmailBtn').addEventListener('click', handleStep2);
+
+            console.log('✅ Event listeners set up');
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('password').value;
+            const strengthFill = document.getElementById('strengthFill');
+            const strengthText = document.getElementById('strengthText');
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            const labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+            const classes = ['strength-weak', 'strength-fair', 'strength-good', 'strength-strong', 'strength-strong'];
+            
+            const percentage = (strength / 5) * 100;
+            strengthFill.style.width = percentage + '%';
+            strengthFill.className = 'strength-fill ' + (classes[strength - 1] || '');
+            strengthText.textContent = labels[strength] || 'Enter a password';
+        }
+
+        function goToStep(step) {
+            document.querySelectorAll('.progress-step').forEach((el, index) => {
+                el.classList.remove('active', 'completed');
+                if (index + 1 < step) el.classList.add('completed');
+                else if (index + 1 === step) el.classList.add('active');
+            });
+
+            document.querySelectorAll('.form-step').forEach((el, index) => {
+                el.classList.remove('active');
+                if (index + 1 === step) el.classList.add('active');
+            });
+
+            currentStep = step;
+        }
+
+        function handleStep1() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const companyName = document.getElementById('companyName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const termsAccepted = document.getElementById('termsAccepted').checked;
+
+            // Validation - ALL fields required
+            if (!firstName || !lastName || !companyName || !email || !phone || !password || !confirmPassword) {
+                showError('Please fill in all required fields');
+                return;
+            }
+
+            if (/\d/.test(firstName) || /\d/.test(lastName)) {
+                showError('Names cannot contain numbers');
+                return;
+            }
+
+            if (!termsAccepted) {
+                showError('Please accept the Terms of Service');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('Passwords do not match');
+                return;
+            }
+
+            if (password.length < 8) {
+                showError('Password must be at least 8 characters');
+                return;
+            }
+
+            // Store data (NO ACCOUNT CREATED YET!)
+            formData = { firstName, lastName, companyName, email, phone, password };
+
+            // Show verification step - user will receive email from Firebase
+            document.getElementById('emailDisplay').textContent = email;
+            
+            goToStep(2);
+            showSuccess('Please check your email for the verification link from Firebase.');
+        }
+
+        async function handleStep2() {
+            const btn = document.getElementById('verifyEmailBtn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            try {
+                // Step 1: Create Firebase account
+                showSuccess('Creating account...');
+                const userCredential = await createUserWithEmailAndPassword(
+                    auth, 
+                    formData.email, 
+                    formData.password
+                );
+                const user = userCredential.user;
+
+                // Step 2: Send verification email
+                showSuccess('Sending verification email...');
+                await sendEmailVerification(user, {
+                    url: window.location.origin + '/login.html',
+                    handleCodeInApp: false
+                });
+
+                // Step 3: Update profile
+                const displayName = `${formData.firstName} ${formData.lastName}`;
+                const fullDisplayName = formData.companyName 
+                    ? `${displayName} (${formData.companyName})` 
+                    : displayName;
+
+                await updateProfile(user, { displayName: fullDisplayName });
+
+                // Step 4: Store in Firestore (all fields required)
+                await setDoc(doc(db, 'users', user.uid), {
+                    uid: user.uid,
+                    email: formData.email,
+                    phone: formData.phone,
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    companyName: formData.companyName,
+                    displayName: fullDisplayName,
+                    createdAt: new Date(),
+                    lastLogin: new Date(),
+                    profileComplete: true,
+                    emailVerified: false,  // Not verified yet!
+                    phoneVerified: false
+                });
+
+                // Success!
+                showSuccess('✅ Verification email sent! Check your inbox.');
+                goToStep(3);
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 3000);
+
+            } catch (error) {
+                console.error('❌ Signup error:', error);
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    showError('This email is already registered. Redirecting to login...');
+                    setTimeout(() => window.location.href = 'login.html', 3000);
+                } else {
+                    showError('Failed to create account: ' + error.message);
+                }
+                
+                btn.classList.remove('loading');
+                btn.disabled = false;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            successDiv.style.display = 'none';
+            setTimeout(() => errorDiv.style.display = 'none', 5000);
+        }
+
+        function showSuccess(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            errorDiv.style.display = 'none';
+            setTimeout(() => successDiv.style.display = 'none', 5000);
+        }
+
+        window.goToStep = goToStep;
+    </script>
+</body>
+</html>
