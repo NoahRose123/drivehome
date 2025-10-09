@@ -814,10 +814,26 @@
                 // Generate 6-digit code
                 emailVerificationCode = Math.floor(100000 + Math.random() * 900000).toString();
                 
-                // TODO: In production, call your backend API to send email
-                // For now, just show it in console (REMOVE THIS IN PRODUCTION!)
-                console.log('📧 Email verification code:', emailVerificationCode);
-                console.log('📧 Send this to:', formData.email);
+                // Call Firebase Cloud Function to send email via SendGrid
+                const response = await fetch('https://sendverificationemail-yasr4ccbwq-uc.a.run.app', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: formData.email,
+                        code: emailVerificationCode,
+                        firstName: formData.firstName
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    throw new Error(result.error || 'Failed to send email');
+                }
+
+                console.log('✅ Email sent successfully');
                 
                 // Show code input section
                 document.getElementById('emailCodeSection').style.display = 'block';
@@ -826,7 +842,7 @@
                 showSuccess('Verification code sent! Check your email.');
             } catch (error) {
                 console.error('❌ Error sending email code:', error);
-                showError('Failed to send verification code');
+                showError('Failed to send verification code. Please try again.');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Verification Code';
             }
