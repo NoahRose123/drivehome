@@ -720,6 +720,61 @@ p {
     h4 { font-size: var(--font-size-sm); }
 }
 
+/* iPhone XR and similar (375px - 414px width) - OPTIMIZED */
+@media (max-width: 414px) and (min-width: 375px) {
+    .app-nav {
+        height: 54px;
+    }
+    
+    .app-main {
+        margin-top: 54px;
+        padding: 0.625rem;
+    }
+    
+    .nav-container {
+        padding: 0 0.5rem;
+    }
+    
+    .logo-text {
+        font-size: 0.9rem;
+    }
+    
+    .nav-link {
+        padding: 0.3rem 0.4rem;
+    }
+    
+    .nav-link i {
+        font-size: 0.85rem;
+    }
+    
+    .section-header h1 {
+        font-size: 1.1rem;
+    }
+    
+    .section-header p {
+        font-size: 0.75rem;
+    }
+    
+    .dashboard-grid,
+    .kpi-grid {
+        gap: 0.5rem;
+    }
+    
+    .kpi-card {
+        padding: 0.5rem;
+    }
+    
+    .btn {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.7rem;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.65rem;
+    }
+}
+
 /* Enhanced Animations */
 @keyframes slideInUp {
     from {
@@ -1211,21 +1266,21 @@ p {
     flex-shrink: 0;
 }
 
-/* Schedule Cards Grid */
+/* Schedule Cards Grid - CLEANER COMPACT DESIGN */
 .schedule-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    gap: var(--spacing-sm);
 }
 
 .schedule-card.modern {
     background: var(--white);
     border: 1px solid var(--gray-200);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-md);
     overflow: hidden;
     transition: all var(--transition-fast);
-    min-height: 180px;
-    max-height: 300px;
+    min-height: 120px;
+    max-height: none;
 }
 
 .schedule-card.modern:hover {
@@ -1238,38 +1293,39 @@ p {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-md);
-    background: var(--gray-50);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--white);
     border-bottom: 1px solid var(--gray-200);
 }
 
 .schedule-card.modern .farm-info h3 {
-    margin: 0 0 var(--spacing-xs) 0;
+    margin: 0 0 0.25rem 0;
     color: var(--gray-900);
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
+    font-weight: 600;
 }
 
 .schedule-card.modern .upload-date {
-    color: var(--gray-600);
-    font-size: var(--font-size-sm);
+    color: var(--gray-500);
+    font-size: var(--font-size-xs);
 }
 
 .schedule-card.modern .card-actions {
     display: flex;
-    gap: var(--spacing-xs);
+    gap: 0.25rem;
 }
 
 .schedule-card.modern .action-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border: none;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all var(--transition-fast);
-    font-size: var(--font-size-sm);
+    font-size: 0.75rem;
 }
 
 .schedule-card.modern .view-btn {
@@ -1302,56 +1358,57 @@ p {
 }
 
 .schedule-card.modern .card-content {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
 }
 
 .schedule-card.modern .schedule-stats {
     display: flex;
     align-items: center;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
 }
 
 .schedule-card.modern .stat {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    gap: 0.375rem;
     color: var(--gray-600);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-xs);
 }
 
 .schedule-card.modern .deliveries-preview {
-    margin-top: var(--spacing-md);
+    margin-top: var(--spacing-sm);
 }
 
 .schedule-card.modern .deliveries-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: 0.375rem;
 }
 
 .schedule-card.modern .deliveries-header h4 {
     margin: 0;
     color: var(--gray-900);
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
 }
 
 .schedule-card.modern .delivery-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-xs);
+    gap: 0.375rem;
 }
 
 .schedule-card.modern .delivery-chip {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-sm);
+    gap: 0.375rem;
+    padding: 0.375rem 0.5rem;
     background: var(--light-blue);
     border: 1px solid var(--accent-blue);
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
     color: var(--gray-700);
 }
 
@@ -1531,8 +1588,8 @@ p {
 }
 
 .schedules-header.modern {
-    padding: var(--spacing-lg);
-    background: var(--gray-50);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--white);
     border-bottom: 1px solid var(--gray-200);
 }
 
@@ -1737,10 +1794,10 @@ p {
 
 /* Schedules Container */
 .schedules-container.modern {
-    padding: var(--spacing-lg);
+    padding: var(--spacing-sm);
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(800px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    gap: var(--spacing-sm);
 }
 
 /* Calendar Section */
@@ -2293,38 +2350,139 @@ p {
     color: var(--gray-900);
 }
 
-/* Responsive Adjustments */
+/* Responsive Adjustments - IMPROVED FOR MOBILE */
 @media (max-width: 768px) {
     .header-top {
         flex-direction: column;
         align-items: stretch;
+        gap: var(--spacing-sm);
     }
     
     .schedule-stats {
         justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .stat-card {
+        min-width: 140px;
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .stat-icon {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .stat-number {
+        font-size: var(--font-size-lg);
+    }
+    
+    .stat-label {
+        font-size: 0.7rem;
     }
     
     .farm-tabs {
-        justify-content: center;
+        justify-content: flex-start;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: var(--spacing-xs);
+    }
+    
+    .farm-tab {
+        flex-shrink: 0;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.7rem;
     }
     
     .header-actions {
-        flex-direction: column;
-        align-items: stretch;
+        flex-direction: row;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    
+    .schedule-card.modern {
+        min-height: auto;
+    }
+    
+    .schedule-card.modern .card-header {
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .schedule-card.modern .card-content {
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .schedule-card.modern .farm-info h3 {
+        font-size: var(--font-size-base);
+    }
+    
+    .upload-card.modern.compact {
+        padding: var(--spacing-sm);
+    }
+    
+    .upload-header h3 {
+        font-size: var(--font-size-base);
+    }
+    
+    .upload-header p {
+        font-size: 0.7rem;
+    }
+    
+    .schedules-container.modern {
+        grid-template-columns: 1fr;
+        padding: var(--spacing-sm);
     }
     
     .month-tabs {
-        justify-content: center;
+        justify-content: flex-start;
+        overflow-x: auto;
     }
     
     .calendar-header {
         flex-direction: column;
-        gap: var(--spacing-md);
+        gap: var(--spacing-sm);
         align-items: stretch;
+        padding: var(--spacing-sm);
+    }
+    
+    .calendar-header-compact {
+        padding: var(--spacing-sm);
+    }
+    
+    .calendar-header-top {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .calendar-title-with-arrows h1 {
+        font-size: var(--font-size-xl);
+    }
+    
+    .calendar-filters-compact {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .filter-buttons-compact {
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn-compact {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.7rem;
     }
     
     .form-row-compact {
         grid-template-columns: 1fr;
+    }
+    
+    .calendar-day {
+        min-height: 70px;
+        padding: 0.25rem;
+    }
+    
+    .day-number {
+        font-size: 0.75rem;
     }
 }
 
@@ -2332,7 +2490,8 @@ p {
     .farm-item {
         flex-direction: column;
         text-align: center;
-        gap: var(--spacing-sm);
+        gap: var(--spacing-xs);
+        padding: var(--spacing-xs);
     }
     
     .farm-details {
@@ -2343,12 +2502,163 @@ p {
     .calendar-access-item {
         flex-direction: column;
         text-align: center;
-        gap: var(--spacing-sm);
+        gap: var(--spacing-xs);
     }
     
     .calendar-details {
         margin-left: 0;
         text-align: center;
+    }
+    
+    /* Feed Schedules Mobile */
+    .schedules-header.modern {
+        padding: var(--spacing-xs);
+    }
+    
+    .header-title-section {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+    }
+    
+    .title-content h2 {
+        font-size: var(--font-size-base);
+        margin-bottom: 0.25rem;
+    }
+    
+    .title-content .subtitle {
+        font-size: 0.65rem;
+    }
+    
+    .schedule-stats {
+        width: 100%;
+    }
+    
+    .stat-card {
+        flex: 1;
+        min-width: auto;
+        padding: 0.375rem;
+    }
+    
+    .stat-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+    }
+    
+    .stat-number {
+        font-size: var(--font-size-base);
+    }
+    
+    .stat-label {
+        font-size: 0.625rem;
+    }
+    
+    .schedule-card.modern {
+        border-radius: var(--radius-md);
+    }
+    
+    .delivery-chip {
+        padding: 0.25rem 0.375rem;
+        font-size: 0.625rem;
+    }
+    
+    .action-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.7rem;
+    }
+    
+    /* Calendar Mobile */
+    .calendar-container {
+        border-radius: var(--radius-md);
+    }
+    
+    .calendar-header-top {
+        padding: 0;
+    }
+    
+    .calendar-title-with-arrows {
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-xs);
+    }
+    
+    .calendar-title-with-arrows h1 {
+        font-size: var(--font-size-lg);
+    }
+    
+    .calendar-nav-arrows {
+        display: flex;
+        gap: var(--spacing-xs);
+    }
+    
+    .nav-btn {
+        padding: 0.375rem 0.5rem;
+    }
+    
+    .view-btn {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.65rem;
+    }
+    
+    .calendar-filters-compact {
+        padding: var(--spacing-xs);
+    }
+    
+    .filter-group-inline {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 0.25rem;
+    }
+    
+    .filter-group-inline label {
+        font-size: 0.7rem;
+    }
+    
+    .farm-filter-compact,
+    .barn-filter-compact {
+        width: 100%;
+        padding: 0.375rem;
+        font-size: 0.75rem;
+    }
+    
+    .legend-compact {
+        width: 100%;
+        margin-top: var(--spacing-xs);
+    }
+    
+    .legend-items-compact {
+        flex-wrap: wrap;
+        gap: 0.375rem;
+    }
+    
+    .legend-label-compact {
+        font-size: 0.625rem;
+    }
+    
+    .calendar-grid {
+        padding: var(--spacing-xs);
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        padding: 0.25rem;
+    }
+    
+    .day-number {
+        font-size: 0.7rem;
+        margin-bottom: 0.125rem;
+    }
+    
+    .weekday {
+        padding: var(--spacing-xs);
+        font-size: 0.65rem;
+    }
+    
+    .event-indicator {
+        width: 6px;
+        height: 6px;
     }
 }
 

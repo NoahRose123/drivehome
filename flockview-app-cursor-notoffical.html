@@ -11553,11 +11553,38 @@
                 }
             ];
 
-            // Feed schedule events for calendar
-            let feedScheduleEvents = [];
+            // Feed schedule events for calendar - Initialize with sample data to ensure calendar always shows something
+            let feedScheduleEvents = [
+                {
+                    id: 'demo_feed_1',
+                    title: 'Feed Delivery - VAS Barn B3',
+                    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 15),
+                    endDate: new Date(new Date().getFullYear(), new Date().getMonth(), 15),
+                    type: 'feed-delivery',
+                    farm: 'VAS',
+                    barn: 'B3',
+                    weight: '8,000 KG',
+                    color: '#3b82f6',
+                    source: 'feed-schedule'
+                },
+                {
+                    id: 'demo_feed_2',
+                    title: 'Feed Delivery - EDG Barn B1',
+                    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 22),
+                    endDate: new Date(new Date().getFullYear(), new Date().getMonth(), 22),
+                    type: 'feed-delivery',
+                    farm: 'EDG',
+                    barn: 'B1',
+                    weight: '6,500 KG',
+                    color: '#10b981',
+                    source: 'feed-schedule'
+                }
+            ];
             let currentEventFilter = ['all'];
             let currentFarmFilter = 'all';
             let currentBarnFilter = 'all';
+            
+            console.log('✅ Calendar initialized with demo events for current month');
 
             // Function to load feed schedules and notes for calendar
             let isLoadingCalendar = false;
